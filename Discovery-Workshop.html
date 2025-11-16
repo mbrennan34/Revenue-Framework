@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BearOps Discovery Workshop Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            background: #764ba2;
+            color: white;
+        }
+
+        .workshop-page {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .workshop-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .workshop-title-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .workshop-title {
+            font-size: 2.2em;
+            color: #667eea;
+            padding: 8px;
+            border-radius: 6px;
+            flex-grow: 1;
+        }
+
+        .workshop-title:focus {
+            outline: 2px solid #667eea;
+            background: #f0f0f0;
+        }
+
+        .framework-link-btn {
+            background: #4299e1;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .framework-link-btn:hover {
+            background: #3182ce;
+        }
+
+        .workshop-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .meta-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .meta-label {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .meta-value {
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            min-height: 30px;
+        }
+
+        .meta-value:focus {
+            outline: 2px solid #667eea;
+        }
+
+        .trigger-description {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 6px;
+        }
+
+        .trigger-description h3 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .trigger-content {
+            color: #856404;
+            line-height: 1.6;
+            padding: 5px;
+            min-height: 40px;
+        }
+
+        .trigger-content:focus {
+            outline: 2px solid #ffc107;
+            background: white;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.3em;
+            font-weight: 600;
+        }
+
+        .section-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 0 0 8px 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .agenda-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+        }
+
+        .agenda-table th {
+            background: #764ba2;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .agenda-table td {
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            vertical-align: top;
+        }
+
+        .agenda-table td:focus {
+            outline: 2px solid #667eea;
+            background: #f0f0f0;
+        }
+
+        .agenda-row-delete {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .agenda-row-delete:hover {
+            background: #c0392b;
+        }
+
+        .goals-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .goal-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            border-left: 4px solid #48bb78;
+            position: relative;
+        }
+
+        .goal-number {
+            display: inline-block;
+            background: #48bb78;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .goal-text {
+            padding: 8px;
+            min-height: 40px;
+            line-height: 1.6;
+        }
+
+        .goal-text:focus {
+            outline: 2px solid #48bb78;
+            background: #f0f0f0;
+        }
+
+        .delete-goal-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+        }
+
+        .delete-goal-btn:hover {
+            background: #c0392b;
+        }
+
+        .notes-area {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+            resize: vertical;
+        }
+
+        .notes-area:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+        }
+
+        .add-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            margin-top: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
+        }
+
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+            background: #38a169;
+        }
+
+        .deliverables-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .deliverable-card {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .deliverable-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+            padding: 5px;
+        }
+
+        .deliverable-title:focus {
+            outline: 2px solid #667eea;
+            background: #f0f0f0;
+        }
+
+        .deliverable-content {
+            padding: 8px;
+            min-height: 50px;
+            line-height: 1.6;
+        }
+
+        .deliverable-content:focus {
+            outline: 2px solid #667eea;
+            background: #f0f0f0;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            color: white;
+            border-color: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .workshop-title {
+                font-size: 1.5em;
+            }
+
+            .framework-link-btn {
+                font-size: 0.9em;
+                padding: 10px 20px;
+            }
+        }
+
+.pdf-folder-btn {
+    background: #9f7aea;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    margin-left: 10px;
+}
+
+.pdf-folder-btn:hover {
+    background: #805ad5;
+}
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button class="btn" onclick="window.location.href='sales-triggers2.html'">Tracker</button>
+    <button class="btn" onclick="window.location.href='Command-Message.html'">Command of Message</button>
+    <button class="btn" onclick="window.location.href='sales-triggers-messaging.html'">Messaging Library</button>
+   
+</div>
+
+    <div class="container">
+        <div id="homePage">
+            <h1>BearOps Discovery Workshop Tracker</h1>
+            <p class="subtitle">Leverage EOS Framework to Uncover 1-2 Key Growth Blockers</p>
+            
+            <div class="nav-buttons">
+                <div style="width: 100%; max-width: 500px; margin: 0 auto;">
+                    <label for="workshopSelect" style="display: block; margin-bottom: 10px; font-size: 1.1em; font-weight: 600; color: white;">Select Workshop Type:</label>
+                    <select id="workshopSelect" style="width: 100%; padding: 15px; font-size: 1em; border-radius: 8px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; background: white; color: #667eea; font-weight: 600;">
+                        <option value="">-- Choose a workshop --</option>
+                        <option value="workshop-1">Funding Rounds Discovery</option>
+                        <option value="workshop-2">Team Expansion Discovery</option>
+                        <option value="workshop-3">GTM Leadership Discovery</option>
+                        <option value="workshop-4">Tech Stack Adoption Discovery</option>
+                        <option value="workshop-5">International Expansion Discovery</option>
+                    </select>
+                    <button onclick="openDropdownEditor()" style="margin-top: 15px; background: white; color: #667eea; border: none; padding: 10px 20px; border-radius: 8px; font-size: 0.9em; font-weight: 600; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.3s ease;">✏️ Edit Dropdown Options</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="workshopsContainer"></div>
+
+        <!-- Dropdown Editor Modal -->
+        <div id="dropdownEditorModal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; border-radius: 12px; padding: 40px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                <h2 style="color: #667eea; margin-bottom: 20px;">Edit Dropdown Options</h2>
+                <p style="margin-bottom: 20px; color: #666;">Edit the names of the workshop types below. The workshop data will remain intact.</p>
+                
+                <div id="dropdownOptionsList" style="margin-bottom: 20px;"></div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="closeDropdownEditor()" style="background: #e0e0e0; color: #333; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">Cancel</button>
+                    <button onclick="saveDropdownChanges()" style="background: #48bb78; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 1em; font-weight: 600; cursor: pointer;">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="save-btn" onclick="saveToFile()">💾 Save Workshop</button>
+
+    <script>
+        function openDropdownEditor() {
+            const modal = document.getElementById('dropdownEditorModal');
+            const optionsList = document.getElementById('dropdownOptionsList');
+            const select = document.getElementById('workshopSelect');
+            
+            optionsList.innerHTML = '';
+            
+            const options = Array.from(select.options).slice(1);
+            options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.style.marginBottom = '15px';
+                optionDiv.innerHTML = `
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #667eea;">Workshop ${index + 1}:</label>
+                    <input type="text" 
+                           data-workshop-id="${option.value}" 
+                           value="${option.textContent}" 
+                           style="width: 100%; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 1em;"
+                           placeholder="Enter workshop name...">
+                `;
+                optionsList.appendChild(optionDiv);
+            });
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeDropdownEditor() {
+            const modal = document.getElementById('dropdownEditorModal');
+            modal.classList.add('hidden');
+        }
+
+        function saveDropdownChanges() {
+            const optionsList = document.getElementById('dropdownOptionsList');
+            const inputs = optionsList.querySelectorAll('input');
+            const select = document.getElementById('workshopSelect');
+            
+            inputs.forEach(input => {
+                const workshopId = input.getAttribute('data-workshop-id');
+                const newName = input.value.trim();
+                
+                if (newName) {
+                    const option = select.querySelector(`option[value="${workshopId}"]`);
+                    if (option) {
+                        option.textContent = newName;
+                    }
+                    
+                    if (workshopTemplates[workshopId]) {
+                        workshopTemplates[workshopId].title = newName;
+                        
+                        const workshopPage = document.getElementById(workshopId);
+                        if (workshopPage) {
+                            const titleElement = workshopPage.querySelector('.workshop-title');
+                            if (titleElement) {
+                                titleElement.textContent = newName;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            closeDropdownEditor();
+            alert('Dropdown options updated successfully!');
+        }
+
+        function showHomePage() {
+            document.querySelectorAll('.workshop-page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById('homePage').classList.remove('hidden');
+            const select = document.getElementById('workshopSelect');
+            if (select) {
+                select.value = '';
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showWorkshop(workshopId) {
+            document.getElementById('homePage').classList.add('hidden');
+            document.querySelectorAll('.workshop-page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            const selectedWorkshop = document.getElementById(workshopId);
+            if (selectedWorkshop) {
+                selectedWorkshop.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function addGoal(listId) {
+            const list = document.getElementById(listId);
+            const goalNumber = list.children.length + 1;
+            const newGoal = document.createElement('li');
+            newGoal.className = 'goal-item';
+            newGoal.innerHTML = `
+                <button class="delete-goal-btn" onclick="deleteGoal(this)">Delete</button>
+                <span class="goal-number">${goalNumber}</span>
+                <div class="goal-text" contenteditable="true">Enter new goal...</div>
+            `;
+            list.appendChild(newGoal);
+        }
+
+        function deleteGoal(button) {
+            if (confirm('Delete this goal?')) {
+                const list = button.closest('.goals-list');
+                button.closest('.goal-item').remove();
+                Array.from(list.children).forEach((item, index) => {
+                    item.querySelector('.goal-number').textContent = index + 1;
+                });
+            }
+        }
+
+        function addAgendaRow(tableId) {
+            const table = document.getElementById(tableId).querySelector('tbody');
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td contenteditable="true">00:00 - 00:00</td>
+                <td contenteditable="true">New Session</td>
+                <td contenteditable="true">Purpose of this session...</td>
+                <td><button class="agenda-row-delete" onclick="deleteAgendaRow(this)">Delete</button></td>
+            `;
+        }
+
+        function deleteAgendaRow(button) {
+            if (confirm('Delete this agenda item?')) {
+                button.closest('tr').remove();
+            }
+        }
+
+        function saveToFile() {
+            const htmlContent = document.documentElement.outerHTML;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.download = `bearops-workshop-${timestamp}.html`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            alert('Workshop saved! Open the downloaded file to continue editing.');
+        }
+
+        const workshopTemplates = {
+            'workshop-1': {
+                title: 'Funding Rounds Discovery Workshop',
+                frameworkLink: 'Framework-quickstart.html',
+                trigger: 'Fresh capital creates urgency to scale fast. Common pain: unclear deployment strategy, misaligned investor expectations, no governance model.',
+                attendees: 'CEO, Founders, CFO, Investors...',
+                goals: [
+                    'Align leadership on capital deployment priorities and timeline',
+                    'Establish governance framework for investor communication and reporting'
+                ],
+                agenda: [
+                    ['0:00 - 0:15', 'Kickoff & Objectives', 'Set expectations, review agenda'],
+                    ['0:15 - 0:45', 'Capital Deployment Strategy', 'Define priorities for fund allocation']
+                ],
+                deliverables: [
+                    ['Growth Blockers Document', 'Identification of 1-2 key growth blockers'],
+                    ['Capital Deployment Plan', 'Strategic allocation framework']
+                ]
+            },
+            'workshop-2': {
+                title: 'Team Expansion Discovery Workshop',
+                frameworkLink: 'Framework-quickstart.html',
+                trigger: 'Jump from 5 → 15+ people creates accountability challenges.',
+                attendees: 'CEO, Founders, GTM Leaders...',
+                goals: ['Align Leadership Team on Vision', 'Translate Revenue Goals into KPIs'],
+                agenda: [['0:00 - 0:15', 'Kickoff', 'Set expectations']],
+                deliverables: [['Growth Blockers', 'Key blockers identified']]
+            },
+            'workshop-3': {
+                title: 'GTM Leadership Discovery Workshop',
+                frameworkLink: 'Framework-quickstart.html',
+                trigger: 'New GTM leader joining signals revenue acceleration.',
+                attendees: 'CEO, CRO/VP Sales, CMO...',
+                goals: ['Align GTM leadership on revenue strategy'],
+                agenda: [['0:00 - 0:15', 'Kickoff', 'Set expectations']],
+                deliverables: [['Growth Blockers', 'Key blockers identified']]
+            },
+            'workshop-4': {
+                title: 'Tech Stack Adoption Discovery Workshop',
+                frameworkLink: 'Framework-quickstart.html',
+                trigger: 'Implementing new CRM or revenue tools.',
+                attendees: 'CEO, CRO, RevOps Lead...',
+                goals: ['Align on business requirements'],
+                agenda: [['0:00 - 0:15', 'Kickoff', 'Set expectations']],
+                deliverables: [['Process Assessment', 'Documentation of workflows']]
+            },
+            'workshop-5': {
+                title: 'International Expansion Discovery Workshop',
+                frameworkLink: 'Framework-quickstart.html',
+                trigger: 'Planning to enter new geographic markets.',
+                attendees: 'CEO, CFO, GTM Leaders...',
+                goals: ['Evaluate market opportunity'],
+                agenda: [['0:00 - 0:15', 'Kickoff', 'Set expectations']],
+                deliverables: [['Market Entry Strategy', 'Detailed approach for target market']]
+            }
+        };
+
+        function createWorkshopHTML(workshopId, template) {
+            const goalsHTML = template.goals.map((goal, index) => `
+                <li class="goal-item">
+                    <button class="delete-goal-btn" onclick="deleteGoal(this)">Delete</button>
+                    <span class="goal-number">${index + 1}</span>
+                    <div class="goal-text" contenteditable="true">${goal}</div>
+                </li>
+            `).join('');
+
+            const agendaHTML = template.agenda.map(([time, session, purpose]) => `
+                <tr>
+                    <td contenteditable="true">${time}</td>
+                    <td contenteditable="true">${session}</td>
+                    <td contenteditable="true">${purpose}</td>
+                    <td><button class="agenda-row-delete" onclick="deleteAgendaRow(this)">Delete</button></td>
+                </tr>
+            `).join('');
+
+            const deliverablesHTML = template.deliverables.map(([title, content]) => `
+                <div class="deliverable-card">
+                    <div class="deliverable-title" contenteditable="true">${title}</div>
+                    <div class="deliverable-content" contenteditable="true">${content}</div>
+                </div>
+            `).join('');
+
+            return `
+            <div class="workshop-page hidden" id="${workshopId}">
+                <button class="back-btn" onclick="showHomePage()">← Back to All Workshops</button>
+                
+                <div class="workshop-title-container">
+    <h2 class="workshop-title" contenteditable="true">${template.title}</h2>
+    <div style="display: flex; gap: 10px;">
+        <button class="framework-link-btn" onclick="window.location.href='${template.frameworkLink}'">📄 Framework</button>
+        <button class="pdf-folder-btn" onclick="C:\Users\marti\Desktop\HTML Playbooks\Discovery Workshops'">📁 PDF Resources</button>
+    </div>
+</div>
+
+                    
+                    <div class="workshop-meta">
+                        <div class="meta-item">
+                            <div class="meta-label">Company Name</div>
+                            <div class="meta-value" contenteditable="true">Enter company name...</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Workshop Date</div>
+                            <div class="meta-value" contenteditable="true">DD/MM/YYYY</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Duration</div>
+                            <div class="meta-value" contenteditable="true">3 Hours</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Facilitator</div>
+                            <div class="meta-value" contenteditable="true">Your name...</div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Attendees</div>
+                            <div class="meta-value" contenteditable="true">${template.attendees}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="trigger-description">
+                    <h3>🎯 Trigger Context</h3>
+                    <div class="trigger-content" contenteditable="true">${template.trigger}</div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Workshop Goals</div>
+                    <div class="section-content">
+                        <ul class="goals-list" id="goals-list-${workshopId}">
+                            ${goalsHTML}
+                        </ul>
+                        <button class="add-btn" onclick="addGoal('goals-list-${workshopId}')">+ Add Goal</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Workshop Agenda</div>
+                    <div class="section-content">
+                        <table class="agenda-table" id="agenda-table-${workshopId}">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%;">Time</th>
+                                    <th style="width: 25%;">Session</th>
+                                    <th style="width: 50%;">Purpose</th>
+                                    <th style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${agendaHTML}
+                            </tbody>
+                        </table>
+                        <button class="add-btn" onclick="addAgendaRow('agenda-table-${workshopId}')">+ Add Agenda Item</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Key Insights & Growth Blockers Identified</div>
+                    <div class="section-content">
+                        <textarea class="notes-area" placeholder="Document 1-2 key growth blockers..."></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Session Notes & Key Takeaways</div>
+                    <div class="section-content">
+                        <textarea class="notes-area" placeholder="Document key discussion points..."></textarea>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Workshop Deliverables</div>
+                    <div class="section-content">
+                        <div class="deliverables-grid">
+                            ${deliverablesHTML}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="section-header">Next Steps & Action Items</div>
+                    <div class="section-content">
+                        <textarea class="notes-area" placeholder="List next steps, action items, owners, and deadlines..."></textarea>
+                    </div>
+                </div>
+            </div>
+            `;
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('workshopsContainer');
+            for (const workshopId in workshopTemplates) {
+                container.innerHTML += createWorkshopHTML(workshopId, workshopTemplates[workshopId]);
+            }
+            
+            const workshopSelect = document.getElementById('workshopSelect');
+            workshopSelect.addEventListener('change', function() {
+                const workshopId = this.value;
+                if (workshopId) {
+                    showWorkshop(workshopId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

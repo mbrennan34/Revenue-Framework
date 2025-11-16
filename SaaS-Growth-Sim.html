@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Growth Simulator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            padding: 20px; 
+            min-height: 100vh; 
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Control buttons styling */
+        .controls {
+            max-width: 1400px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        header { text-align: center; color: white; margin-bottom: 30px; }
+        h1 { font-size: 2.5em; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .subtitle { font-size: 1.1em; opacity: 0.95; }
+        
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 25px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1); 
+        }
+        
+        .section-header { 
+            font-size: 1.5em; 
+            font-weight: 600; 
+            color: #2d3748; 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 3px solid #667eea;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .control-group {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .control-value {
+            font-size: 1.2em;
+            color: #667eea;
+        }
+        
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e2e8f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+        
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .control-description {
+            font-size: 0.85em;
+            color: #718096;
+            margin-top: 8px;
+            font-style: italic;
+        }
+        
+        .benchmark {
+            display: inline-block;
+            margin-top: 5px;
+            padding: 4px 8px;
+            background: #edf2f7;
+            border-radius: 4px;
+            font-size: 0.8em;
+            color: #4a5568;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .metric-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+        
+        .metric-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        .metric-change {
+            font-size: 0.85em;
+            margin-top: 5px;
+            opacity: 0.85;
+        }
+        
+        .chart-container {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            position: relative;
+            height: 400px;
+        }
+        
+        .chart-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+        
+        .chart-canvas {
+            width: 100%;
+            height: 350px;
+        }
+        
+        .cohort-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        
+        .cohort-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .cohort-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .cohort-table tr:hover {
+            background: #f7fafc;
+        }
+        
+        .retention-cell {
+            text-align: center;
+            font-weight: 600;
+            padding: 8px;
+            border-radius: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .action-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn-primary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .action-btn-primary:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn-secondary {
+            background: #5a67d8;
+            color: white;
+        }
+        
+        .action-btn-secondary:hover {
+            background: #4c51bf;
+            transform: translateY(-2px);
+        }
+        
+        .scenario-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .scenario-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .scenario-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .scenario-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .insights-box {
+            background: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .insights-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #c53030;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .insight-item {
+            margin: 8px 0;
+            padding-left: 20px;
+            color: #4a5568;
+        }
+        
+        .positive-insight {
+            background: #f0fff4;
+            border-left-color: #48bb78;
+        }
+        
+        .positive-insight .insights-title {
+            color: #2f855a;
+        }
+        
+        .waterfall-chart {
+            display: flex;
+            align-items: flex-end;
+            height: 300px;
+            gap: 10px;
+            padding: 20px;
+        }
+        
+        .waterfall-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .waterfall-bar-visual {
+            width: 100%;
+            background: #667eea;
+            border-radius: 4px 4px 0 0;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .waterfall-bar-visual.positive {
+            background: #48bb78;
+        }
+        
+        .waterfall-bar-visual.negative {
+            background: #e53e3e;
+        }
+        
+        .waterfall-label {
+            margin-top: 10px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-align: center;
+            color: #2d3748;
+        }
+        
+        .waterfall-value {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.9em;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        @media print {
+            body { background: white; }
+            .controls, .action-buttons, .scenario-selector { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn" onclick="window.location.href='Goal Seek.html'">Goal Seek</button>
+    <button class="btn" onclick="window.location.href='Monte-Carlo-Sim.html'">Monte Carlo Sim</button>
+
+</div>
+
+<div class="container">
+    <header>
+        <h1>📈 SaaS Growth Simulator</h1>
+        <p class="subtitle">Model your growth trajectory by adjusting key business levers</p>
+    </header>
+
+    <div class="card">
+        <div class="scenario-selector">
+            <button class="scenario-btn active" onclick="loadScenario('current')">Current State</button>
+            <button class="scenario-btn" onclick="loadScenario('optimized')">Optimized</button>
+            <button class="scenario-btn" onclick="loadScenario('aggressive')">Aggressive Growth</button>
+            <button class="scenario-btn" onclick="loadScenario('benchmark')">Industry Benchmark</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <span>🎛️</span> Growth Levers
+        </div>
+        
+        <div class="controls-grid">
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Starting MRR</span>
+                    <span class="control-value">$<span id="starting-mrr-value">50000</span></span>
+                </div>
+                <input type="range" class="slider" id="starting-mrr" min="10000" max="500000" step="5000" value="50000" oninput="updateSimulation()">
+                <div class="control-description">Your current monthly recurring revenue</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Monthly Churn Rate</span>
+                    <span class="control-value"><span id="churn-rate-value">5</span>%</span>
+                </div>
+                <input type="range" class="slider" id="churn-rate" min="0" max="15" step="0.5" value="5" oninput="updateSimulation()">
+                <div class="control-description">Percentage of customers lost each month</div>
+                <div class="benchmark">Good: &lt;3% | Average: 5-7% | Poor: &gt;10%</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Average Revenue Per Account (ARPA)</span>
+                    <span class="control-value">$<span id="arpa-value">500</span></span>
+                </div>
+                <input type="range" class="slider" id="arpa" min="50" max="2000" step="50" value="500" oninput="updateSimulation()">
+                <div class="control-description">Average monthly revenue per customer</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>New Customers per Month</span>
+                    <span class="control-value"><span id="new-customers-value">20</span></span>
+                </div>
+                <input type="range" class="slider" id="new-customers" min="5" max="100" step="1" value="20" oninput="updateSimulation()">
+                <div class="control-description">Number of new customers acquired monthly</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Time to Activation (Days)</span>
+                    <span class="control-value"><span id="onboarding-speed-value">14</span></span>
+                </div>
+                <input type="range" class="slider" id="onboarding-speed" min="1" max="60" step="1" value="14" oninput="updateSimulation()">
+                <div class="control-description">Days until customer starts paying</div>
+                <div class="benchmark">Best: &lt;7 days | Good: 7-14 days | Slow: &gt;30 days</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Retention Decay Factor</span>
+                    <span class="control-value"><span id="retention-decay-value">0.95</span></span>
+                </div>
+                <input type="range" class="slider" id="retention-decay" min="0.80" max="1.00" step="0.01" value="0.95" oninput="updateSimulation()">
+                <div class="control-description">How retention changes over time (1.0 = stable)</div>
+                <div class="benchmark">Stable retention: &gt;0.95 | Declining: &lt;0.90</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Expansion Revenue %</span>
+                    <span class="control-value"><span id="expansion-value">10</span>%</span>
+                </div>
+                <input type="range" class="slider" id="expansion" min="0" max="30" step="1" value="10" oninput="updateSimulation()">
+                <div class="control-description">% of customers who upgrade monthly</div>
+                <div class="benchmark">Good: 15-20% | Great: &gt;25%</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Expansion Amount</span>
+                    <span class="control-value"><span id="expansion-amount-value">50</span>%</span>
+                </div>
+                <input type="range" class="slider" id="expansion-amount" min="10" max="200" step="10" value="50" oninput="updateSimulation()">
+                <div class="control-description">Average increase when customers upgrade</div>
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>CAC (Customer Acquisition Cost)</span>
+                    <span class="control-value">$<span id="cac-value">1500</span></span>
+                </div>
+                <input type="range" class="slider" id="cac" min="100" max="5000" step="100" value="1500" oninput="updateSimulation()">
+                <div class="control-description">Cost to acquire one customer</div>
+                <div class="benchmark">LTV:CAC Ratio should be &gt; 3:1</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <span>📊</span> Key Metrics
+        </div>
+        <div class="metrics-grid" id="metrics-grid"></div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <span>📈</span> MRR Growth Projection
+        </div>
+        <div class="chart-container">
+            <canvas id="mrr-chart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <span>💧</span> Revenue Waterfall
+        </div>
+        <div class="chart-container">
+            <div id="waterfall-chart" class="waterfall-chart"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <span>👥</span> Customer Cohort Analysis
+        </div>
+        <div style="overflow-x: auto;">
+            <table class="cohort-table" id="cohort-table"></table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div id="insights-container"></div>
+    </div>
+
+    <div class="card">
+        <div class="action-buttons">
+            <button class="action-btn action-btn-primary" onclick="exportToPDF()">📄 Export to PDF</button>
+            <button class="action-btn action-btn-secondary" onclick="saveScenario()">💾 Save Scenario</button>
+            <button class="action-btn action-btn-secondary" onclick="resetToDefaults()">🔄 Reset to Defaults</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Simulation state
+let simulationData = {
+    startingMRR: 50000,
+    churnRate: 5,
+    arpa: 500,
+    newCustomers: 20,
+    onboardingSpeed: 14,
+    retentionDecay: 0.95,
+    expansion: 10,
+    expansionAmount: 50,
+    cac: 1500
+};
+
+let mrrChart = null;
+
+// Predefined scenarios
+const scenarios = {
+    current: {
+        startingMRR: 50000,
+        churnRate: 5,
+        arpa: 500,
+        newCustomers: 20,
+        onboardingSpeed: 14,
+        retentionDecay: 0.95,
+        expansion: 10,
+        expansionAmount: 50,
+        cac: 1500
+    },
+    optimized: {
+        startingMRR: 50000,
+        churnRate: 3,
+        arpa: 600,
+        newCustomers: 25,
+        onboardingSpeed: 7,
+        retentionDecay: 0.98,
+        expansion: 15,
+        expansionAmount: 60,
+        cac: 1200
+    },
+    aggressive: {
+        startingMRR: 50000,
+        churnRate: 4,
+        arpa: 700,
+        newCustomers: 40,
+        onboardingSpeed: 5,
+        retentionDecay: 0.97,
+        expansion: 20,
+        expansionAmount: 75,
+        cac: 2000
+    },
+    benchmark: {
+        startingMRR: 50000,
+        churnRate: 3.5,
+        arpa: 550,
+        newCustomers: 22,
+        onboardingSpeed: 10,
+        retentionDecay: 0.96,
+        expansion: 12,
+        expansionAmount: 55,
+        cac: 1400
+    }
+};
+
+function updateSimulation() {
+    // Update values display
+    document.getElementById('starting-mrr-value').textContent = document.getElementById('starting-mrr').value;
+    document.getElementById('churn-rate-value').textContent = document.getElementById('churn-rate').value;
+    document.getElementById('arpa-value').textContent = document.getElementById('arpa').value;
+    document.getElementById('new-customers-value').textContent = document.getElementById('new-customers').value;
+    document.getElementById('onboarding-speed-value').textContent = document.getElementById('onboarding-speed').value;
+    document.getElementById('retention-decay-value').textContent = document.getElementById('retention-decay').value;
+    document.getElementById('expansion-value').textContent = document.getElementById('expansion').value;
+    document.getElementById('expansion-amount-value').textContent = document.getElementById('expansion-amount').value;
+    document.getElementById('cac-value').textContent = document.getElementById('cac').value;
+    
+    // Update simulation data
+    simulationData = {
+        startingMRR: parseFloat(document.getElementById('starting-mrr').value),
+        churnRate: parseFloat(document.getElementById('churn-rate').value),
+        arpa: parseFloat(document.getElementById('arpa').value),
+        newCustomers: parseInt(document.getElementById('new-customers').value),
+        onboardingSpeed: parseInt(document.getElementById('onboarding-speed').value),
+        retentionDecay: parseFloat(document.getElementById('retention-decay').value),
+        expansion: parseFloat(document.getElementById('expansion').value),
+        expansionAmount: parseFloat(document.getElementById('expansion-amount').value),
+        cac: parseFloat(document.getElementById('cac').value)
+    };
+    
+    // Recalculate and render
+    calculateMetrics();
+    renderMRRChart();
+    renderCohortTable();
+    renderWaterfallChart();
+    generateInsights();
+}
+
+function calculateMetrics() {
+    const months = 12;
+    let currentMRR = simulationData.startingMRR;
+    let currentCustomers = Math.round(currentMRR / simulationData.arpa);
+    let projectedMRR = [];
+    let projectedCustomers = [];
+    
+    for (let i = 0; i < months; i++) {
+        // Calculate churn
+        const churnedCustomers = Math.round(currentCustomers * (simulationData.churnRate / 100));
+        const churnedMRR = churnedCustomers * simulationData.arpa;
+        
+        // Calculate new customers (with onboarding delay effect)
+        const onboardingFactor = Math.max(0.5, 1 - (simulationData.onboardingSpeed / 60));
+        const effectiveNewCustomers = Math.round(simulationData.newCustomers * onboardingFactor);
+        const newMRR = effectiveNewCustomers * simulationData.arpa;
+        
+        // Calculate expansion
+        const expandingCustomers = Math.round(currentCustomers * (simulationData.expansion / 100));
+        const expansionMRR = expandingCustomers * simulationData.arpa * (simulationData.expansionAmount / 100);
+        
+        // Apply retention decay
+        const retentionFactor = Math.pow(simulationData.retentionDecay, i);
+        
+        // Update MRR and customers
+        currentMRR = (currentMRR - churnedMRR + newMRR + expansionMRR) * retentionFactor;
+        currentCustomers = currentCustomers - churnedCustomers + effectiveNewCustomers;
+        
+        projectedMRR.push(currentMRR);
+        projectedCustomers.push(currentCustomers);
+    }
+    
+    // Calculate key metrics
+    const endingMRR = projectedMRR[months - 1];
+    const mrrGrowth = ((endingMRR - simulationData.startingMRR) / simulationData.startingMRR) * 100;
+    const avgMonthlyGrowth = mrrGrowth / months;
+    
+    // Calculate LTV
+    const avgCustomerLifetime = 1 / (simulationData.churnRate / 100);
+    const ltv = simulationData.arpa * avgCustomerLifetime;
+    const ltvCacRatio = ltv / simulationData.cac;
+    
+    // Calculate payback period
+    const paybackMonths = simulationData.cac / simulationData.arpa;
+    
+    // Calculate NRR (Net Revenue Retention)
+    const monthlyChurnRate = simulationData.churnRate / 100;
+    const monthlyExpansionRate = (simulationData.expansion / 100) * (simulationData.expansionAmount / 100);
+    const nrr = (1 - monthlyChurnRate + monthlyExpansionRate) * 100;
+    
+    // Calculate Quick Ratio
+    const newExpansionMRR = (simulationData.newCustomers * simulationData.arpa) + 
+                            (currentCustomers * (simulationData.expansion / 100) * simulationData.arpa * (simulationData.expansionAmount / 100));
+    const churnedMRR = currentCustomers * (simulationData.churnRate / 100) * simulationData.arpa;
+    const quickRatio = churnedMRR > 0 ? newExpansionMRR / churnedMRR : 0;
+    
+    // Render metrics
+    const metricsGrid = document.getElementById('metrics-grid');
+    metricsGrid.innerHTML = `
+        <div class="metric-box">
+            <div class="metric-value">$${formatNumber(endingMRR)}</div>
+            <div class="metric-label">Projected MRR (12mo)</div>
+            <div class="metric-change">${mrrGrowth > 0 ? '+' : ''}${mrrGrowth.toFixed(1)}% growth</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">$${formatNumber(endingMRR * 12)}</div>
+            <div class="metric-label">Projected ARR (12mo)</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">$${formatNumber(ltv)}</div>
+            <div class="metric-label">Customer LTV</div>
+            <div class="metric-change">Lifetime: ${avgCustomerLifetime.toFixed(1)} months</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">${ltvCacRatio.toFixed(1)}:1</div>
+            <div class="metric-label">LTV:CAC Ratio</div>
+            <div class="metric-change">${ltvCacRatio >= 3 ? '✓ Healthy' : '⚠ Below target'}</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">${paybackMonths.toFixed(1)}</div>
+            <div class="metric-label">CAC Payback (months)</div>
+            <div class="metric-change">${paybackMonths <= 12 ? '✓ Good' : '⚠ Too long'}</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">${nrr.toFixed(0)}%</div>
+            <div class="metric-label">Net Revenue Retention</div>
+            <div class="metric-change">${nrr >= 100 ? '✓ Excellent' : '⚠ Need improvement'}</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">${quickRatio.toFixed(1)}</div>
+            <div class="metric-label">Quick Ratio</div>
+            <div class="metric-change">${quickRatio >= 4 ? '✓ Excellent' : quickRatio >= 2 ? '✓ Good' : '⚠ Weak'}</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-value">${projectedCustomers[months - 1]}</div>
+            <div class="metric-label">Total Customers (12mo)</div>
+            <div class="metric-change">From ${currentCustomers} today</div>
+        </div>
+    `;
+    
+    return { projectedMRR, projectedCustomers, endingMRR, mrrGrowth };
+}
+
+function renderMRRChart() {
+    const canvas = document.getElementById('mrr-chart');
+    const ctx = canvas.getContext('2d');
+    
+    // Set canvas size
+    canvas.width = canvas.offsetWidth;
+    canvas.height = 350;
+    
+    const months = 12;
+    let currentMRR = simulationData.startingMRR;
+    let mrrData = [currentMRR];
+    
+    // Calculate MRR for each month
+    for (let i = 0; i < months; i++) {
+        const currentCustomers = Math.round(currentMRR / simulationData.arpa);
+        const churnedMRR = currentCustomers * (simulationData.churnRate / 100) * simulationData.arpa;
+        const onboardingFactor = Math.max(0.5, 1 - (simulationData.onboardingSpeed / 60));
+        const newMRR = simulationData.newCustomers * onboardingFactor * simulationData.arpa;
+        const expansionMRR = currentCustomers * (simulationData.expansion / 100) * simulationData.arpa * (simulationData.expansionAmount / 100);
+        const retentionFactor = Math.pow(simulationData.retentionDecay, i);
+        
+        currentMRR = (currentMRR - churnedMRR + newMRR + expansionMRR) * retentionFactor;
+        mrrData.push(currentMRR);
+    }
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Calculate dimensions
+    const padding = 60;
+    const chartWidth = canvas.width - padding * 2;
+    const chartHeight = canvas.height - padding * 2;
+    
+    const maxMRR = Math.max(...mrrData) * 1.1;
+    const minMRR = Math.min(...mrrData) * 0.9;
+    
+    // Draw axes
+    ctx.strokeStyle = '#cbd5e0';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 5; i++) {
+        const y = padding + (chartHeight / 5) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(canvas.width - padding, y);
+        ctx.stroke();
+        
+        // Y-axis labels
+        const value = maxMRR - ((maxMRR - minMRR) / 5) * i;
+        ctx.fillStyle = '#4a5568';
+        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('$' + formatNumber(value), padding - 10, y + 5);
+    }
+    
+    // Draw line
+    ctx.strokeStyle = '#667eea';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    
+    mrrData.forEach((mrr, index) => {
+        const x = padding + (chartWidth / months) * index;
+        const y = padding + chartHeight - ((mrr - minMRR) / (maxMRR - minMRR)) * chartHeight;
+        
+        if (index === 0) {
+            ctx.moveTo(x, y);
+        } else {
+            ctx.lineTo(x, y);
+        }
+    });
+    
+    ctx.stroke();
+    
+    // Draw points
+    mrrData.forEach((mrr, index) => {
+        const x = padding + (chartWidth / months) * index;
+        const y = padding + chartHeight - ((mrr - minMRR) / (maxMRR - minMRR)) * chartHeight;
+        
+        ctx.fillStyle = '#667eea';
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // X-axis labels
+        if (index % 2 === 0) {
+            ctx.fillStyle = '#4a5568';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('M' + index, x, canvas.height - padding + 20);
+        }
+    });
+    
+    // Add title
+    ctx.fillStyle = '#2d3748';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Monthly Recurring Revenue Growth', canvas.width / 2, 30);
+}
+
+function renderCohortTable() {
+    const table = document.getElementById('cohort-table');
+    const months = 6;
+    
+    let html = '<thead><tr><th>Cohort</th><th>Customers</th><th>Starting MRR</th>';
+    for (let i = 0; i < months; i++) {
+        html += `<th>Month ${i}</th>`;
+    }
+    html += '</tr></thead><tbody>';
+    
+    for (let cohort = 0; cohort < months; cohort++) {
+        const customers = simulationData.newCustomers;
+        const startingMRR = customers * simulationData.arpa;
+        
+        html += `<tr><td><strong>Cohort ${cohort + 1}</strong></td><td>${customers}</td><td>$${formatNumber(startingMRR)}</td>`;
+        
+        for (let month = 0; month < months; month++) {
+            if (month < cohort) {
+                html += '<td>-</td>';
+            } else {
+                const monthsActive = month - cohort;
+                const retention = Math.pow(1 - simulationData.churnRate / 100, monthsActive) * 
+                                Math.pow(simulationData.retentionDecay, monthsActive);
+                const retentionPercent = (retention * 100).toFixed(0);
+                
+                let colorClass = '';
+                if (retentionPercent >= 90) colorClass = 'background: #c6f6d5; color: #22543d;';
+                else if (retentionPercent >= 70) colorClass = 'background: #fef3c7; color: #78350f;';
+                else colorClass = 'background: #fed7d7; color: #742a2a;';
+                
+                html += `<td class="retention-cell" style="${colorClass}">${retentionPercent}%</td>`;
+            }
+        }
+        html += '</tr>';
+    }
+    
+    html += '</tbody>';
+    table.innerHTML = html;
+}
+
+function renderWaterfallChart() {
+    const container = document.getElementById('waterfall-chart');
+    
+    const currentCustomers = Math.round(simulationData.startingMRR / simulationData.arpa);
+    const startingMRR = simulationData.startingMRR;
+    const churnedMRR = currentCustomers * (simulationData.churnRate / 100) * simulationData.arpa;
+    const onboardingFactor = Math.max(0.5, 1 - (simulationData.onboardingSpeed / 60));
+    const newMRR = simulationData.newCustomers * onboardingFactor * simulationData.arpa;
+    const expansionMRR = currentCustomers * (simulationData.expansion / 100) * simulationData.arpa * (simulationData.expansionAmount / 100);
+    const endingMRR = startingMRR - churnedMRR + newMRR + expansionMRR;
+    
+    const maxValue = Math.max(startingMRR, endingMRR) * 1.2;
+    
+    const bars = [
+        { label: 'Starting MRR', value: startingMRR, type: 'base' },
+        { label: 'Churned', value: -churnedMRR, type: 'negative' },
+        { label: 'New Customers', value: newMRR, type: 'positive' },
+        { label: 'Expansion', value: expansionMRR, type: 'positive' },
+        { label: 'Ending MRR', value: endingMRR, type: 'base' }
+    ];
+    
+    container.innerHTML = bars.map(bar => {
+        const height = (Math.abs(bar.value) / maxValue) * 250;
+        return `
+            <div class="waterfall-bar">
+                <div class="waterfall-bar-visual ${bar.type}" style="height: ${height}px;">
+                    <div class="waterfall-value">$${formatNumber(Math.abs(bar.value))}</div>
+                </div>
+                <div class="waterfall-label">${bar.label}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function generateInsights() {
+    const container = document.getElementById('insights-container');
+    const avgCustomerLifetime = 1 / (simulationData.churnRate / 100);
+    const ltv = simulationData.arpa * avgCustomerLifetime;
+    const ltvCacRatio = ltv / simulationData.cac;
+    const paybackMonths = simulationData.cac / simulationData.arpa;
+    const nrr = (1 - simulationData.churnRate / 100 + (simulationData.expansion / 100) * (simulationData.expansionAmount / 100)) * 100;
+    
+    let insights = [];
+    let positives = [];
+    
+    // Generate insights
+    if (simulationData.churnRate > 7) {
+        insights.push('🔴 High churn rate (' + simulationData.churnRate + '%) is limiting growth. Reducing churn to 3-5% could increase MRR by 20-30%.');
+    }
+    
+    if (ltvCacRatio < 3) {
+        insights.push('🔴 LTV:CAC ratio of ' + ltvCacRatio.toFixed(1) + ':1 is below the healthy threshold of 3:1. Consider reducing CAC or improving retention.');
+    }
+    
+    if (paybackMonths > 12) {
+        insights.push('🔴 CAC payback period of ' + paybackMonths.toFixed(1) + ' months is too long. Target is under 12 months for sustainable growth.');
+    }
+    
+    if (simulationData.onboardingSpeed > 21) {
+        insights.push('🟡 Onboarding takes ' + simulationData.onboardingSpeed + ' days. Faster onboarding (7-14 days) would accelerate revenue recognition.');
+    }
+    
+    if (nrr < 100) {
+        insights.push('🟡 Net Revenue Retention below 100% means you\'re losing revenue from existing customers. Focus on expansion and reducing churn.');
+    }
+    
+    // Positive insights
+    if (simulationData.churnRate <= 3) {
+        positives.push('✅ Excellent churn rate! Your retention is best-in-class.');
+    }
+    
+    if (ltvCacRatio >= 3) {
+        positives.push('✅ Strong LTV:CAC ratio indicates efficient customer acquisition.');
+    }
+    
+    if (nrr >= 100) {
+        positives.push('✅ Net Revenue Retention above 100% - you\'re growing revenue from existing customers!');
+    }
+    
+    if (simulationData.onboardingSpeed <= 7) {
+        positives.push('✅ Fast onboarding speed is accelerating time to revenue.');
+    }
+    
+    let html = '';
+    
+    if (insights.length > 0) {
+        html += '<div class="insights-box"><div class="insights-title">⚠️ Areas for Improvement</div>';
+        insights.forEach(insight => {
+            html += `<div class="insight-item">${insight}</div>`;
+        });
+        html += '</div>';
+    }
+    
+    if (positives.length > 0) {
+        html += '<div class="insights-box positive-insight"><div class="insights-title">✨ Strengths</div>';
+        positives.forEach(positive => {
+            html += `<div class="insight-item">${positive}</div>`;
+        });
+        html += '</div>';
+    }
+    
+    container.innerHTML = html;
+}
+
+function formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(2) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(0) + 'K';
+    }
+    return Math.round(num).toLocaleString();
+}
+
+function loadScenario(scenarioName) {
+    // Update active button
+    document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    const scenario = scenarios[scenarioName];
+    
+    // Update all inputs
+    document.getElementById('starting-mrr').value = scenario.startingMRR;
+    document.getElementById('churn-rate').value = scenario.churnRate;
+    document.getElementById('arpa').value = scenario.arpa;
+    document.getElementById('new-customers').value = scenario.newCustomers;
+    document.getElementById('onboarding-speed').value = scenario.onboardingSpeed;
+    document.getElementById('retention-decay').value = scenario.retentionDecay;
+    document.getElementById('expansion').value = scenario.expansion;
+    document.getElementById('expansion-amount').value = scenario.expansionAmount;
+    document.getElementById('cac').value = scenario.cac;
+    
+    updateSimulation();
+}
+
+function saveScenario() {
+    const scenarioData = JSON.stringify(simulationData);
+    localStorage.setItem('savedScenario', scenarioData);
+    alert('Scenario saved! You can load it later by refreshing the page.');
+}
+
+function resetToDefaults() {
+    loadScenario('current');
+}
+
+function exportToPDF() {
+    const style = document.createElement('style');
+    style.textContent = `
+        @media print {
+            body { background: white; }
+            .controls, .action-buttons, .scenario-selector { display: none !important; }
+            .card { page-break-inside: avoid; }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    window.print();
+    
+    setTimeout(() => document.head.removeChild(style), 1000);
+}
+
+// Initialize on load
+document.addEventListener('DOMContentLoaded', function() {
+    // Load saved scenario if exists
+    const saved = localStorage.getItem('savedScenario');
+    if (saved) {
+        const scenario = JSON.parse(saved);
+        Object.keys(scenario).forEach(key => {
+            const input = document.getElementById(key.replace(/([A-Z])/g, '-$1').toLowerCase());
+            if (input) input.value = scenario[key];
+        });
+    }
+    
+    updateSimulation();
+});
+</script>
+</body>
+</html>

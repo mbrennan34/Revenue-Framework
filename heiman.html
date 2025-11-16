@@ -1,0 +1,1928 @@
+<div style="display: flex; justify-content: space-between; background: #e6e6e6; padding: 10px; border-bottom: 1px solid #000;">
+            <div style="flex: 1;">
+                <strong style="font-size: 11px;">RATING:</strong>
+                <div style="font-size: 10px;">Rate how well your base is covered with each Buying Influence on this scale: 5 High = 5 | 10, Negative = -5 | 0</div>
+            </div>
+            <div style="flex: 1; border-left: 1px solid #000; padding-left: 10px;">
+                <strong style="font-size: 11px;">RED/FLAG:</strong>
+                <div style="font-size: 10px;">⚠ R: Unresolved Basic Need Repair/Reorganization, Uncertainty/Lack of Data</div>
+            </div>
+            <div style="flex: 1; border-left: 1px solid #000; padding-left: 10px;">
+                <strong style="font-size: 11px;">STRENGTHS:</strong>
+                <div style="font-size: 10px;">💪 S: Areas of differentiation. Opportunities to improve your position.</div>
+            </div>
+        </div>
+        
+        <!-- Buying Influences Table -->
+        <table class="buying-influences-table">
+            <thead>
+                <tr>
+                    <th style="width: 200px;">BUYING INFLUENCES INVOLVED<br><span style="font-weight: normal; font-size: 10px;">(NAME/TITLE, LOCATION)</span></th>
+                    <th class="narrow-col">ROLE</th>
+                    <th class="narrow-col">DEGREE OF INFLUENCE</th>
+                    <th class="narrow-col">MODE</th>
+                    <th style="width: 300px;">BUYING INFLUENCE'S KEY WIN - RESULTS<br><span style="font-weight: normal; font-size: 10px;">(WIN RESULTS STATEMENT)</span></th>
+                    <th class="narrow-col">RATING</th>
+                    <th style="width: 300px;">HOW WELL IS BASE COVERED?<br><span style="font-weight: normal; font-size: 10px;">(EVIDENCE TO SUPPORT YOUR RATING)</span></th>
+                    <th style="width: 50px;"></th>
+                </tr>
+            </thead>
+            <tbody id="buyersTableBody">
+            </tbody>
+        </table>
+        
+        <button class="add-row-btn" onclick="addBuyerRow()">+ Add Buying Influence</button>
+        
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <div class="bottom-box">
+                <div class="bottom-header">SUMMARY OF MY POSITION TODAY</div>
+                <div class="bottom-content">
+                    <div class="list-section">
+                        <strong>💪 STRENGTHS:</strong>
+                        <textarea id="strengths" placeholder="List your competitive advantages and strengths in this opportunity..."></textarea>
+                    </div>
+                    <div class="list-section">
+                        <strong>🚩 RED FLAGS:</strong>
+                        <textarea id="red-flags" placeholder="List concerns, risks, and areas needing attention..."></textarea>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bottom-box">
+                <div class="bottom-header">POSSIBLE ACTIONS</div>
+                <div class="bottom-content">
+                    <p style="font-size: 10px; margin-bottom: 10px; font-style: italic;">
+                        A GOOD SALES STRATEGY LEVERAGES STRENGTHS AND RESOLVES/ELIMINATES RED FLAGS
+                    </p>
+                    <textarea id="possible-actions" placeholder="List all possible actions you could take to strengthen your position and address red flags..."></textarea>
+                </div>
+            </div>
+            
+            <div class="bottom-box">
+                <div class="bottom-header">BEST ACTION PLAN</div>
+                <div class="bottom-content">
+                    <table class="action-table">
+                        <thead>
+                            <tr>
+                                <th>WHAT:</th>
+                                <th>WHO:</th>
+                                <th>WHEN:</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="actionTableBody">
+                        </tbody>
+                    </table>
+                    <button class="add-row-btn" onclick="addActionRow()">+ Add Action</button>
+                    
+                    <div style="margin-top: 20px;">
+                        <strong style="font-size: 11px;">INFORMATION NEEDED:</strong>
+                        <table class="action-table" style="margin-top: 5px;">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50%;">FROM WHOM:</th>
+                                    <th>WHEN:</th>
+                                    <th style="width: 50px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="infoTableBody">
+                            </tbody>
+                        </table>
+                        <button class="add-row-btn" onclick="addInfoRow()">+ Add Info Need</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 2015 Miller Heiman Group. All rights reserved.
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analytics-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Analytics Dashboard</h2>
+                <button class="modal-close" onclick="closeAnalytics()">×</button>
+            </div>
+            <div id="analytics-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let strategies = {};
+        let currentStrategyId = null;
+        let autoSaveInterval = null;
+        let lastSaveTime = null;
+
+        // Use localStorage instead of memory storage
+        function loadFromStorage() {
+            try {
+                const savedStrategies = localStorage.getItem('millerHeimanStrategies');
+                const savedCurrentId = localStorage.getItem('millerHeimanCurrentId');
+                
+                if (savedStrategies) {
+                    strategies = JSON.parse(savedStrategies);
+                    console.log('Loaded strategies from localStorage:', Object.keys(strategies).length);
+                }
+                if (savedCurrentId) {
+                    currentStrategyId = savedCurrentId;
+                }
+            } catch (error) {
+                console.error('Error loading from storage:', error);
+                alert('Error loading saved data. Your browser storage might be corrupted.');
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('millerHeimanStrategies', JSON.stringify(strategies));
+                localStorage.setItem('millerHeimanCurrentId', currentStrategyId);
+                lastSaveTime = new Date();
+                updateSaveIndicator();
+                console.log('Saved to localStorage successfully');
+            } catch (error) {
+                console.error('Error saving to storage:', error);
+                if (error.name === 'QuotaExceededError') {
+                    alert('Browser storage is full! Please export your strategies and clear some data.');
+                } else {
+                    alert('Failed to save data. Please try again or export your work.');
+                }
+            }
+        }
+
+        function autoSave() {
+            showSavingIndicator();
+            saveCurrentStrategy();
+            saveToStorage();
+        }
+
+        function startAutoSave() {
+            if (autoSaveInterval) {
+                clearInterval(autoSaveInterval);
+            }
+            autoSaveInterval = setInterval(autoSave, 15000);
+        }
+
+        function updateSaveIndicator() {
+            const indicator = document.getElementById('save-indicator');
+            if (indicator && lastSaveTime) {
+                const timeStr = lastSaveTime.toLocaleTimeString();
+                indicator.innerHTML = `✓ Saved at ${timeStr}`;
+                indicator.style.color = '#48bb78';
+                indicator.style.fontWeight = '600';
+                
+                setTimeout(() => {
+                    indicator.innerHTML = '🟢 Auto-save enabled';
+                    indicator.style.color = '#718096';
+                    indicator.style.fontWeight = 'normal';
+                }, 3000);
+            }
+        }
+
+        function showSavingIndicator() {
+            const indicator = document.getElementById('save-indicator');
+            if (indicator) {
+                indicator.innerHTML = '💾 Saving...';
+                indicator.style.color = '#4299e1';
+                indicator.style.fontWeight = '600';
+            }
+        }
+
+        function manualSave() {
+            showSavingIndicator();
+            setTimeout(() => {
+                autoSave();
+                alert('Strategy saved successfully to browser storage!');
+            }, 300);
+        }
+
+        function exportAllData() {
+            saveCurrentStrategy();
+            
+            const dataStr = JSON.stringify(strategies, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `miller-heiman-strategies-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            alert('All strategies exported successfully!\n\nKeep this file safe as a backup.');
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        
+                        if (confirm('This will merge imported strategies with existing ones. Continue?')) {
+                            Object.assign(strategies, importedData);
+                            
+                            saveToStorage();
+                            renderStrategySelector();
+                            
+                            alert(`Successfully imported ${Object.keys(importedData).length} strategies!`);
+                        }
+                    } catch (error) {
+                        console.error('Import error:', error);
+                        alert('Error importing file. Please make sure it\'s a valid export file.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function createEmptyStrategy(clientName) {
+            return {
+                id: 'strategy-' + Date.now(),
+                clientName: clientName,
+                dateCreated: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                data: {
+                    account: '',
+                    opportunity: '',
+                    date: '',
+                    adequacy: '',
+                    idealCustomer: '',
+                    competition: '',
+                    competitorsList: '',
+                    sso: '',
+                    position: '',
+                    funnel: '',
+                    timing: '',
+                    buyingInfluences: [],
+                    strengths: '',
+                    redFlags: '',
+                    possibleActions: '',
+                    actions: [],
+                    infoNeeds: []
+                }
+            };
+        }
+
+        function createSampleStrategy() {
+            return {
+                id: 'strategy-sample-' + Date.now(),
+                clientName: 'Global Financial Corp',
+                dateCreated: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                data: {
+                    account: 'Global Financial Corp',
+                    opportunity: 'Enterprise Virtual Desktop Infrastructure (VDI) Replacement - 8,500 users',
+                    date: '2024-11-15',
+                    adequacy: 'concern',
+                    idealCustomer: 'Enterprise financial services company (5,000+ employees) with regulatory compliance requirements (SOX, FINRA), hybrid work model requiring secure remote access, existing VMware environment looking to modernize, budget for premium solutions with strong ROI focus, IT team experienced with virtualization, C-level commitment to digital transformation.',
+                    competition: 'VMware Horizon is incumbent solution (current 3-year contract expiring in Q1 2025). Broadcom acquisition has created significant pricing uncertainty - they received 380% price increase for renewal. Also evaluating Parallels RAS as budget alternative. Decision influenced by recent Broadcom price shock and need for predictable costs.',
+                    competitorsList: 'VMware Horizon (incumbent), Parallels RAS (budget option)',
+                    sso: 'Secure commitment from CFO and CIO to evaluate Citrix as primary alternative to VMware, with executive presentation scheduled for December 10th demonstrating 40%+ TCO savings and superior compliance capabilities for regulatory requirements.',
+                    position: 'staged',
+                    funnel: 'in',
+                    timing: 'urgent',
+                    buyingInfluences: [
+                        {
+                            name: 'Sarah Chen, Chief Information Officer',
+                            role: 'E',
+                            influence: 'H',
+                            mode: 'T',
+                            winResults: 'WIN: Avoid career risk of another vendor acquisition disaster. Needs predictable, stable partner for 5-year horizon.\nRESULTS: Successfully migrate 8,500 users with zero downtime, achieve 99.95% uptime SLA, demonstrate cost savings to board.',
+                            rating: '6',
+                            evidence: '3 meetings completed. Concerned about VMware price increase but risk-averse about switching. Her previous vendor (Oracle) was acquired and caused major problems. Need to position Citrix stability and financial strength. Coach relationship through Director of IT.'
+                        },
+                        {
+                            name: 'Michael Rodriguez, Chief Financial Officer',
+                            role: 'E',
+                            influence: 'H',
+                            mode: 'G',
+                            winResults: 'WIN: Deliver significant cost savings to reinvest in revenue-generating initiatives. Be seen as cost-conscious steward.\nRESULTS: Reduce VDI costs by 35-40% over 3 years, achieve predictable OpEx model, free up $2M annually for digital banking platform.',
+                            rating: '8',
+                            evidence: 'Strong relationship. CFO is champion - furious about VMware price increase. Wants us to win but needs bulletproof business case for board. Scheduled financial analysis session next week. This is our strongest ally.'
+                        },
+                        {
+                            name: 'James Park, Director of IT Infrastructure',
+                            role: 'T',
+                            influence: 'M',
+                            mode: 'EK',
+                            winResults: 'WIN: Smooth implementation that makes him look good to CIO. Avoid overtime and weekend work for his team.\nRESULTS: Seamless migration with comprehensive training, strong vendor support, modern platform that reduces daily firefighting.',
+                            rating: '7',
+                            evidence: 'Our coach. Likes Citrix from previous company. Concerned about team learning curve but we addressed with training plan. He will advocate for us if we keep supporting him with technical details for CIO.'
+                        },
+                        {
+                            name: 'David Kumar, VP of Information Security',
+                            role: 'T',
+                            influence: 'H',
+                            mode: 'T',
+                            winResults: 'WIN: Bulletproof security posture for upcoming SOX audit. Zero security incidents during migration.\nRESULTS: Pass Q1 2025 SOX audit with zero findings, implement zero-trust architecture, achieve security certifications required by regulators.',
+                            rating: '5',
+                            evidence: 'Met twice. Skeptical of all vendors. Major concerns about security during migration and long-term security roadmap. Need dedicated security workshop with our CISO to address concerns. This is a potential blocker if not addressed.'
+                        },
+                        {
+                            name: 'Lisa Thompson, Head of Trading Technology',
+                            role: 'U',
+                            influence: 'M',
+                            mode: 'T',
+                            winResults: 'WIN: Zero disruption to trading desk - cannot afford downtime during market hours.\nRESULTS: Faster application performance than current VMware, seamless experience for 200 traders, ability to work from anywhere without performance degradation.',
+                            rating: '4',
+                            evidence: 'Only one brief meeting. Very concerned about performance for trading applications. VMware currently works and she sees switching as risk. Need hands-on demo with trading apps and reference calls with similar financial services customers.'
+                        },
+                        {
+                            name: 'Robert Jackson, VP Compliance',
+                            role: 'U',
+                            influence: 'M',
+                            mode: 'OC',
+                            winResults: 'WIN: Audit-ready documentation and compliance controls that impress regulators.\nRESULTS: Meet all FINRA, SOX requirements, comprehensive audit logging, session recording for compliance review.',
+                            rating: '7',
+                            evidence: 'Positive meeting. Impressed with compliance features and audit capabilities. Sees Citrix as upgrade over VMware for regulatory requirements. Will support decision if security VP approves.'
+                        }
+                    ],
+                    strengths: '💪 FINANCIAL CHAMPION: CFO is strongly advocating for Citrix due to VMware price increase - our biggest strength\n\n💪 COST SAVINGS: Can demonstrate 40% TCO reduction over 3 years - compelling business case\n\n💪 COACH RELATIONSHIP: Director of IT is internal advocate, has positive Citrix experience\n\n💪 TIMING: VMware contract expires Q1 2025, urgent timeline favors change\n\n💪 COMPLIANCE ADVANTAGE: Our analytics and security features exceed VMware for regulatory requirements\n\n💪 BROADCOM BACKLASH: Industry-wide dissatisfaction with VMware creates receptive environment\n\n💪 REFERENCE CUSTOMERS: Have 3 similar financial services customers who switched from VMware',
+                    redFlags: '🚩 CIO RISK AVERSION: Sarah Chen burned by previous vendor acquisition, hesitant to switch despite VMware problems\n\n🚩 SECURITY VP SKEPTICISM: David Kumar is potential blocker - needs dedicated attention and security workshop\n\n🚩 TRADING DESK CONCERNS: Lisa Thompson worried about performance disruption - critical user group\n\n🚩 TECHNICAL EVALUATION: Haven\'t completed hands-on POC yet - scheduled for December\n\n🚩 PARALLELS PRICING: Budget alternative creating downward price pressure\n\n🚩 VMWARE COUNTER: Incumbent will offer aggressive win-back pricing (expect 40-50% discount)\n\n🚩 IMPLEMENTATION TIMELINE: Aggressive Q1 2025 deadline creates execution risk perception\n\n🚩 INTERNAL POLITICS: Tension between CIO (cautious) and CFO (pushing change) - need to align them',
+                    possibleActions: 'IMMEDIATE ACTIONS:\n• Schedule security workshop with David Kumar and our CISO within 10 days\n• Arrange trading desk demo with high-performance workload testing\n• Provide 3 financial services reference customers for peer conversations\n• Develop detailed migration plan addressing timeline concerns\n• Create executive presentation for Dec 10th board meeting\n\nSTRENGTH LEVERAGE:\n• Quantify productivity gains (not just cost savings) for CFO business case\n• Connect James Park (coach) with our implementation team for his confidence\n• Highlight Citrix stability vs Broadcom acquisition chaos\n• Use compliance angle to differentiate from Parallels\n\nRED FLAG RESOLUTION:\n• One-on-one session with CIO focused on risk mitigation and vendor stability\n• Arrange dinner with CIO and our CEO to build relationship\n• Include trading desk requirements in POC success criteria\n• Develop Parallels competitive response (features they lack)\n• Prepare for VMware aggressive pricing with value justification\n• Create detailed Week-by-Week implementation timeline with contingencies',
+                    actions: [
+                        {
+                            what: 'Schedule security architecture workshop with VP Security and our CISO',
+                            who: 'Account Executive + Security Sales Engineer',
+                            when: '2024-11-22'
+                        },
+                        {
+                            what: 'Arrange trading desk performance demo with actual trading applications',
+                            who: 'Sales Engineer + Trading Tech Lead',
+                            when: '2024-11-25'
+                        },
+                        {
+                            what: 'Provide reference calls with 3 peer financial services companies',
+                            who: 'Account Executive',
+                            when: '2024-11-20'
+                        },
+                        {
+                            what: 'Create executive presentation for board meeting (Dec 10th)',
+                            who: 'Account Executive + Sales Engineer',
+                            when: '2024-12-05'
+                        },
+                        {
+                            what: 'Develop comprehensive migration plan with timeline and risk mitigation',
+                            who: 'Professional Services + Sales Engineer',
+                            when: '2024-11-27'
+                        },
+                        {
+                            what: 'Schedule CIO dinner with Citrix CEO to discuss vendor stability',
+                            who: 'Account Executive',
+                            when: '2024-12-03'
+                        },
+                        {
+                            what: 'Complete Proof of Concept including trading desk scenarios',
+                            who: 'Sales Engineer + Customer IT Team',
+                            when: '2024-12-15'
+                        },
+                        {
+                            what: 'Deliver final proposal with 3-year TCO analysis',
+                            who: 'Account Executive',
+                            when: '2024-12-20'
+                        }
+                    ],
+                    infoNeeds: [
+                        {
+                            fromWhom: 'Current VMware licensing costs and renewal quote from CFO',
+                            when: '2024-11-18'
+                        },
+                        {
+                            fromWhom: 'Detailed security requirements and audit findings from Security VP',
+                            when: '2024-11-22'
+                        },
+                        {
+                            fromWhom: 'Trading application performance requirements from Trading Tech Lead',
+                            when: '2024-11-20'
+                        },
+                        {
+                            fromWhom: 'Decision timeline and board meeting dates from CIO',
+                            when: '2024-11-19'
+                        },
+                        {
+                            fromWhom: 'Complete list of applications needing virtualization from IT Director',
+                            when: '2024-11-21'
+                        },
+                        {
+                            fromWhom: 'Regulatory compliance requirements (SOX, FINRA specifics) from Compliance VP',
+                            when: '2024-11-23'
+                        }
+                    ]
+                }
+            };
+        }
+
+        function loadSampleStrategy() {
+            if (confirm('Load a sample strategy for "Global Financial Corp"? This will not delete your existing strategies.')) {
+                const sampleStrategy = createSampleStrategy();
+                
+                const existingSample = Object.values(strategies).find(s => s.clientName === 'Global Financial Corp');
+                if (existingSample) {
+                    if (!confirm('Sample strategy already exists. Replace it with a fresh copy?')) {
+                        return;
+                    }
+                    delete strategies[existingSample.id];
+                }
+                
+                strategies[sampleStrategy.id] = sampleStrategy;
+                currentStrategyId = sampleStrategy.id;
+                
+                saveToStorage();
+                renderStrategySelector();
+                loadStrategy(currentStrategyId);
+                
+                alert('Sample strategy loaded! This is a realistic enterprise VDI replacement opportunity for a financial services company fleeing VMware.');
+            }
+        }
+
+        function initializeStrategies() {
+            loadFromStorage();
+            
+            if (Object.keys(strategies).length === 0) {
+                console.log('No saved strategies found. Creating first strategy...');
+                const firstStrategy = createEmptyStrategy('New Client');
+                strategies[firstStrategy.id] = firstStrategy;
+                currentStrategyId = firstStrategy.id;
+                saveToStorage();
+            } else {
+                console.log(`Loaded ${Object.keys(strategies).length} strategies from localStorage`);
+            }
+            
+            renderStrategySelector();
+            loadStrategy(currentStrategyId);
+            startAutoSave();
+            
+            setTimeout(() => {
+                const storageUsed = new Blob([JSON.stringify(strategies)]).size;
+                console.log(`Storage used: ${(storageUsed / 1024).toFixed(2)} KB`);
+            }, 1000);
+        }
+
+        function renderStrategySelector() {
+            const select = document.getElementById('strategy-select');
+            
+            const sortedStrategies = Object.entries(strategies).sort((a, b) => {
+                return new Date(b[1].lastModified) - new Date(a[1].lastModified);
+            });
+            
+            select.innerHTML = sortedStrategies.map(([id, strategy]) => 
+                `<option value="${id}" ${id === currentStrategyId ? 'selected' : ''}>
+                    ${strategy.clientName} - ${strategy.data.account || 'Untitled'}
+                </option>`
+            ).join('');
+        }
+
+        function updateClientInfo() {
+            const strategy = strategies[currentStrategyId];
+            if (!strategy) return;
+            
+            const info = document.getElementById('client-info');
+            const created = new Date(strategy.dateCreated);
+            const modified = new Date(strategy.lastModified);
+            
+            info.innerHTML = `
+                <div class="client-info-title">${strategy.clientName}</div>
+                <div class="client-info-meta">
+                    Created: ${created.toLocaleDateString()} | 
+                    Last Modified: ${modified.toLocaleDateString()} | 
+                    Total Strategies: ${Object.keys(strategies).length}
+                </div>
+            `;
+        }
+
+        function createNewStrategy() {
+            saveCurrentStrategy();
+            
+            const clientName = prompt('Enter client name:');
+            if (!clientName || !clientName.trim()) return;
+            
+            const newStrategy = createEmptyStrategy(clientName.trim());
+            strategies[newStrategy.id] = newStrategy;
+            currentStrategyId = newStrategy.id;
+            
+            renderStrategySelector();
+            loadStrategy(currentStrategyId);
+            autoSave();
+        }
+
+        function copyCurrentStrategy() {
+            const current = strategies[currentStrategyId];
+            if (!current) return;
+            
+            const newName = prompt('Enter name for copied strategy:', current.clientName + ' (Copy)');
+            if (!newName || !newName.trim()) return;
+            
+            const newStrategy = JSON.parse(JSON.stringify(current));
+            newStrategy.id = 'strategy-' + Date.now();
+            newStrategy.clientName = newName.trim();
+            newStrategy.dateCreated = new Date().toISOString();
+            newStrategy.lastModified = new Date().toISOString();
+            
+            strategies[newStrategy.id] = newStrategy;
+            currentStrategyId = newStrategy.id;
+            
+            renderStrategySelector();
+            loadStrategy(currentStrategyId);
+            autoSave();
+        }
+
+        function deleteCurrentStrategy() {
+            if (Object.keys(strategies).length === 1) {
+                alert('Cannot delete the last strategy. You must have at least one strategy.');
+                return;
+            }
+            
+            const strategy = strategies[currentStrategyId];
+            if (confirm(`Are you sure you want to delete the strategy for "${strategy.clientName}"?`)) {
+                delete strategies[currentStrategyId];
+                currentStrategyId = Object.keys(strategies)[0];
+                renderStrategySelector();
+                loadStrategy(currentStrategyId);
+                autoSave();
+            }
+        }
+
+        function switchStrategy(strategyId) {
+            saveCurrentStrategy();
+            currentStrategyId = strategyId;
+            loadStrategy(strategyId);
+        }
+
+        function saveCurrentStrategy() {
+            if (!currentStrategyId) return;
+            
+            const strategy = strategies[currentStrategyId];
+            if (!strategy) return;
+            
+            strategy.lastModified = new Date().toISOString();
+            
+            strategy.data.account = document.getElementById('account').value;
+            strategy.data.opportunity = document.getElementById('opportunity').value;
+            strategy.data.date = document.getElementById('date').value;
+            strategy.data.idealCustomer = document.getElementById('ideal-customer').value;
+            strategy.data.competition = document.getElementById('competition').value;
+            strategy.data.competitorsList = document.getElementById('competitors-list').value;
+            strategy.data.sso = document.getElementById('sso').value;
+            strategy.data.strengths = document.getElementById('strengths').value;
+            strategy.data.redFlags = document.getElementById('red-flags').value;
+            strategy.data.possibleActions = document.getElementById('possible-actions').value;
+            
+            const adequacyRadio = document.querySelector('input[name="adequacy"]:checked');
+            strategy.data.adequacy = adequacyRadio ? adequacyRadio.value : '';
+            
+            const positionRadio = document.querySelector('input[name="position"]:checked');
+            strategy.data.position = positionRadio ? positionRadio.value : '';
+            
+            const funnelRadio = document.querySelector('input[name="funnel"]:checked');
+            strategy.data.funnel = funnelRadio ? funnelRadio.value : '';
+            
+            const timingRadio = document.querySelector('input[name="timing"]:checked');
+            strategy.data.timing = timingRadio ? timingRadio.value : '';
+            
+            strategy.data.buyingInfluences = [];
+            const buyerRows = document.querySelectorAll('#buyersTableBody tr');
+            buyerRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 7) {
+                    strategy.data.buyingInfluences.push({
+                        name: cells[0].querySelector('input').value,
+                        role: cells[1].querySelector('select').value,
+                        influence: cells[2].querySelector('select').value,
+                        mode: cells[3].querySelector('select').value,
+                        winResults: cells[4].querySelector('textarea').value,
+                        rating: cells[5].querySelector('input').value,
+                        evidence: cells[6].querySelector('textarea').value
+                    });
+                }
+            });
+            
+            strategy.data.actions = [];
+            const actionRows = document.querySelectorAll('#actionTableBody tr');
+            actionRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 3) {
+                    strategy.data.actions.push({
+                        what: cells[0].querySelector('input').value,
+                        who: cells[1].querySelector('input').value,
+                        when: cells[2].querySelector('input').value
+                    });
+                }
+            });
+            
+            strategy.data.infoNeeds = [];
+            const infoRows = document.querySelectorAll('#infoTableBody tr');
+            infoRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length >= 2) {
+                    strategy.data.infoNeeds.push({
+                        fromWhom: cells[0].querySelector('input').value,
+                        when: cells[1].querySelector('input').value
+                    });
+                }
+            });
+            
+            updateClientInfo();
+        }
+
+        function loadStrategy(strategyId) {
+            const strategy = strategies[strategyId];
+            if (!strategy) return;
+            
+            document.getElementById('account').value = strategy.data.account || '';
+            document.getElementById('opportunity').value = strategy.data.opportunity || '';
+            document.getElementById('date').value = strategy.data.date || '';
+            document.getElementById('ideal-customer').value = strategy.data.idealCustomer || '';
+            document.getElementById('competition').value = strategy.data.competition || '';
+            document.getElementById('competitors-list').value = strategy.data.competitorsList || '';
+            document.getElementById('sso').value = strategy.data.sso || '';
+            document.getElementById('strengths').value = strategy.data.strengths || '';
+            document.getElementById('red-flags').value = strategy.data.redFlags || '';
+            document.getElementById('possible-actions').value = strategy.data.possibleActions || '';
+            
+            if (strategy.data.adequacy) {
+                const adequacyRadio = document.querySelector(`input[name="adequacy"][value="${strategy.data.adequacy}"]`);
+                if (adequacyRadio) adequacyRadio.checked = true;
+            } else {
+                document.querySelectorAll('input[name="adequacy"]').forEach(r => r.checked = false);
+            }
+            
+            if (strategy.data.position) {
+                const positionRadio = document.querySelector(`input[name="position"][value="${strategy.data.position}"]`);
+                if (positionRadio) positionRadio.checked = true;
+            } else {
+                document.querySelectorAll('input[name="position"]').forEach(r => r.checked = false);
+            }
+            
+            if (strategy.data.funnel) {
+                const funnelRadio = document.querySelector(`input[name="funnel"][value="${strategy.data.funnel}"]`);
+                if (funnelRadio) funnelRadio.checked = true;
+            } else {
+                document.querySelectorAll('input[name="funnel"]').forEach(r => r.checked = false);
+            }
+            
+            if (strategy.data.timing) {
+                const timingRadio = document.querySelector(`input[name="timing"][value="${strategy.data.timing}"]`);
+                if (timingRadio) timingRadio.checked = true;
+            } else {
+                document.querySelectorAll('input[name="timing"]').forEach(r => r.checked = false);
+            }
+            
+            const buyersBody = document.getElementById('buyersTableBody');
+            buyersBody.innerHTML = '';
+            
+            if (strategy.data.buyingInfluences && strategy.data.buyingInfluences.length > 0) {
+                strategy.data.buyingInfluences.forEach(buyer => {
+                    const row = buyersBody.insertRow();
+                    row.innerHTML = createBuyerRowHTML(buyer);
+                });
+            } else {
+                addBuyerRow();
+            }
+            
+            const actionsBody = document.getElementById('actionTableBody');
+            actionsBody.innerHTML = '';
+            
+            if (strategy.data.actions && strategy.data.actions.length > 0) {
+                strategy.data.actions.forEach(action => {
+                    const row = actionsBody.insertRow();
+                    row.innerHTML = createActionRowHTML(action);
+                });
+            } else {
+                addActionRow();
+            }
+            
+            const infoBody = document.getElementById('infoTableBody');
+            infoBody.innerHTML = '';
+            
+            if (strategy.data.infoNeeds && strategy.data.infoNeeds.length > 0) {
+                strategy.data.infoNeeds.forEach(info => {
+                    const row = infoBody.insertRow();
+                    row.innerHTML = createInfoRowHTML(info);
+                });
+            } else {
+                addInfoRow();
+            }
+            
+            updateClientInfo();
+        }
+
+        function createBuyerRowHTML(buyer = {}) {
+            return `
+                <td><input type="text" value="${buyer.name || ''}" placeholder="e.g., John Doe, VP Technology"></td>
+                <td>
+                    <select>
+                        <option value="">-</option>
+                        <option value="E" ${buyer.role === 'E' ? 'selected' : ''}>E</option>
+                        <option value="T" ${buyer.role === 'T' ? 'selected' : ''}>T</option>
+                        <option value="U" ${buyer.role === 'U' ? 'selected' : ''}>U</option>
+                        <option value="C" ${buyer.role === 'C' ? 'selected' : ''}>C</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option value="">-</option>
+                        <option value="H" ${buyer.influence === 'H' ? 'selected' : ''}>H</option>
+                        <option value="M" ${buyer.influence === 'M' ? 'selected' : ''}>M</option>
+                        <option value="L" ${buyer.influence === 'L' ? 'selected' : ''}>L</option>
+                    </select>
+                </td>
+                <td>
+                    <select>
+                        <option value="">-</option>
+                        <option value="G" ${buyer.mode === 'G' ? 'selected' : ''}>G</option>
+                        <option value="T" ${buyer.mode === 'T' ? 'selected' : ''}>T</option>
+                        <option value="EK" ${buyer.mode === 'EK' ? 'selected' : ''}>EK</option>
+                        <option value="OC" ${buyer.mode === 'OC' ? 'selected' : ''}>OC</option>
+                    </select>
+                </td>
+                <td><textarea placeholder="What personal win does this buyer need?">${buyer.winResults || ''}</textarea></td>
+                <td><input type="number" min="-5" max="10" value="${buyer.rating || ''}" placeholder="0"></td>
+                <td><textarea placeholder="Evidence of relationship strength...">${buyer.evidence || ''}</textarea></td>
+                <td><button class="delete-row-btn" onclick="deleteBuyerRow(this)">Delete</button></td>
+            `;
+        }
+
+        function createActionRowHTML(action = {}) {
+            return `
+                <td><input type="text" value="${action.what || ''}" placeholder="Action item"></td>
+                <td><input type="text" value="${action.who || ''}" placeholder="Owner"></td>
+                <td><input type="date" value="${action.when || ''}"></td>
+                <td><button class="delete-row-btn" onclick="deleteActionRow(this)">Delete</button></td>
+            `;
+        }
+
+        function createInfoRowHTML(info = {}) {
+            return `
+                <td><input type="text" value="${info.fromWhom || ''}" placeholder="What info from whom?"></td>
+                <td><input type="date" value="${info.when || ''}"></td>
+                <td><button class="delete-row-btn" onclick="deleteInfoRow(this)">Delete</button></td>
+            `;
+        }
+
+        function addBuyerRow() {
+            const tbody = document.getElementById('buyersTableBody');
+            const row = tbody.insertRow();
+            row.innerHTML = createBuyerRowHTML();
+            setTimeout(autoSave, 100);
+        }
+
+        function deleteBuyerRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            setTimeout(autoSave, 100);
+        }
+
+        function addActionRow() {
+            const tbody = document.getElementById('actionTableBody');
+            const row = tbody.insertRow();
+            row.innerHTML = createActionRowHTML();
+            setTimeout(autoSave, 100);
+        }
+
+        function deleteActionRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            setTimeout(autoSave, 100);
+        }
+
+        function addInfoRow() {
+            const tbody = document.getElementById('infoTableBody');
+            const row = tbody.insertRow();
+            row.innerHTML = createInfoRowHTML();
+            setTimeout(autoSave, 100);
+        }
+
+        function deleteInfoRow(btn) {
+            const row = btn.closest('tr');
+            row.remove();
+            setTimeout(autoSave, 100);
+        }
+
+        function exportToPDF() {
+            saveCurrentStrategy();
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @media print {
+                    body { background: white; padding: 0; }
+                    .controls, .controls-bar { display: none !important; }
+                    .add-row-btn, .delete-row-btn { display: none !important; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            window.print();
+            
+            setTimeout(() => document.head.removeChild(style), 1000);
+        }
+
+        function showAnalytics() {
+            const modal = document.getElementById('analytics-modal');
+            const content = document.getElementById('analytics-content');
+            
+            const analytics = calculateAnalytics();
+            
+            content.innerHTML = `
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.totalStrategies}</div>
+                        <div class="stat-label">Total Strategies</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.totalBuyingInfluences}</div>
+                        <div class="stat-label">Total Buying Influences</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.avgRating}</div>
+                        <div class="stat-label">Avg Base Coverage</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${analytics.totalActions}</div>
+                        <div class="stat-label">Total Action Items</div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #2d3748;">Strategies by Adequacy Level</h3>
+                    <div style="background: #f7fafc; padding: 20px; border-radius: 8px;">
+                        ${generateAdequacyChart(analytics.adequacyDistribution)}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #2d3748;">Most Common Buying Influence Roles</h3>
+                    <div style="background: #f7fafc; padding: 20px; border-radius: 8px;">
+                        ${generateRoleChart(analytics.roleDistribution)}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #2d3748;">Recent Strategies</h3>
+                    <div style="background: #f7fafc; padding: 20px; border-radius: 8px;">
+                        ${generateStrategyList(analytics.recentStrategies)}
+                    </div>
+                </div>
+            `;
+            
+            modal.style.display = 'flex';
+        }
+
+        function closeAnalytics() {
+            const modal = document.getElementById('analytics-modal');
+            modal.style.display = 'none';
+        }
+
+        function calculateAnalytics() {
+            const totalStrategies = Object.keys(strategies).length;
+            let totalBuyingInfluences = 0;
+            let totalRating = 0;
+            let ratingCount = 0;
+            let totalActions = 0;
+            
+            const adequacyDistribution = {};
+            const roleDistribution = { E: 0, T: 0, U: 0, C: 0 };
+            
+            Object.values(strategies).forEach(strategy => {
+                if (strategy.data.buyingInfluences) {
+                    totalBuyingInfluences += strategy.data.buyingInfluences.length;
+                    
+                    strategy.data.buyingInfluences.forEach(buyer => {
+                        if (buyer.rating && !isNaN(buyer.rating)) {
+                            totalRating += parseFloat(buyer.rating);
+                            ratingCount++;
+                        }
+                        
+                        if (buyer.role && roleDistribution.hasOwnProperty(buyer.role)) {
+                            roleDistribution[buyer.role]++;
+                        }
+                    });
+                }
+                
+                if (strategy.data.actions) {
+                    totalActions += strategy.data.actions.length;
+                }
+                
+                if (strategy.data.adequacy) {
+                    adequacyDistribution[strategy.data.adequacy] = 
+                        (adequacyDistribution[strategy.data.adequacy] || 0) + 1;
+                }
+            });
+            
+            const avgRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(1) : 'N/A';
+            
+            const recentStrategies = Object.values(strategies)
+                .sort((a, b) => new Date(b.lastModified) - new Date(a.lastModified))
+                .slice(0, 5);
+            
+            return {
+                totalStrategies,
+                totalBuyingInfluences,
+                avgRating,
+                totalActions,
+                adequacyDistribution,
+                roleDistribution,
+                recentStrategies
+            };
+        }
+
+        function generateAdequacyChart(distribution) {
+            if (Object.keys(distribution).length === 0) {
+                return '<p style="color: #a0aec0; text-align: center;">No adequacy data available</p>';
+            }
+            
+            const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+            
+            return Object.entries(distribution)
+                .sort((a, b) => b[1] - a[1])
+                .map(([level, count]) => {
+                    const percentage = Math.round((count / total) * 100);
+                    return `
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-weight: 600; text-transform: capitalize;">${level}</span>
+                                <span>${count} (${percentage}%)</span>
+                            </div>
+                            <div style="background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 100%; width: ${percentage}%;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function generateRoleChart(distribution) {
+            const roleNames = { E: 'Economic', T: 'Technical', U: 'User', C: 'Coach' };
+            const total = Object.values(distribution).reduce((a, b) => a + b, 0);
+            
+            if (total === 0) {
+                return '<p style="color: #a0aec0; text-align: center;">No role data available</p>';
+            }
+            
+            return Object.entries(distribution)
+                .sort((a, b) => b[1] - a[1])
+                .map(([role, count]) => {
+                    const percentage = Math.round((count / total) * 100);
+                    return `
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span style="font-weight: 600;">${roleNames[role]}</span>
+                                <span>${count} (${percentage}%)</span>
+                            </div>
+                            <div style="background: #e2e8f0; height: 20px; border-radius: 10px; overflow: hidden;">
+                                <div style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); height: 100%; width: ${percentage}%;"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+        }
+
+        function generateStrategyList(strategies) {
+            if (strategies.length === 0) {
+                return '<p style="color: #a0aec0; text-align: center;">No strategies available</p>';
+            }
+            
+            return strategies.map(strategy => {
+                const modified = new Date(strategy.lastModified).toLocaleDateString();
+                return `
+                    <div style="padding: 15px; background: white; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid #667eea;">
+                        <div style="font-weight: 600; color: #2d3748; margin-bottom: 5px;">
+                            ${strategy.clientName} - ${strategy.data.account || 'Untitled'}
+                        </div>
+                        <div style="font-size: 12px; color: #4a5568;">
+                            Last modified: ${modified} | 
+                            ${strategy.data.buyingInfluences ? strategy.data.buyingInfluences.length : 0} buying influences |
+                            ${strategy.data.actions ? strategy.data.actions.length : 0} actions
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.addEventListener('input', function(e) {
+            const strategy = strategies[currentStrategyId];
+            if (strategy) {
+                strategy.lastModified = new Date().toISOString();
+            }
+            
+            clearTimeout(window.inputTimer);
+            window.inputTimer = setTimeout(() => {
+                autoSave();
+            }, 2000);
+        });
+
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'radio') {
+                setTimeout(autoSave, 100);
+            }
+        });
+
+        window.addEventListener('beforeunload', function(e) {
+            saveCurrentStrategy();
+            saveToStorage();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStrategies();
+        });
+    </script>
+</body>
+</html>
+            <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miller Heiman Strategic Analysis - Multi-Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* Control buttons styling */
+        .controls {
+            max-width: 1600px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .controls-bar {
+            max-width: 1600px;
+            margin: 0 auto 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .client-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .client-selector label {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .client-selector select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .client-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .control-btn.new {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .control-btn.new:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.copy {
+            background: linear-gradient(135deg, #5a67d8 0%, #4c51bf 100%);
+            color: white;
+        }
+
+        .control-btn.copy:hover {
+            background: linear-gradient(135deg, #4c51bf 0%, #434190 100%);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.delete {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+        }
+
+        .control-btn.delete:hover {
+            background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.export {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+
+        .control-btn.export:hover {
+            background: linear-gradient(135deg, #dd6b20 0%, #c05621 100%);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.analytics {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+        }
+
+        .control-btn.analytics:hover {
+            background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+            transform: translateY(-2px);
+        }
+
+        .save-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            color: #718096;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .client-info {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .client-info-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .client-info-meta {
+            font-size: 12px;
+            color: #4a5568;
+        }
+        
+        .page {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            padding: 0;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+        
+        .logo {
+            font-size: 14px;
+            font-style: italic;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+        
+        .top-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            border-bottom: 2px solid #000;
+        }
+        
+        .left-panel {
+            border-right: 2px solid #000;
+        }
+        
+        .section-row {
+            border-bottom: 1px solid #000;
+            display: grid;
+            grid-template-columns: 150px 1fr;
+        }
+        
+        .section-label {
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            padding: 12px 15px;
+            font-weight: 600;
+            border-right: 2px solid #cbd5e0;
+            display: flex;
+            align-items: center;
+            color: #2d3748;
+        }
+        
+        .section-content {
+            padding: 12px 15px;
+            min-height: 45px;
+            background: #ffffff;
+        }
+        
+        .section-content input,
+        .section-content textarea {
+            width: 100%;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            background: transparent;
+            color: #2d3748;
+        }
+        
+        .section-content input:focus,
+        .section-content textarea:focus {
+            outline: none;
+            background: #f7fafc;
+        }
+        
+        .section-content textarea {
+            min-height: 60px;
+        }
+        
+        .adequacy-box {
+            padding: 15px;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+        
+        .adequacy-grid {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        .adequacy-item {
+            text-align: center;
+        }
+        
+        .adequacy-item input[type="radio"] {
+            display: block;
+            margin: 8px auto;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+        
+        .ideal-customer {
+            padding: 15px;
+            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+            border-top: 2px solid #4299e1;
+        }
+        
+        .ideal-customer textarea {
+            width: 100%;
+            min-height: 90px;
+            border: 2px solid #4299e1;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            background: white;
+        }
+        
+        .sso-section {
+            display: grid;
+            grid-template-columns: 150px 1fr 200px 200px 200px;
+            border-bottom: 2px solid #000;
+        }
+        
+        .sso-label {
+            background: #e6e6e6;
+            padding: 10px;
+            font-weight: bold;
+            border-right: 1px solid #000;
+        }
+        
+        .sso-content {
+            padding: 10px;
+            border-right: 1px solid #000;
+        }
+        
+        .checkbox-group {
+            padding: 5px;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+        
+        .roles-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 2px solid #cbd5e0;
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+        }
+        
+        .role-box {
+            padding: 15px;
+            border-right: 2px solid #f5b041;
+            font-size: 13px;
+        }
+        
+        .role-box:last-child {
+            border-right: none;
+        }
+        
+        .role-box strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #d68910;
+            font-size: 14px;
+        }
+        
+        .buying-influences-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .buying-influences-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            border: 1px solid #5a67d8;
+            font-weight: 600;
+        }
+        
+        .buying-influences-table td {
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            background: #f7fafc;
+            transition: background 0.2s;
+        }
+        
+        .buying-influences-table tr:hover td {
+            background: #edf2f7;
+        }
+        
+        .buying-influences-table input,
+        .buying-influences-table select {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        
+        .buying-influences-table input:focus,
+        .buying-influences-table select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .buying-influences-table textarea {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            min-height: 50px;
+            resize: vertical;
+            padding: 6px;
+            border-radius: 4px;
+        }
+        
+        .buying-influences-table textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .narrow-col {
+            width: 60px;
+        }
+        
+        .medium-col {
+            width: 100px;
+        }
+        
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-top: 2px solid #000;
+        }
+        
+        .bottom-box {
+            border-right: 1px solid #000;
+            min-height: 200px;
+        }
+        
+        .bottom-box:last-child {
+            border-right: none;
+        }
+        
+        .bottom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+        
+        .bottom-content {
+            padding: 20px;
+            background: #f7fafc;
+        }
+        
+        .bottom-content textarea {
+            width: 100%;
+            min-height: 130px;
+            border: 2px solid #cbd5e0;
+            padding: 12px;
+            font-size: 13px;
+            resize: vertical;
+            border-radius: 8px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        
+        .bottom-content textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .list-section {
+            margin-bottom: 15px;
+        }
+        
+        .list-section strong {
+            display: block;
+            margin-bottom: 8px;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        
+        .action-table th {
+            background: linear-gradient(135deg, #edf2f7 0%, #e2e8f0 100%);
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        .action-table td {
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            background: white;
+        }
+        
+        .action-table input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+            transition: border-color 0.2s;
+        }
+        
+        .action-table input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .delete-row-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .delete-row-btn:hover {
+            background: #c53030;
+        }
+        
+        .footer {
+            padding: 10px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #000;
+        }
+        
+        .add-row-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(72, 187, 120, 0.3);
+        }
+        
+        .add-row-btn:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(72, 187, 120, 0.4);
+        }
+        
+        .note-box {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border: 2px solid #f5b041;
+            border-left: 5px solid #f39c12;
+            padding: 15px;
+            margin: 15px;
+            font-size: 12px;
+            font-style: italic;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(243, 156, 18, 0.2);
+        }
+        
+        .note-box strong {
+            color: #d68910;
+            font-size: 13px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 900px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .modal-close {
+            font-size: 2em;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #a0aec0;
+        }
+
+        .modal-close:hover {
+            color: #2d3748;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #4a5568;
+            margin-top: 5px;
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .controls, .controls-bar,
+            .add-row-btn,
+            .delete-row-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button class="btn" onclick="window.location.href='sales-triggers-messaging.html'">Messaging Library</button>
+    <button class="btn" onclick="window.location.href='Command-Message.html'">Command of Message</button>
+    <button class="btn" onclick="window.location.href='one2one3.html'">1:1 Tracker</button>
+    <button class="btn" onclick="window.location.href='competitive-battlecards.html'">Battle Cards</button>
+</div>
+
+    <!-- Controls Bar -->
+    <div class="controls-bar">
+        <div class="controls-grid">
+            <div>
+                <div class="client-selector">
+                    <label for="strategy-select">Select Client Strategy:</label>
+                    <select id="strategy-select" onchange="switchStrategy(this.value)"></select>
+                </div>
+                <div class="client-info" id="client-info"></div>
+            </div>
+            <div>
+                <div class="action-buttons">
+                    <button class="control-btn new" onclick="createNewStrategy()">+ New Strategy</button>
+                    <button class="control-btn copy" onclick="copyCurrentStrategy()">📋 Copy</button>
+                    <button class="control-btn delete" onclick="deleteCurrentStrategy()">🗑️ Delete</button>
+                    <button class="control-btn export" onclick="exportToPDF()">📄 Export PDF</button>
+                    <button class="control-btn analytics" onclick="showAnalytics()">📊 Analytics</button>
+                    <button class="control-btn" style="background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); color: white;" onclick="loadSampleStrategy()">📝 Load Sample</button>
+                    <button class="control-btn" style="background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%); color: white;" onclick="manualSave()">💾 Save Now</button>
+                    <button class="control-btn" style="background: linear-gradient(135deg, #38b2ac 0%, #319795 100%); color: white;" onclick="exportAllData()">📦 Export All</button>
+                    <button class="control-btn" style="background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%); color: white;" onclick="importData()">📥 Import</button>
+                </div>
+                <div class="save-indicator">
+                    <span id="save-indicator">🟢 Auto-save enabled</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Miller Heiman</div>
+            <h1>STRATEGIC ANALYSIS</h1>
+            <div style="font-size: 10px;">STRATEGIC SELLING®</div>
+        </div>
+        
+        <!-- Top Section -->
+        <div class="top-section">
+            <div class="left-panel">
+                <div class="section-row">
+                    <div class="section-label">Account:</div>
+                    <div class="section-content">
+                        <input type="text" id="account" placeholder="Enter account name">
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div class="section-label">Opportunity:</div>
+                    <div class="section-content">
+                        <input type="text" id="opportunity" placeholder="Enter opportunity">
+                    </div>
+                </div>
+                <div class="section-row">
+                    <div class="section-label">Date Prepared/Revised:</div>
+                    <div class="section-content">
+                        <input type="date" id="date">
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="adequacy-box">
+                    <strong>ADEQUACY OF CURRENT POSITION:</strong>
+                    <div class="adequacy-grid">
+                        <div class="adequacy-item">
+                            <div>Euphoria</div>
+                            <input type="radio" name="adequacy" value="euphoria">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Great</div>
+                            <input type="radio" name="adequacy" value="great">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Secure</div>
+                            <input type="radio" name="adequacy" value="secure">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Comfort</div>
+                            <input type="radio" name="adequacy" value="comfort">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>OK</div>
+                            <input type="radio" name="adequacy" value="ok">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Concern</div>
+                            <input type="radio" name="adequacy" value="concern">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Discomfort</div>
+                            <input type="radio" name="adequacy" value="discomfort">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Worry</div>
+                            <input type="radio" name="adequacy" value="worry">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Fear</div>
+                            <input type="radio" name="adequacy" value="fear">
+                        </div>
+                        <div class="adequacy-item">
+                            <div>Panic</div>
+                            <input type="radio" name="adequacy" value="panic">
+                        </div>
+                    </div>
+                </div>
+                <div class="ideal-customer">
+                    <strong>IDEAL CUSTOMER CRITERIA:</strong>
+                    <textarea id="ideal-customer" placeholder="Enter ideal customer criteria..."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Competition Section -->
+        <div class="section-row">
+            <div class="section-label">Competition:</div>
+            <div class="section-content">
+                <textarea id="competition" placeholder="List competitors and their strategies..."></textarea>
+            </div>
+        </div>
+        
+        <div class="section-row">
+            <div class="section-label">Specify Competitors:</div>
+            <div class="section-content">
+                <input type="text" id="competitors-list" placeholder="Name specific competitors">
+            </div>
+        </div>
+        
+        <!-- SSO Section -->
+        <div class="sso-section">
+            <div class="sso-label">SINGLE SALES OBJECTIVE</div>
+            <div class="sso-content">
+                <textarea id="sso" placeholder="Define your single sales objective for this call/meeting..."></textarea>
+            </div>
+            <div class="sso-content">
+                <strong style="font-size: 11px;">My Position vs. Competition:</strong>
+                <div class="checkbox-group">
+                    <label><input type="radio" name="position" value="only"> Only Alternative</label>
+                    <label><input type="radio" name="position" value="front"> Front Runner</label>
+                    <label><input type="radio" name="position" value="staged"> Staged</label>
+                    <label><input type="radio" name="position" value="out"> Out</label>
+                </div>
+            </div>
+            <div class="sso-content">
+                <strong style="font-size: 11px;">Place in Sales Funnel:</strong>
+                <div class="checkbox-group">
+                    <label><input type="radio" name="funnel" value="universe"> Universe</label>
+                    <label><input type="radio" name="funnel" value="above"> Above</label>
+                    <label><input type="radio" name="funnel" value="in"> In</label>
+                    <label><input type="radio" name="funnel" value="best"> Best Few</label>
+                </div>
+            </div>
+            <div class="sso-content">
+                <strong style="font-size: 11px;">Timing for Priorities:</strong>
+                <div class="checkbox-group">
+                    <label><input type="radio" name="timing" value="urgent"> Urgent</label>
+                    <label><input type="radio" name="timing" value="active"> Active</label>
+                    <label><input type="radio" name="timing" value="work"> Work It In</label>
+                    <label><input type="radio" name="timing" value="later"> Later</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Roles Section -->
+        <div class="roles-section">
+            <div class="role-box">
+                <strong>ROLES</strong>
+                <div>E = Economic</div>
+                <div>T = Technical</div>
+                <div>U = User</div>
+                <div>C = Coach</div>
+            </div>
+            <div class="role-box">
+                <strong>DEGREE OF INFLUENCE</strong>
+                <div>H = High</div>
+                <div>M = Medium</div>
+                <div>L = Low</div>
+            </div>
+            <div class="role-box">
+                <strong>MODE</strong>
+                <div>G = Growth</div>
+                <div>T = Trouble</div>
+                <div>EK = Even Keel</div>
+                <div>OC = Overconfident</div>
+            </div>
+        </div>
+        
+        <div class="note-box">
+            <strong>NOTE:</strong> Win-Results Statement: a short statement of the personal Win that a Buying Influence desires when important measurable business Results are delivered.
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; background: #e6e6e6; padding: 10px; border-bottom: 1px solid #000;">
+            <div style="flex: 1;">
+                <strong style="font-size: 11px;">RATING:</strong>
+                <div style="font-size: 10px;">Rate how well your base is covered with each Buying Influence on this scale: 5 High = 5 | 10, Negative = -5 | 0</div>
+            </div>
+            <div style="

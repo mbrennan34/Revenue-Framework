@@ -1,0 +1,2574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS AE Territory Planning Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            overflow-x: auto;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 150px;
+            padding: 18px 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+        }
+
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+            border-bottom: 3px solid #1e3c72;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #1e3c72;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group select,
+        .input-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus,
+        .input-group textarea:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+
+        .input-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #6c757d;
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            border-color: #1e3c72;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.2);
+        }
+
+        .card h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+
+        .metric-card h3 {
+            color: white;
+        }
+
+        .metric-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #2a5298;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .account-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .account-item:hover {
+            border-color: #1e3c72;
+            box-shadow: 0 4px 12px rgba(30, 60, 114, 0.1);
+        }
+
+        .account-info h4 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        .account-info p {
+            font-size: 13px;
+            color: #6c757d;
+            margin: 4px 0;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 8px;
+        }
+
+        .tier-badge.tier1 {
+            background: #28a745;
+            color: white;
+        }
+
+        .tier-badge.tier2 {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .tier-badge.tier3 {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .score-display {
+            text-align: right;
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+
+        .calculator-result {
+            background: #f8f9fa;
+            border-left: 4px solid #1e3c72;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .calculator-result h4 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+        }
+
+        .calc-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .calc-row:last-child {
+            border-bottom: none;
+        }
+
+        .calc-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .calc-value {
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .progress-bar {
+            background: #e9ecef;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            transition: width 0.5s;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 2px solid #17a2b8;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 2px solid #28a745;
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            color: #856404;
+        }
+
+        .activity-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .activity-day {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .activity-day h4 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .activity-day input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .export-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        table th {
+            background: #1e3c72;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 13px;
+        }
+
+        table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .summary-box h3 {
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .grid, .grid-2, .activity-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+
+        .time-block {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .time-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .time-block-time {
+            font-weight: 700;
+            color: #1e3c72;
+        }
+
+        .time-block-activity {
+            color: #495057;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+ <a href="index.html" class="back-button">← Back to Playbook Hub</a>
+            <h1>🎯 SaaS AE Territory Planning Tool</h1>
+            <p>Research-based framework for building high-performance territory plans</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('overview')">Territory Overview</button>
+            <button class="tab" onclick="switchTab('icp')">Territory ICP</button>
+            <button class="tab" onclick="switchTab('accounts')">Account Prioritization</button>
+            <button class="tab" onclick="switchTab('quota')">Quota Calculator</button>
+            <button class="tab" onclick="switchTab('activities')">Activity Planning</button>
+            <button class="tab" onclick="switchTab('plan')">5-Min Plan</button>
+            <button class="tab" onclick="switchTab('dashboard')">Dashboard</button>
+        </div>
+
+        <!-- Tab 1: Territory Overview -->
+        <div id="overview" class="tab-content active">
+            <div class="alert alert-info">
+                <strong>Welcome!</strong> This tool helps you build a data-driven territory plan following industry best practices from Salesforce, HubSpot, and other leading SaaS organizations.
+            </div>
+
+            <div class="card" style="margin-bottom: 20px; background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); border: 2px solid #28a745;">
+                <h3 style="color: #155724;">🚀 Quick Start: Import Your Account List</h3>
+                <p style="color: #155724; margin: 10px 0;">
+                    <strong>New!</strong> Skip manual entry and import your entire account list from CSV or Excel.
+                </p>
+                <ol style="margin-left: 20px; line-height: 1.8; color: #155724;">
+                    <li>Go to the <strong>"Account Prioritization"</strong> tab</li>
+                    <li>Upload your CSV file with account names (and optional: industry, size, revenue)</li>
+                    <li>Set scoring rules based on your ICP</li>
+                    <li>Click "Score All Accounts" to automatically tier all accounts</li>
+                    <li>Review and adjust individual scores as needed</li>
+                </ol>
+                <button class="btn btn-success" onclick="switchTab('accounts'); document.querySelector('[onclick=\'switchTab(\\\'accounts\\\')\']').click();">
+                    Import Accounts Now →
+                </button>
+            </div>
+
+            <div class="section">
+                <div class="section-header">Territory Snapshot</div>
+                
+                <div class="grid">
+                    <div class="card">
+                        <h3>Basic Information</h3>
+                        <div class="input-group">
+                            <label>Account Executive Name</label>
+                            <input type="text" id="aeName" placeholder="Your name">
+                        </div>
+                        <div class="input-group">
+                            <label>Territory Name/Region</label>
+                            <input type="text" id="territoryName" placeholder="e.g., Northeast Enterprise">
+                        </div>
+                        <div class="input-group">
+                            <label>Planning Period</label>
+                            <select id="planningPeriod">
+                                <option value="Q1-2025">Q1 2025</option>
+                                <option value="Q2-2025">Q2 2025</option>
+                                <option value="Q3-2025">Q3 2025</option>
+                                <option value="Q4-2025">Q4 2025</option>
+                                <option value="2025">Full Year 2025</option>
+                                <option value="2026">Full Year 2026</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Territory Size</h3>
+                        <div class="input-group">
+                            <label>Total Accounts in Territory</label>
+                            <input type="number" id="totalAccounts" placeholder="100" value="0">
+                            <span class="help-text">All accounts you're responsible for</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Current Customers</label>
+                            <input type="number" id="currentCustomers" placeholder="20" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Active Opportunities</label>
+                            <input type="number" id="activeOpps" placeholder="15" value="0">
+                        </div>
+                        <div class="input-group">
+                            <label>Greenfield Prospects</label>
+                            <input type="number" id="greenfield" placeholder="65" value="0">
+                            <span class="help-text">Calculated automatically: Total - Customers - Active Opps</span>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Segment Type</h3>
+                        <div class="input-group">
+                            <label>Which segment do you sell into?</label>
+                            <select id="segment">
+                                <option value="smb">SMB (Small Business)</option>
+                                <option value="midmarket">Mid-Market</option>
+                                <option value="enterprise">Enterprise</option>
+                            </select>
+                            <span class="help-text">This affects benchmarks and recommendations</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Sales Motion</label>
+                            <select id="salesMotion">
+                                <option value="ramping">Ramping (First 3-6 months)</option>
+                                <option value="established">Established Territory</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveOverview()">Save Overview & Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 2: Territory ICP -->
+        <div id="icp" class="tab-content">
+            <div class="alert alert-info">
+                <strong>Territory ICP:</strong> Define YOUR specific ICP for this territory. This should be more specific than your company's general ICP.
+            </div>
+
+            <div class="section">
+                <div class="section-header">Territory ICP Definition</div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Firmographics</h3>
+                        <div class="input-group">
+                            <label>Target Industries (comma-separated)</label>
+                            <input type="text" id="icpIndustries" placeholder="SaaS, FinTech, E-commerce">
+                        </div>
+                        <div class="input-group">
+                            <label>Company Size (Employees)</label>
+                            <input type="text" id="icpEmployees" placeholder="200-500">
+                        </div>
+                        <div class="input-group">
+                            <label>Revenue Range</label>
+                            <input type="text" id="icpRevenue" placeholder="$50M-$200M">
+                        </div>
+                        <div class="input-group">
+                            <label>Geography</label>
+                            <input type="text" id="icpGeography" placeholder="Northeast US, UK">
+                        </div>
+                        <div class="input-group">
+                            <label>Growth Stage</label>
+                            <select id="icpGrowth">
+                                <option value="">Any stage</option>
+                                <option value="startup">Startup (Seed-Series A)</option>
+                                <option value="growth">Growth (Series B-C)</option>
+                                <option value="scale">Scale (Series D+)</option>
+                                <option value="public">Public Company</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Technographics & Behavioral</h3>
+                        <div class="input-group">
+                            <label>Key Technology Stack Indicators</label>
+                            <textarea id="icpTech" placeholder="Salesforce, HubSpot, AWS, Slack, Marketo"></textarea>
+                            <span class="help-text">Technologies that indicate good fit</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Buying Patterns</label>
+                            <textarea id="icpBuying" placeholder="Annual budget cycles, Q4 decision-making"></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>Strategic Fit Indicators</label>
+                            <textarea id="icpStrategic" placeholder="Expanding sales teams, hiring VP Sales, investing in enablement"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3>ICP Scoring Weights (FIRE Framework)</h3>
+                    <p class="help-text" style="margin-bottom: 15px;">Adjust these weights based on what matters most in your territory. Default is 35/35/20/10 based on research.</p>
+                    
+                    <div class="grid">
+                        <div class="input-group">
+                            <label>Fit Weight (%)</label>
+                            <input type="number" id="fitWeight" value="35" min="0" max="100">
+                            <span class="help-text">ICP alignment</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Intent Weight (%)</label>
+                            <input type="number" id="intentWeight" value="35" min="0" max="100">
+                            <span class="help-text">Buying signals</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Relationship Weight (%)</label>
+                            <input type="number" id="relationshipWeight" value="20" min="0" max="100">
+                            <span class="help-text">Existing connections</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Engagement Weight (%)</label>
+                            <input type="number" id="engagementWeight" value="10" min="0" max="100">
+                            <span class="help-text">Historical interaction</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar" style="margin-top: 20px;">
+                        <div class="progress-fill" id="weightTotal" style="width: 100%">Total: 100%</div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveICP()">Save ICP & Continue →</button>
+            </div>
+        </div>
+
+        <!-- Tab 3: Account Prioritization -->
+        <div id="accounts" class="tab-content">
+            <div class="alert alert-info">
+                <strong>Account Tiering:</strong> 80% of your bookings will come from 20% of your accounts. Prioritize strategically.
+            </div>
+
+            <div class="section">
+                <div class="section-header">
+                    Import Account List
+                    <span class="badge badge-info">CSV or Excel</span>
+                </div>
+
+                <div class="card">
+                    <h3>📥 Bulk Import Accounts</h3>
+                    <p class="help-text" style="margin-bottom: 15px;">
+                        Upload your account list as CSV or Excel file. The tool will help you score and tier all accounts at once.
+                    </p>
+
+                    <div class="input-group">
+                        <label>Upload Account File (CSV or Excel)</label>
+                        <input type="file" id="accountFile" accept=".csv,.xlsx,.xls" onchange="handleFileUpload(event)" style="padding: 10px;">
+                        <span class="help-text">
+                            Required columns: Company Name. Optional: Industry, Employees, Revenue, Status, ACV
+                        </span>
+                    </div>
+
+                    <div id="importPreview" style="display: none; margin-top: 20px;">
+                        <h4 style="margin-bottom: 10px;">Preview Imported Data</h4>
+                        <div style="max-height: 300px; overflow-y: auto; border: 2px solid #e9ecef; border-radius: 8px; padding: 15px; background: #f8f9fa;">
+                            <table id="previewTable" style="width: 100%; font-size: 12px;">
+                                <thead>
+                                    <tr style="background: #1e3c72; color: white;">
+                                        <th style="padding: 8px;">Company</th>
+                                        <th style="padding: 8px;">Industry</th>
+                                        <th style="padding: 8px;">Employees</th>
+                                        <th style="padding: 8px;">Revenue</th>
+                                        <th style="padding: 8px;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="previewTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                        <p style="margin-top: 10px; font-weight: 600;">
+                            <span id="importCount">0</span> accounts ready to import
+                        </p>
+                        <button class="btn" onclick="showBulkScoring()">Continue to Bulk Scoring →</button>
+                    </div>
+
+                    <div class="alert alert-warning" style="margin-top: 15px;">
+                        <strong>📋 Sample CSV Format:</strong><br>
+                        <code style="background: white; padding: 5px; display: block; margin-top: 5px;">
+                            Company Name,Industry,Employees,Revenue,Status,ACV<br>
+                            Acme Corp,SaaS,350,$100M,Greenfield,75000<br>
+                            Beta Inc,FinTech,200,$50M,Customer,50000
+                        </code>
+                    </div>
+
+                    <div class="card" style="margin-top: 15px; background: #f8f9fa;">
+                        <h3>💡 Import Tips</h3>
+                        <ul style="margin-left: 20px; line-height: 1.8;">
+                            <li><strong>Required column:</strong> "Company Name" (or "Company", "Account Name", "Name")</li>
+                            <li><strong>Optional columns:</strong> Industry, Employees, Revenue, Status, ACV</li>
+                            <li><strong>Status values:</strong> Use "greenfield", "opportunity", or "customer"</li>
+                            <li><strong>Excel users:</strong> Save as CSV first (File → Save As → CSV)</li>
+                            <li><strong>Large lists:</strong> Can import 100s of accounts at once</li>
+                            <li><strong>After import:</strong> Review auto-assigned tiers and adjust scores as needed</li>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-secondary" onclick="downloadSampleCSV()">📥 Download Sample CSV Template</button>
+                </div>
+            </div>
+
+            <div class="section" id="bulkScoringSection" style="display: none;">
+                <div class="section-header">Bulk Account Scoring</div>
+
+                <div class="alert alert-info">
+                    <strong>Quick Scoring:</strong> Apply scoring rules to automatically tier your imported accounts. You can adjust individual scores later.
+                </div>
+
+                <div class="card">
+                    <h3>🎯 Scoring Rules</h3>
+                    <p class="help-text" style="margin-bottom: 15px;">
+                        Define scoring rules based on your ICP. Accounts will be automatically scored and tiered.
+                    </p>
+
+                    <div class="grid-2">
+                        <div>
+                            <h4 style="margin-bottom: 10px; color: #1e3c72;">FIT Score Rules</h4>
+                            <div class="input-group">
+                                <label>Industries matching your ICP (high fit = 80-100 points)</label>
+                                <input type="text" id="bulkFitIndustries" placeholder="e.g., SaaS, FinTech, E-commerce">
+                                <span class="help-text">Comma-separated. Matches get 90 fit score, partial 70, others 50</span>
+                            </div>
+                            <div class="input-group">
+                                <label>Ideal employee range (for high fit)</label>
+                                <input type="text" id="bulkFitEmployees" placeholder="e.g., 200-500">
+                                <span class="help-text">Range like "200-500" or ">500" or "<100"</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="margin-bottom: 10px; color: #1e3c72;">Default Scores</h4>
+                            <div class="input-group">
+                                <label>Default INTENT score for all accounts</label>
+                                <input type="number" id="bulkIntentDefault" value="50" min="0" max="100">
+                                <span class="help-text">You can update individually later based on signals</span>
+                            </div>
+                            <div class="input-group">
+                                <label>Default RELATIONSHIP score</label>
+                                <input type="number" id="bulkRelDefault" value="30" min="0" max="100">
+                                <span class="help-text">Update for accounts where you have connections</span>
+                            </div>
+                            <div class="input-group">
+                                <label>Default ENGAGEMENT score</label>
+                                <input type="number" id="bulkEngDefault" value="20" min="0" max="100">
+                                <span class="help-text">Update based on email/meeting history</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>
+                            <input type="checkbox" id="autoGenerateStrategy" checked style="width: auto; margin-right: 8px;">
+                            Auto-generate outreach strategy based on tier
+                        </label>
+                    </div>
+
+                    <button class="btn btn-success" onclick="processBulkScoring()">🚀 Score All Accounts & Import</button>
+                </div>
+
+                <div id="bulkScoringResults" style="display: none; margin-top: 20px;">
+                    <div class="alert alert-success">
+                        <strong>✅ Bulk Import & Scoring Complete!</strong>
+                    </div>
+                    
+                    <div class="summary-box">
+                        <h3>Import Summary</h3>
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-value" id="bulkTotalImported">0</div>
+                                <div class="summary-label">Total Accounts</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value" id="bulkTier1Count">0</div>
+                                <div class="summary-label">Tier 1 (Strategic)</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value" id="bulkTier2Count">0</div>
+                                <div class="summary-label">Tier 2 (Growth)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-result">
+                        <h4>Tier Distribution</h4>
+                        <div class="calc-row">
+                            <span class="calc-label">
+                                <span class="tier-badge tier1">Tier 1</span> Strategic Priority (Score 80-100)
+                            </span>
+                            <span class="calc-value">
+                                <span id="bulkTier1Count2">0</span> accounts 
+                                (<span id="bulkTier1Pct">0</span>%)
+                            </span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">
+                                <span class="tier-badge tier2">Tier 2</span> Growth Focus (Score 60-79)
+                            </span>
+                            <span class="calc-value">
+                                <span id="bulkTier2Count2">0</span> accounts 
+                                (<span id="bulkTier2Pct">0</span>%)
+                            </span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">
+                                <span class="tier-badge tier3">Tier 3</span> Programmatic (Score 40-59)
+                            </span>
+                            <span class="calc-value">
+                                <span id="bulkTier3Count2">0</span> accounts 
+                                (<span id="bulkTier3Pct">0</span>%)
+                            </span>
+                        </div>
+                        <div class="calc-row">
+                            <span class="calc-label">
+                                <span class="tier-badge reserve" style="background: #6c757d; color: white;">Reserve</span> Watch List (Score <40)
+                            </span>
+                            <span class="calc-value">
+                                <span id="bulkReserveCount2">0</span> accounts 
+                                (<span id="bulkReservePct">0</span>%)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Next Steps:</strong>
+                        <ul style="margin-left: 20px; margin-top: 10px; line-height: 1.8;">
+                            <li>Review your Tier 1 accounts and adjust scores based on additional context</li>
+                            <li>Update Intent scores for accounts showing buying signals</li>
+                            <li>Add Relationship scores for accounts where you have connections</li>
+                            <li>Customize strategies and next actions for your top accounts</li>
+                        </ul>
+                    </div>
+                    
+                    <button class="btn" onclick="viewImportedAccounts()">View All Accounts →</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-header">Manual Account Entry</div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <h3>Account Information</h3>
+                        <div class="input-group">
+                            <label>Company Name</label>
+                            <input type="text" id="accName" placeholder="Acme Corporation">
+                        </div>
+                        <div class="input-group">
+                            <label>Industry</label>
+                            <input type="text" id="accIndustry" placeholder="SaaS">
+                        </div>
+                        <div class="input-group">
+                            <label>Employees</label>
+                            <input type="number" id="accEmployees" placeholder="350">
+                        </div>
+                        <div class="input-group">
+                            <label>Annual Revenue (estimate)</label>
+                            <input type="text" id="accRevenue" placeholder="$100M">
+                        </div>
+                        <div class="input-group">
+                            <label>Current Status</label>
+                            <select id="accStatus">
+                                <option value="greenfield">Greenfield Prospect</option>
+                                <option value="opportunity">Active Opportunity</option>
+                                <option value="customer">Current Customer</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Estimated ACV Potential</label>
+                            <input type="number" id="accACV" placeholder="75000">
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>FIRE Scoring</h3>
+                        
+                        <div class="input-group">
+                            <label>Fit Score (0-100)</label>
+                            <input type="number" id="accFit" min="0" max="100" value="0">
+                            <span class="help-text">ICP alignment - industry, size, tech stack match</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Intent Score (0-100)</label>
+                            <input type="number" id="accIntent" min="0" max="100" value="0">
+                            <span class="help-text">Buying signals - website visits, content downloads, events</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Relationship Score (0-100)</label>
+                            <input type="number" id="accRelationship" min="0" max="100" value="0">
+                            <span class="help-text">Existing connections, warm introductions</span>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Engagement Score (0-100)</label>
+                            <input type="number" id="accEngagement" min="0" max="100" value="0">
+                            <span class="help-text">Email opens, past meetings, demo requests</span>
+                        </div>
+
+                        <div class="calculator-result">
+                            <h4>Total Score: <span id="accTotalScore">0</span></h4>
+                            <p>Tier: <span id="accTierPreview" class="tier-badge">-</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Strategic Context</h3>
+                    <div class="input-group">
+                        <label>Why This Account is Priority</label>
+                        <textarea id="accWhy" placeholder="Perfect ICP fit, just raised Series B, expanding sales team, warm intro available from existing customer"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>One-Sentence Outreach Strategy</label>
+                        <input type="text" id="accStrategy" placeholder="Warm intro via Sarah at TechCorp → Value-based email sequence → Discovery call">
+                    </div>
+                    <div class="input-group">
+                        <label>Next Action & Date</label>
+                        <input type="text" id="accNextAction" placeholder="Request intro from Sarah by Nov 20">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn" onclick="calculateAndAddAccount()">Calculate Score & Add Account</button>
+                    <button class="btn btn-secondary" onclick="clearAccountForm()">Clear Form</button>
+                </div>
+
+                <div class="section" style="margin-top: 40px;">
+                    <div class="section-header">
+                        Your Priority Accounts
+                        <span class="badge badge-info" id="accountCount">0 accounts</span>
+                    </div>
+                    
+                    <div class="card" style="margin-bottom: 15px;">
+                        <h3>Filter & Actions</h3>
+                        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: end;">
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label>Filter by Tier</label>
+                                <select id="filterTier" onchange="filterAccounts()">
+                                    <option value="all">All Tiers</option>
+                                    <option value="tier1">Tier 1 Only</option>
+                                    <option value="tier2">Tier 2 Only</option>
+                                    <option value="tier3">Tier 3 Only</option>
+                                    <option value="reserve">Reserve Only</option>
+                                </select>
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label>Search Accounts</label>
+                                <input type="text" id="searchAccounts" placeholder="Search by name or industry" oninput="filterAccounts()">
+                            </div>
+                            <div class="input-group" style="margin-bottom: 0;">
+                                <label>Sort By</label>
+                                <select id="sortAccounts" onchange="filterAccounts()">
+                                    <option value="score">Highest Score</option>
+                                    <option value="name">Company Name</option>
+                                    <option value="acv">ACV (High to Low)</option>
+                                    <option value="recent">Recently Added</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; gap: 10px;">
+                                <button class="btn btn-secondary btn-small" onclick="exportAccountsCSV()">📥 Export CSV</button>
+                                <button class="btn btn-danger btn-small" onclick="clearAllAccounts()">🗑️ Clear All</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="accountList">
+                        <p style="text-align: center; color: #6c757d; padding: 40px;">No accounts added yet. Add your first account above or import a list.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Quota Calculator -->
+        <div id="quota" class="tab-content">
+            <div class="alert alert-info">
+                <strong>Reverse-Engineer Your Quota:</strong> Work backwards from your target to determine required activities.
+            </div>
+
+            <div class="section">
+                <div class="section-header">Quota Math</div>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>Quota & Deal Size</h3>
+                        <div class="input-group">
+                            <label>Quarterly Quota ($)</label>
+                            <input type="number" id="quotaAmount" placeholder="300000" value="300000">
+                        </div>
+                        <div class="input-group">
+                            <label>Average ACV ($)</label>
+                            <input type="number" id="avgACV" placeholder="50000" value="50000">
+                        </div>
+                        <div class="calculator-result">
+                            <div class="calc-row">
+                                <span class="calc-label">Deals Required</span>
+                                <span class="calc-value" id="dealsRequired">6</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Historical Conversion Rates</h3>
+                        <div class="input-group">
+                            <label>Win Rate (%)</label>
+                            <input type="number" id="winRate" placeholder="25" value="25" min="1" max="100">
+                            <span class="help-text">% of opportunities that close. SaaS benchmark: 15-35%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Meeting → Opportunity Rate (%)</label>
+                            <input type="number" id="meetingOppRate" placeholder="40" value="40" min="1" max="100">
+                            <span class="help-text">Benchmark: 30-50%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Response → Meeting Rate (%)</label>
+                            <input type="number" id="responseMeetingRate" placeholder="30" value="30" min="1" max="100">
+                            <span class="help-text">Benchmark: 20-40%</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Outreach Response Rate (%)</label>
+                            <input type="number" id="responseRate" placeholder="5" value="5" min="1" max="100">
+                            <span class="help-text">Benchmark: 2-10% depending on channel/personalization</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="calculateQuotaMath()">Calculate Required Activities</button>
+
+                <div class="calculator-result" id="quotaResults" style="display: none; margin-top: 30px;">
+                    <h4>📊 Your Activity Targets</h4>
+                    
+                    <div class="summary-box" style="margin-top: 20px;">
+                        <div class="summary-grid">
+                            <div class="summary-item">
+                                <div class="summary-value" id="reqOpps">-</div>
+                                <div class="summary-label">Opportunities Needed</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value" id="reqMeetings">-</div>
+                                <div class="summary-label">Meetings Needed</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-value" id="reqTouches">-</div>
+                                <div class="summary-label">Outreach Touches Needed</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Timeframe</th>
+                                <th>Deals</th>
+                                <th>Opportunities</th>
+                                <th>Meetings</th>
+                                <th>Responses</th>
+                                <th>Outreach Touches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Total (Quarter)</strong></td>
+                                <td id="totalDeals">-</td>
+                                <td id="totalOpps">-</td>
+                                <td id="totalMeetings">-</td>
+                                <td id="totalResponses">-</td>
+                                <td id="totalTouches">-</td>
+                            </tr>
+                            <tr>
+                                <td>Monthly</td>
+                                <td id="monthlyDeals">-</td>
+                                <td id="monthlyOpps">-</td>
+                                <td id="monthlyMeetings">-</td>
+                                <td id="monthlyResponses">-</td>
+                                <td id="monthlyTouches">-</td>
+                            </tr>
+                            <tr>
+                                <td>Weekly</td>
+                                <td id="weeklyDeals">-</td>
+                                <td id="weeklyOpps">-</td>
+                                <td id="weeklyMeetings">-</td>
+                                <td id="weeklyResponses">-</td>
+                                <td id="weeklyTouches">-</td>
+                            </tr>
+                            <tr>
+                                <td>Daily (5 days/week)</td>
+                                <td id="dailyDeals">-</td>
+                                <td id="dailyOpps">-</td>
+                                <td id="dailyMeetings">-</td>
+                                <td id="dailyResponses">-</td>
+                                <td id="dailyTouches">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-success" style="margin-top: 20px;">
+                        <strong>Key Insight:</strong> Focus on controlling your INPUTS (activities) not OUTPUTS (results). 
+                        If you execute consistently on these activity targets, the quota takes care of itself.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Activity Planning -->
+        <div id="activities" class="tab-content">
+            <div class="alert alert-info">
+                <strong>Time Blocking:</strong> Protect 40-60% of your time for prospecting activities. Batch similar tasks.
+            </div>
+
+            <div class="section">
+                <div class="section-header">Weekly Activity Plan</div>
+
+                <div class="card">
+                    <h3>Channel Mix Strategy</h3>
+                    <p class="help-text" style="margin-bottom: 15px;">Allocate your outreach across channels. Research suggests this mix for balanced approach.</p>
+                    
+                    <div class="grid">
+                        <div class="input-group">
+                            <label>Email (%)</label>
+                            <input type="number" id="channelEmail" value="40" min="0" max="100">
+                            <span class="help-text">Personalized sequences</span>
+                        </div>
+                        <div class="input-group">
+                            <label>LinkedIn/Social (%)</label>
+                            <input type="number" id="channelLinkedIn" value="30" min="0" max="100">
+                            <span class="help-text">Connection requests, InMail</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Phone/Voice (%)</label>
+                            <input type="number" id="channelPhone" value="20" min="0" max="100">
+                            <span class="help-text">Strategic calls</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Events/Referrals (%)</label>
+                            <input type="number" id="channelEvents" value="10" min="0" max="100">
+                            <span class="help-text">High conversion</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="channelTotal" style="width: 100%">Total: 100%</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Weekly Time Blocking Template</h3>
+                    <p class="help-text">Example schedule based on best practices. Customize for your needs.</p>
+
+                    <div class="time-block">
+                        <div class="time-block-header">
+                            <strong>MONDAY</strong>
+                            <span class="badge badge-info">Planning Day</span>
+                        </div>
+                        <div class="time-block-time">9:00-10:00am</div>
+                        <div class="time-block-activity">Week planning, account research, priority review</div>
+                        
+                        <div class="time-block-time">10:00-12:00pm</div>
+                        <div class="time-block-activity">Email sequences + LinkedIn (Tier 1 accounts)</div>
+                        
+                        <div class="time-block-time">1:00-3:00pm</div>
+                        <div class="time-block-activity">Demos and discovery calls</div>
+                        
+                        <div class="time-block-time">3:00-4:00pm</div>
+                        <div class="time-block-activity">Pipeline review and follow-ups</div>
+                    </div>
+
+                    <div class="time-block">
+                        <div class="time-block-header">
+                            <strong>TUESDAY</strong>
+                            <span class="badge badge-success">Prospecting Focus</span>
+                        </div>
+                        <div class="time-block-time">9:00-11:00am</div>
+                        <div class="time-block-activity">Call blitz (Tier 2 accounts) - batch calling</div>
+                        
+                        <div class="time-block-time">11:00-12:00pm</div>
+                        <div class="time-block-activity">Email follow-ups and LinkedIn engagement</div>
+                        
+                        <div class="time-block-time">1:00-3:00pm</div>
+                        <div class="time-block-activity">Discovery calls</div>
+                        
+                        <div class="time-block-time">3:00-4:00pm</div>
+                        <div class="time-block-activity">Opportunity progression work</div>
+                    </div>
+
+                    <div class="time-block">
+                        <div class="time-block-header">
+                            <strong>WEDNESDAY</strong>
+                            <span class="badge badge-success">Prospecting Focus</span>
+                        </div>
+                        <div class="time-block-time">9:00-10:00am</div>
+                        <div class="time-block-activity">Deep account research (new Tier 1 prospects)</div>
+                        
+                        <div class="time-block-time">10:00-12:00pm</div>
+                        <div class="time-block-activity">Highly personalized outreach (Tier 1)</div>
+                        
+                        <div class="time-block-time">1:00-3:00pm</div>
+                        <div class="time-block-activity">Customer meetings and expansion discussions</div>
+                        
+                        <div class="time-block-time">3:00-4:00pm</div>
+                        <div class="time-block-activity">Deal room updates, proposal work</div>
+                    </div>
+
+                    <div class="time-block">
+                        <div class="time-block-header">
+                            <strong>THURSDAY</strong>
+                            <span class="badge badge-warning">Mixed Activities</span>
+                        </div>
+                        <div class="time-block-time">9:00-11:00am</div>
+                        <div class="time-block-activity">Call blitz (follow-ups and warm leads)</div>
+                        
+                        <div class="time-block-time">11:00-12:00pm</div>
+                        <div class="time-block-activity">LinkedIn engagement and content</div>
+                        
+                        <div class="time-block-time">1:00-4:00pm</div>
+                        <div class="time-block-activity">Demos and discovery calls (meetings-heavy day)</div>
+                    </div>
+
+                    <div class="time-block">
+                        <div class="time-block-header">
+                            <strong>FRIDAY</strong>
+                            <span class="badge badge-warning">Deal Progression & Planning</span>
+                        </div>
+                        <div class="time-block-time">9:00-11:00am</div>
+                        <div class="time-block-activity">Deal progression, proposals, follow-ups</div>
+                        
+                        <div class="time-block-time">11:00-12:00pm</div>
+                        <div class="time-block-activity">Pipeline hygiene (CRM updates)</div>
+                        
+                        <div class="time-block-time">1:00-3:00pm</div>
+                        <div class="time-block-activity">Account planning for Tier 1</div>
+                        
+                        <div class="time-block-time">3:00-4:00pm</div>
+                        <div class="time-block-activity">Next week planning and prep</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Weekly Activity Targets</h3>
+                    <p class="help-text">Set your targets based on quota calculator. Track completion throughout week.</p>
+                    
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>New Outreach Touches/Week</label>
+                            <input type="number" id="targetOutreach" placeholder="25-50">
+                        </div>
+                        <div class="input-group">
+                            <label>Follow-up Activities/Week</label>
+                            <input type="number" id="targetFollowup" placeholder="15-25">
+                        </div>
+                        <div class="input-group">
+                            <label>Discovery Meetings/Week</label>
+                            <input type="number" id="targetMeetings" placeholder="5-8">
+                        </div>
+                        <div class="input-group">
+                            <label>New Opportunities/Week</label>
+                            <input type="number" id="targetOpps" placeholder="1-2">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveActivityPlan()">Save Activity Plan</button>
+            </div>
+        </div>
+
+        <!-- Tab 6: 5-Minute Plan -->
+        <div id="plan" class="tab-content">
+            <div class="alert alert-success">
+                <strong>The 5-Minute Territory Plan:</strong> This is your monthly review format. Keep it short, focused, and actionable.
+            </div>
+
+            <div class="section">
+                <div class="section-header">Generate Your 5-Minute Plan</div>
+
+                <button class="btn btn-success" onclick="generate5MinPlan()" style="margin-bottom: 20px;">
+                    📋 Generate 5-Minute Plan
+                </button>
+
+                <div class="card">
+                    <div id="fiveMinPlan">
+                        <h3 style="text-align: center; color: #6c757d; padding: 40px;">
+                            Complete the previous tabs to generate your 5-minute plan
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="export-section">
+                    <h3>Export Options</h3>
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="exportPlanText()">📄 Copy as Text</button>
+                        <button class="btn btn-secondary" onclick="exportPlanWord()">📝 Export to Word Format</button>
+                        <button class="btn btn-secondary" onclick="printPlan()">🖨️ Print Plan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 7: Dashboard -->
+        <div id="dashboard" class="tab-content">
+            <div class="section">
+                <div class="section-header">Territory Performance Dashboard</div>
+
+                <div class="summary-box">
+                    <h3>Quick Stats</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="summary-value" id="dashTotalAccounts">0</div>
+                            <div class="summary-label">Total Accounts</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value" id="dashTier1">0</div>
+                            <div class="summary-label">Tier 1 Accounts</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value" id="dashQuota">$0</div>
+                            <div class="summary-label">Quarterly Quota</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <div class="card metric-card">
+                        <h3>Account Distribution</h3>
+                        <div class="metric-value" id="dashAccountDist">-</div>
+                        <div class="metric-label">Tier 1 / Tier 2 / Tier 3</div>
+                    </div>
+
+                    <div class="card metric-card">
+                        <h3>Weekly Outreach Target</h3>
+                        <div class="metric-value" id="dashWeeklyTarget">-</div>
+                        <div class="metric-label">Touches per week</div>
+                    </div>
+
+                    <div class="card metric-card">
+                        <h3>Required Win Rate</h3>
+                        <div class="metric-value" id="dashWinRate">-</div>
+                        <div class="metric-label">To hit quota</div>
+                    </div>
+
+                    <div class="card metric-card">
+                        <h3>Pipeline Coverage</h3>
+                        <div class="metric-value" id="dashCoverage">-</div>
+                        <div class="metric-label">Benchmark: 3-4x</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Tier Distribution</h3>
+                    <div id="tierDistributionChart"></div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tier</th>
+                                <th>Count</th>
+                                <th>% of Total</th>
+                                <th>Target %</th>
+                                <th>Avg Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tierTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 40px;">Add accounts to see distribution</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h3>Top 10 Priority Accounts</h3>
+                    <div id="top10List">
+                        <p style="text-align: center; color: #6c757d; padding: 40px;">Add and prioritize accounts to see your top 10</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data storage
+        let territoryData = {
+            overview: {},
+            icp: {},
+            accounts: [],
+            quotaMath: {},
+            activityPlan: {}
+        };
+
+        // Store imported data temporarily
+        let importedData = [];
+
+        // CSV/Excel file handling
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            
+            if (fileName.endsWith('.csv')) {
+                parseCSV(file);
+            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                parseExcel(file);
+            } else {
+                alert('Please upload a CSV or Excel file');
+            }
+        }
+
+        // Parse CSV file
+        function parseCSV(file) {
+            // Show loading state
+            const fileInput = document.getElementById('accountFile');
+            fileInput.disabled = true;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                const lines = text.split('\n');
+                const headers = lines[0].split(',').map(h => h.trim().replace(/['"]/g, ''));
+                
+                importedData = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const values = parseCSVLine(lines[i]);
+                    const row = {};
+                    
+                    headers.forEach((header, index) => {
+                        row[header] = values[index] || '';
+                    });
+                    
+                    // Map common column variations
+                    const account = {
+                        name: row['Company Name'] || row['Company'] || row['Account Name'] || row['Name'] || '',
+                        industry: row['Industry'] || row['Vertical'] || row['Sector'] || '',
+                        employees: row['Employees'] || row['Employee Count'] || row['Size'] || '',
+                        revenue: row['Revenue'] || row['Annual Revenue'] || row['ARR'] || '',
+                        status: row['Status'] || row['Stage'] || row['Account Status'] || 'greenfield',
+                        acv: parseFloat(row['ACV'] || row['Deal Size'] || row['Potential Value'] || '0')
+                    };
+                    
+                    if (account.name) {
+                        importedData.push(account);
+                    }
+                }
+                
+                fileInput.disabled = false;
+                displayImportPreview();
+            };
+            
+            reader.onerror = function() {
+                fileInput.disabled = false;
+                alert('Error reading file. Please try again.');
+            };
+            
+            reader.readAsText(file);
+        }
+
+        // Parse CSV line handling quoted values
+        function parseCSVLine(line) {
+            const values = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    values.push(current.trim().replace(/^["']|["']$/g, ''));
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            values.push(current.trim().replace(/^["']|["']$/g, ''));
+            
+            return values;
+        }
+
+        // Parse Excel file (basic implementation)
+        function parseExcel(file) {
+            alert('📊 Excel Import: For best results, save your Excel file as CSV first, then upload.\n\nFile → Save As → CSV (Comma delimited)');
+            
+            // For a full Excel implementation, you would need a library like SheetJS
+            // This is a simplified version that asks users to convert to CSV
+            document.getElementById('accountFile').value = '';
+        }
+
+        // Display import preview
+        function displayImportPreview() {
+            if (importedData.length === 0) {
+                alert('No valid accounts found in the file. Please check the format.');
+                return;
+            }
+            
+            const previewTable = document.getElementById('previewTableBody');
+            const preview = importedData.slice(0, 10); // Show first 10
+            
+            previewTable.innerHTML = preview.map(acc => `
+                <tr>
+                    <td style="padding: 8px;">${acc.name}</td>
+                    <td style="padding: 8px;">${acc.industry}</td>
+                    <td style="padding: 8px;">${acc.employees}</td>
+                    <td style="padding: 8px;">${acc.revenue}</td>
+                    <td style="padding: 8px;">${acc.status}</td>
+                </tr>
+            `).join('');
+            
+            if (importedData.length > 10) {
+                previewTable.innerHTML += `
+                    <tr>
+                        <td colspan="5" style="padding: 8px; text-align: center; font-style: italic; color: #6c757d;">
+                            ... and ${importedData.length - 10} more accounts
+                        </td>
+                    </tr>
+                `;
+            }
+            
+            document.getElementById('importCount').textContent = importedData.length;
+            document.getElementById('importPreview').style.display = 'block';
+        }
+
+        // Show bulk scoring section
+        // REPLACE YOUR ENTIRE processBulkScoring() FUNCTION WITH THIS:
+
+function processBulkScoring() {
+    if (importedData.length === 0) {
+        alert('No accounts to process. Please upload a CSV file first.');
+        return;
+    }
+    
+    const fitIndustries = document.getElementById('bulkFitIndustries').value
+        .toLowerCase()
+        .split(',')
+        .map(i => i.trim())
+        .filter(i => i);
+    
+    const fitEmployeeRange = document.getElementById('bulkFitEmployees').value.trim();
+    const defaultIntent = parseInt(document.getElementById('bulkIntentDefault').value) || 50;
+    const defaultRel = parseInt(document.getElementById('bulkRelDefault').value) || 30;
+    const defaultEng = parseInt(document.getElementById('bulkEngDefault').value) || 20;
+    const autoStrategy = document.getElementById('autoGenerateStrategy').checked;
+    
+    // FIXED: Proper weight handling with fallback
+    const weights = territoryData.icp && territoryData.icp.weights ? 
+        territoryData.icp.weights : 
+        { fit: 35, intent: 35, relationship: 20, engagement: 10 };
+    
+    console.log('Processing', importedData.length, 'accounts with weights:', weights);
+    
+    let tier1Count = 0, tier2Count = 0, tier3Count = 0, reserveCount = 0;
+    
+    importedData.forEach((acc, index) => {
+        // Calculate FIT score
+        let fitScore = 50; // Base score
+        
+        // Industry match
+        if (fitIndustries.length > 0 && acc.industry) {
+            const accIndustry = acc.industry.toLowerCase();
+            const exactMatch = fitIndustries.some(fi => 
+                accIndustry === fi || 
+                accIndustry.includes(fi) || 
+                fi.includes(accIndustry)
+            );
+            
+            if (exactMatch) {
+                fitScore = 90; // Perfect match
+            } else {
+                // Check for partial word matches
+                const words = accIndustry.split(/[\s-]/);
+                const partialMatch = fitIndustries.some(fi => 
+                    words.some(w => fi.includes(w) || w.includes(fi))
+                );
+                if (partialMatch) {
+                    fitScore = 70; // Partial match
+                }
+            }
+        }
+        
+        // Employee range match - bonus points
+        if (fitEmployeeRange && acc.employees) {
+            const empMatch = matchEmployeeRange(acc.employees, fitEmployeeRange);
+            if (empMatch) {
+                fitScore = Math.min(100, fitScore + 10);
+            }
+        }
+        
+        // FIXED: Calculate total weighted score correctly
+        const totalScore = Math.round(
+            (fitScore * weights.fit / 100) +
+            (defaultIntent * weights.intent / 100) +
+            (defaultRel * weights.relationship / 100) +
+            (defaultEng * weights.engagement / 100)
+        );
+        
+        console.log(`Account ${index + 1}: ${acc.name} - Fit: ${fitScore}, Total: ${totalScore}`);
+        
+        // FIXED: Determine tier with proper counting
+        let tier = 'reserve';
+        if (totalScore >= 80) {
+            tier = 'tier1';
+            tier1Count++;
+        } else if (totalScore >= 60) {
+            tier = 'tier2';
+            tier2Count++;
+        } else if (totalScore >= 40) {
+            tier = 'tier3';
+            tier3Count++;
+        } else {
+            reserveCount++;
+        }
+        
+        // Generate strategy if enabled
+        let strategy = '';
+        let nextAction = '';
+        let why = '';
+        
+        if (autoStrategy) {
+            if (tier === 'tier1') {
+                strategy = 'Personalized multi-touch sequence → Discovery call → Custom demo';
+                nextAction = 'Deep research and personalized outreach within 3 days';
+                why = 'High ICP fit and score - strategic priority for personalized engagement';
+            } else if (tier === 'tier2') {
+                strategy = 'Semi-personalized email sequence → Industry-focused value prop → Demo';
+                nextAction = 'Add to targeted campaign and schedule outreach';
+                why = 'Good ICP fit - growth opportunity with focused approach';
+            } else if (tier === 'tier3') {
+                strategy = 'Automated nurture sequence → Self-service resources → Monitor engagement';
+                nextAction = 'Add to automated nurture campaign';
+                why = 'Moderate fit - programmatic approach to maintain awareness';
+            } else {
+                strategy = 'Passive monitoring → Newsletter inclusion → Watch for intent signals';
+                nextAction = 'Add to passive nurture list';
+                why = 'Low current fit - monitor for future opportunity';
+            }
+        }
+        
+        // Create account object
+        const account = {
+            name: acc.name,
+            industry: acc.industry || '',
+            employees: acc.employees || '',
+            revenue: acc.revenue || '',
+            status: acc.status || 'greenfield',
+            acv: acc.acv || 0,
+            fitScore: fitScore,
+            intentScore: defaultIntent,
+            relationshipScore: defaultRel,
+            engagementScore: defaultEng,
+            totalScore: totalScore,
+            tier: tier,
+            why: why,
+            strategy: strategy,
+            nextAction: nextAction,
+            timestamp: new Date().toISOString(),
+            imported: true
+        };
+        
+        territoryData.accounts.push(account);
+    });
+    
+    console.log('Import complete:', { tier1Count, tier2Count, tier3Count, reserveCount });
+    
+    // Display results
+    const totalImported = importedData.length;
+    document.getElementById('bulkTotalImported').textContent = totalImported;
+    document.getElementById('bulkTier1Count').textContent = tier1Count;
+    document.getElementById('bulkTier2Count').textContent = tier2Count;
+    document.getElementById('bulkTier3Count').textContent = tier3Count;
+    
+    // Display detailed breakdown
+    document.getElementById('bulkTier1Count2').textContent = tier1Count;
+    document.getElementById('bulkTier2Count2').textContent = tier2Count;
+    document.getElementById('bulkTier3Count2').textContent = tier3Count;
+    document.getElementById('bulkReserveCount2').textContent = reserveCount;
+    
+    const calcPct = (count) => totalImported > 0 ? Math.round(count/totalImported*100) : 0;
+    document.getElementById('bulkTier1Pct').textContent = calcPct(tier1Count);
+    document.getElementById('bulkTier2Pct').textContent = calcPct(tier2Count);
+    document.getElementById('bulkTier3Pct').textContent = calcPct(tier3Count);
+    document.getElementById('bulkReservePct').textContent = calcPct(reserveCount);
+    
+    // FIXED: Show results section and scroll
+    document.getElementById('bulkScoringResults').style.display = 'block';
+    document.getElementById('bulkScoringResults').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    // Render account list
+    renderAccountList();
+    
+    // FIXED: Update dashboard after import
+    updateDashboard();
+    
+    // Clear imported data
+    importedData = [];
+    document.getElementById('accountFile').value = '';
+    
+    alert(`✅ Successfully imported and scored ${totalImported} accounts!\n\nTier 1: ${tier1Count}\nTier 2: ${tier2Count}\nTier 3: ${tier3Count}\nReserve: ${reserveCount}`);
+}
+
+        // Helper function to match employee range
+        function matchEmployeeRange(empValue, rangeString) {
+            const empNum = parseInt(String(empValue).replace(/[^\d]/g, '')) || 0;
+            
+            // Handle ranges like "200-500"
+            if (rangeString.includes('-')) {
+                const [min, max] = rangeString.split('-').map(n => parseInt(n.trim()));
+                return empNum >= min && empNum <= max;
+            }
+            
+            // Handle ">500"
+            if (rangeString.startsWith('>')) {
+                const min = parseInt(rangeString.substring(1));
+                return empNum > min;
+            }
+            
+            // Handle "<100"
+            if (rangeString.startsWith('<')) {
+                const max = parseInt(rangeString.substring(1));
+                return empNum < max;
+            }
+            
+            return false;
+        }
+
+        // View imported accounts
+        function viewImportedAccounts() {
+            document.getElementById('bulkScoringSection').style.display = 'none';
+            document.getElementById('importPreview').style.display = 'none';
+            
+            // Scroll to account list
+            const accountListSection = document.querySelector('#accounts .section:last-child');
+            accountListSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Download sample CSV template
+        function downloadSampleCSV() {
+            const csvContent = `Company Name,Industry,Employees,Revenue,Status,ACV
+Acme Corporation,SaaS,350,$100M,greenfield,75000
+Beta Technologies,FinTech,200,$50M,customer,50000
+Gamma Solutions,E-commerce,500,$200M,opportunity,100000
+Delta Industries,Healthcare Tech,150,$30M,greenfield,40000
+Epsilon Systems,MarTech,400,$150M,greenfield,80000
+Zeta Platforms,SaaS,250,$75M,customer,60000
+Eta Dynamics,FinTech,300,$120M,opportunity,90000
+Theta Analytics,Data Analytics,180,$45M,greenfield,55000
+Iota Networks,Cybersecurity,220,$65M,greenfield,70000
+Kappa Digital,AdTech,320,$95M,customer,65000`;
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'territory_accounts_template.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            // Update dashboard when switching to it
+            if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Calculate greenfield automatically
+        function updateGreenfield() {
+            const total = parseInt(document.getElementById('totalAccounts').value) || 0;
+            const customers = parseInt(document.getElementById('currentCustomers').value) || 0;
+            const opps = parseInt(document.getElementById('activeOpps').value) || 0;
+            const greenfield = Math.max(0, total - customers - opps);
+            document.getElementById('greenfield').value = greenfield;
+        }
+
+        document.getElementById('totalAccounts').addEventListener('input', updateGreenfield);
+        document.getElementById('currentCustomers').addEventListener('input', updateGreenfield);
+        document.getElementById('activeOpps').addEventListener('input', updateGreenfield);
+
+        // Save overview
+        function saveOverview() {
+            territoryData.overview = {
+                aeName: document.getElementById('aeName').value,
+                territoryName: document.getElementById('territoryName').value,
+                planningPeriod: document.getElementById('planningPeriod').value,
+                totalAccounts: parseInt(document.getElementById('totalAccounts').value) || 0,
+                currentCustomers: parseInt(document.getElementById('currentCustomers').value) || 0,
+                activeOpps: parseInt(document.getElementById('activeOpps').value) || 0,
+                greenfield: parseInt(document.getElementById('greenfield').value) || 0,
+                segment: document.getElementById('segment').value,
+                salesMotion: document.getElementById('salesMotion').value
+            };
+            
+            alert('✅ Territory overview saved!');
+            document.querySelector('[onclick="switchTab(\'icp\')"]').click();
+        }
+
+        // Update weight totals
+        function updateWeightTotal() {
+            const fit = parseInt(document.getElementById('fitWeight').value) || 0;
+            const intent = parseInt(document.getElementById('intentWeight').value) || 0;
+            const rel = parseInt(document.getElementById('relationshipWeight').value) || 0;
+            const eng = parseInt(document.getElementById('engagementWeight').value) || 0;
+            const total = fit + intent + rel + eng;
+            
+            const bar = document.getElementById('weightTotal');
+            bar.style.width = Math.min(total, 100) + '%';
+            bar.textContent = 'Total: ' + total + '%';
+            
+            if (total !== 100) {
+                bar.style.background = 'linear-gradient(90deg, #dc3545 0%, #c82333 100%)';
+            } else {
+                bar.style.background = 'linear-gradient(90deg, #1e3c72 0%, #2a5298 100%)';
+            }
+        }
+
+        document.getElementById('fitWeight').addEventListener('input', updateWeightTotal);
+        document.getElementById('intentWeight').addEventListener('input', updateWeightTotal);
+        document.getElementById('relationshipWeight').addEventListener('input', updateWeightTotal);
+        document.getElementById('engagementWeight').addEventListener('input', updateWeightTotal);
+
+        // Save ICP
+        function saveICP() {
+            const fit = parseInt(document.getElementById('fitWeight').value) || 35;
+            const intent = parseInt(document.getElementById('intentWeight').value) || 35;
+            const rel = parseInt(document.getElementById('relationshipWeight').value) || 20;
+            const eng = parseInt(document.getElementById('engagementWeight').value) || 10;
+            const total = fit + intent + rel + eng;
+            
+            if (total !== 100) {
+                alert('⚠️ FIRE weights must total 100%. Currently: ' + total + '%');
+                return;
+            }
+            
+            territoryData.icp = {
+                industries: document.getElementById('icpIndustries').value,
+                employees: document.getElementById('icpEmployees').value,
+                revenue: document.getElementById('icpRevenue').value,
+                geography: document.getElementById('icpGeography').value,
+                growth: document.getElementById('icpGrowth').value,
+                tech: document.getElementById('icpTech').value,
+                buying: document.getElementById('icpBuying').value,
+                strategic: document.getElementById('icpStrategic').value,
+                weights: { fit, intent, relationship: rel, engagement: eng }
+            };
+            
+            alert('✅ Territory ICP saved!');
+            document.querySelector('[onclick="switchTab(\'accounts\')"]').click();
+        }
+
+        // Calculate account score in real-time
+        function updateAccountScore() {
+            const fit = parseInt(document.getElementById('accFit').value) || 0;
+            const intent = parseInt(document.getElementById('accIntent').value) || 0;
+            const rel = parseInt(document.getElementById('accRelationship').value) || 0;
+            const eng = parseInt(document.getElementById('accEngagement').value) || 0;
+            
+            const weights = territoryData.icp.weights || { fit: 35, intent: 35, relationship: 20, engagement: 10 };
+            
+            const totalScore = Math.round(
+                (fit * weights.fit / 100) +
+                (intent * weights.intent / 100) +
+                (rel * weights.relationship / 100) +
+                (eng * weights.engagement / 100)
+            );
+            
+            document.getElementById('accTotalScore').textContent = totalScore;
+            
+            // Determine tier
+            let tier = 'tier3';
+            let tierLabel = 'Tier 3';
+            if (totalScore >= 80) {
+                tier = 'tier1';
+                tierLabel = 'Tier 1 - Strategic';
+            } else if (totalScore >= 60) {
+                tier = 'tier2';
+                tierLabel = 'Tier 2 - Growth';
+            } else if (totalScore >= 40) {
+                tier = 'tier3';
+                tierLabel = 'Tier 3 - Programmatic';
+            } else {
+                tier = 'reserve';
+                tierLabel = 'Reserve';
+            }
+            
+            const badge = document.getElementById('accTierPreview');
+            badge.className = 'tier-badge ' + tier;
+            badge.textContent = tierLabel;
+        }
+
+        document.getElementById('accFit').addEventListener('input', updateAccountScore);
+        document.getElementById('accIntent').addEventListener('input', updateAccountScore);
+        document.getElementById('accRelationship').addEventListener('input', updateAccountScore);
+        document.getElementById('accEngagement').addEventListener('input', updateAccountScore);
+
+        // Add account
+        function calculateAndAddAccount() {
+            const name = document.getElementById('accName').value;
+            if (!name) {
+                alert('Please enter a company name');
+                return;
+            }
+            
+            const fit = parseInt(document.getElementById('accFit').value) || 0;
+            const intent = parseInt(document.getElementById('accIntent').value) || 0;
+            const rel = parseInt(document.getElementById('accRelationship').value) || 0;
+            const eng = parseInt(document.getElementById('accEngagement').value) || 0;
+            
+            const weights = territoryData.icp.weights || { fit: 35, intent: 35, relationship: 20, engagement: 10 };
+            
+            const totalScore = Math.round(
+                (fit * weights.fit / 100) +
+                (intent * weights.intent / 100) +
+                (rel * weights.relationship / 100) +
+                (eng * weights.engagement / 100)
+            );
+            
+            let tier = 'tier3';
+            if (totalScore >= 80) tier = 'tier1';
+            else if (totalScore >= 60) tier = 'tier2';
+            else if (totalScore >= 40) tier = 'tier3';
+            else tier = 'reserve';
+            
+            const account = {
+                name: name,
+                industry: document.getElementById('accIndustry').value,
+                employees: document.getElementById('accEmployees').value,
+                revenue: document.getElementById('accRevenue').value,
+                status: document.getElementById('accStatus').value,
+                acv: parseInt(document.getElementById('accACV').value) || 0,
+                fitScore: fit,
+                intentScore: intent,
+                relationshipScore: rel,
+                engagementScore: eng,
+                totalScore: totalScore,
+                tier: tier,
+                why: document.getElementById('accWhy').value,
+                strategy: document.getElementById('accStrategy').value,
+                nextAction: document.getElementById('accNextAction').value,
+                timestamp: new Date().toISOString()
+            };
+            
+            territoryData.accounts.push(account);
+            renderAccountList();
+            clearAccountForm();
+            
+            alert(`✅ Account Added!\n\n${name}\nTotal Score: ${totalScore}\nTier: ${tier.toUpperCase()}`);
+        }
+
+        // Render account list
+        function renderAccountList() {
+            filterAccounts(); // Use filter function which handles rendering
+        }
+
+        // Filter and render accounts
+        function filterAccounts() {
+            const accountList = document.getElementById('accountList');
+            
+            if (territoryData.accounts.length === 0) {
+                accountList.innerHTML = '<p style="text-align: center; color: #6c757d; padding: 40px;">No accounts added yet. Add your first account above or import a list.</p>';
+                document.getElementById('accountCount').textContent = '0 accounts';
+                return;
+            }
+            
+            // Get filter values
+            const tierFilter = document.getElementById('filterTier')?.value || 'all';
+            const searchTerm = document.getElementById('searchAccounts')?.value.toLowerCase() || '';
+            const sortBy = document.getElementById('sortAccounts')?.value || 'score';
+            
+            // Filter accounts
+            let filtered = [...territoryData.accounts];
+            
+            if (tierFilter !== 'all') {
+                filtered = filtered.filter(a => a.tier === tierFilter);
+            }
+            
+            if (searchTerm) {
+                filtered = filtered.filter(a => 
+                    a.name.toLowerCase().includes(searchTerm) ||
+                    a.industry.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            // Sort accounts
+            filtered.sort((a, b) => {
+                switch(sortBy) {
+                    case 'score':
+                        return b.totalScore - a.totalScore;
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'acv':
+                        return (b.acv || 0) - (a.acv || 0);
+                    case 'recent':
+                        return new Date(b.timestamp) - new Date(a.timestamp);
+                    default:
+                        return b.totalScore - a.totalScore;
+                }
+            });
+            
+            document.getElementById('accountCount').textContent = 
+                `${filtered.length} of ${territoryData.accounts.length} accounts`;
+            
+            accountList.innerHTML = filtered.map((acc, index) => {
+                const actualIndex = territoryData.accounts.indexOf(acc);
+                return `
+                <div class="account-item">
+                    <div class="account-info">
+                        <h4>${acc.name} ${acc.imported ? '<span class="badge badge-success" style="font-size: 10px; margin-left: 8px;">IMPORTED</span>' : ''}</h4>
+                        <p>${acc.industry || 'N/A'} • ${acc.employees || 'N/A'} employees • ${acc.revenue || 'N/A'} ${acc.acv ? '• ACV: $' + acc.acv.toLocaleString() : ''}</p>
+                        <p style="margin-top: 8px;">
+                            <span class="tier-badge ${acc.tier}">${acc.tier.toUpperCase()}</span>
+                            <span style="font-size: 11px;">
+                                F: ${acc.fitScore} | I: ${acc.intentScore} | R: ${acc.relationshipScore} | E: ${acc.engagementScore}
+                            </span>
+                        </p>
+                        <p style="margin-top: 8px;"><strong>Why:</strong> ${acc.why || 'Not specified'}</p>
+                        <p><strong>Strategy:</strong> ${acc.strategy || 'Not specified'}</p>
+                        <p><strong>Next:</strong> ${acc.nextAction || 'Not specified'}</p>
+                    </div>
+                    <div class="score-display">
+                        <div class="score-value">${acc.totalScore}</div>
+                        <div class="score-label">Score</div>
+                        <div style="display: flex; gap: 5px; margin-top: 15px;">
+                            <button class="btn btn-secondary btn-small" onclick="editAccount(${actualIndex})" title="Edit scores and details">✏️ Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteAccount(${actualIndex})" title="Delete account">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        // Edit account
+        function editAccount(index) {
+            const acc = territoryData.accounts[index];
+            
+            // Populate the manual entry form with account data
+            document.getElementById('accName').value = acc.name;
+            document.getElementById('accIndustry').value = acc.industry || '';
+            document.getElementById('accEmployees').value = acc.employees || '';
+            document.getElementById('accRevenue').value = acc.revenue || '';
+            document.getElementById('accStatus').value = acc.status || 'greenfield';
+            document.getElementById('accACV').value = acc.acv || '';
+            document.getElementById('accFit').value = acc.fitScore;
+            document.getElementById('accIntent').value = acc.intentScore;
+            document.getElementById('accRelationship').value = acc.relationshipScore;
+            document.getElementById('accEngagement').value = acc.engagementScore;
+            document.getElementById('accWhy').value = acc.why || '';
+            document.getElementById('accStrategy').value = acc.strategy || '';
+            document.getElementById('accNextAction').value = acc.nextAction || '';
+            
+            updateAccountScore();
+            
+            // Delete the old entry
+            territoryData.accounts.splice(index, 1);
+            renderAccountList();
+            
+            // Scroll to form
+            document.querySelector('.section-header').scrollIntoView({ behavior: 'smooth' });
+            
+            alert('✏️ Account loaded for editing. Update the scores and click "Add Account" to save changes.');
+        }
+
+        // Export accounts to CSV
+        function exportAccountsCSV() {
+            if (territoryData.accounts.length === 0) {
+                alert('No accounts to export');
+                return;
+            }
+            
+            const headers = [
+                'Company Name', 'Industry', 'Employees', 'Revenue', 'Status', 'ACV',
+                'Fit Score', 'Intent Score', 'Relationship Score', 'Engagement Score',
+                'Total Score', 'Tier', 'Why Priority', 'Strategy', 'Next Action'
+            ];
+            
+            const rows = territoryData.accounts.map(a => [
+                a.name,
+                a.industry || '',
+                a.employees || '',
+                a.revenue || '',
+                a.status || '',
+                a.acv || '',
+                a.fitScore,
+                a.intentScore,
+                a.relationshipScore,
+                a.engagementScore,
+                a.totalScore,
+                a.tier.toUpperCase(),
+                a.why || '',
+                a.strategy || '',
+                a.nextAction || ''
+            ]);
+            
+            const csv = [headers, ...rows]
+                .map(row => row.map(cell => `"${cell}"`).join(','))
+                .join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `territory_accounts_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('✅ Accounts exported to CSV!');
+        }
+
+        // Clear all accounts
+        function clearAllAccounts() {
+            if (territoryData.accounts.length === 0) {
+                alert('No accounts to clear');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete all ${territoryData.accounts.length} accounts? This cannot be undone.`)) {
+                territoryData.accounts = [];
+                renderAccountList();
+                updateDashboard();
+                alert('All accounts cleared');
+            }
+        }
+
+        // Clear account form
+        function clearAccountForm() {
+            document.getElementById('accName').value = '';
+            document.getElementById('accIndustry').value = '';
+            document.getElementById('accEmployees').value = '';
+            document.getElementById('accRevenue').value = '';
+            document.getElementById('accStatus').selectedIndex = 0;
+            document.getElementById('accACV').value = '';
+            document.getElementById('accFit').value = 0;
+            document.getElementById('accIntent').value = 0;
+            document.getElementById('accRelationship').value = 0;
+            document.getElementById('accEngagement').value = 0;
+            document.getElementById('accWhy').value = '';
+            document.getElementById('accStrategy').value = '';
+            document.getElementById('accNextAction').value = '';
+            updateAccountScore();
+        }
+
+        // Delete account
+        function deleteAccount(index) {
+            if (confirm('Are you sure you want to delete this account?')) {
+                territoryData.accounts.splice(index, 1);
+                renderAccountList();
+                updateDashboard();
+            }
+        }
+
+        // Calculate quota math
+        function calculateQuotaMath() {
+            const quota = parseFloat(document.getElementById('quotaAmount').value) || 0;
+            const acv = parseFloat(document.getElementById('avgACV').value) || 1;
+            const winRate = parseFloat(document.getElementById('winRate').value) / 100 || 0.25;
+            const meetingOpp = parseFloat(document.getElementById('meetingOppRate').value) / 100 || 0.40;
+            const responseMeeting = parseFloat(document.getElementById('responseMeetingRate').value) / 100 || 0.30;
+            const responseRate = parseFloat(document.getElementById('responseRate').value) / 100 || 0.05;
+            
+            const deals = Math.ceil(quota / acv);
+            const opps = Math.ceil(deals / winRate);
+            const meetings = Math.ceil(opps / meetingOpp);
+            const responses = Math.ceil(meetings / responseMeeting);
+            const touches = Math.ceil(responses / responseRate);
+            
+            const months = 3; // Quarterly
+            const weeks = 12;
+            const days = 60; // 5 days/week * 12 weeks
+            
+            territoryData.quotaMath = {
+                quota, acv, winRate, meetingOpp, responseMeeting, responseRate,
+                deals, opps, meetings, responses, touches
+            };
+            
+            document.getElementById('reqOpps').textContent = opps;
+            document.getElementById('reqMeetings').textContent = meetings;
+            document.getElementById('reqTouches').textContent = touches.toLocaleString();
+            
+            document.getElementById('totalDeals').textContent = deals;
+            document.getElementById('totalOpps').textContent = opps;
+            document.getElementById('totalMeetings').textContent = meetings;
+            document.getElementById('totalResponses').textContent = responses;
+            document.getElementById('totalTouches').textContent = touches.toLocaleString();
+            
+            document.getElementById('monthlyDeals').textContent = (deals / months).toFixed(1);
+            document.getElementById('monthlyOpps').textContent = Math.ceil(opps / months);
+            document.getElementById('monthlyMeetings').textContent = Math.ceil(meetings / months);
+            document.getElementById('monthlyResponses').textContent = Math.ceil(responses / months);
+            document.getElementById('monthlyTouches').textContent = Math.ceil(touches / months);
+            
+            document.getElementById('weeklyDeals').textContent = (deals / weeks).toFixed(1);
+            document.getElementById('weeklyOpps').textContent = (opps / weeks).toFixed(1);
+            document.getElementById('weeklyMeetings').textContent = Math.ceil(meetings / weeks);
+            document.getElementById('weeklyResponses').textContent = Math.ceil(responses / weeks);
+            document.getElementById('weeklyTouches').textContent = Math.ceil(touches / weeks);
+            
+            document.getElementById('dailyDeals').textContent = (deals / days).toFixed(2);
+            document.getElementById('dailyOpps').textContent = (opps / days).toFixed(1);
+            document.getElementById('dailyMeetings').textContent = (meetings / days).toFixed(1);
+            document.getElementById('dailyResponses').textContent = (responses / days).toFixed(1);
+            document.getElementById('dailyTouches').textContent = Math.ceil(touches / days);
+            
+            document.getElementById('quotaResults').style.display = 'block';
+        }
+
+        // Update channel totals
+        function updateChannelTotal() {
+            const email = parseInt(document.getElementById('channelEmail').value) || 0;
+            const linkedin = parseInt(document.getElementById('channelLinkedIn').value) || 0;
+            const phone = parseInt(document.getElementById('channelPhone').value) || 0;
+            const events = parseInt(document.getElementById('channelEvents').value) || 0;
+            const total = email + linkedin + phone + events;
+            
+            const bar = document.getElementById('channelTotal');
+            bar.style.width = Math.min(total, 100) + '%';
+            bar.textContent = 'Total: ' + total + '%';
+            
+            if (total !== 100) {
+                bar.style.background = 'linear-gradient(90deg, #dc3545 0%, #c82333 100%)';
+            } else {
+                bar.style.background = 'linear-gradient(90deg, #1e3c72 0%, #2a5298 100%)';
+            }
+        }
+
+        document.getElementById('channelEmail').addEventListener('input', updateChannelTotal);
+        document.getElementById('channelLinkedIn').addEventListener('input', updateChannelTotal);
+        document.getElementById('channelPhone').addEventListener('input', updateChannelTotal);
+        document.getElementById('channelEvents').addEventListener('input', updateChannelTotal);
+
+        // Save activity plan
+        function saveActivityPlan() {
+            territoryData.activityPlan = {
+                channels: {
+                    email: parseInt(document.getElementById('channelEmail').value) || 40,
+                    linkedin: parseInt(document.getElementById('channelLinkedIn').value) || 30,
+                    phone: parseInt(document.getElementById('channelPhone').value) || 20,
+                    events: parseInt(document.getElementById('channelEvents').value) || 10
+                },
+                targets: {
+                    outreach: parseInt(document.getElementById('targetOutreach').value) || 0,
+                    followup: parseInt(document.getElementById('targetFollowup').value) || 0,
+                    meetings: parseInt(document.getElementById('targetMeetings').value) || 0,
+                    opps: parseInt(document.getElementById('targetOpps').value) || 0
+                }
+            };
+            
+            alert('✅ Activity plan saved!');
+        }
+
+        // Generate 5-minute plan
+        function generate5MinPlan() {
+            const overview = territoryData.overview;
+            const accounts = territoryData.accounts;
+            const quota = territoryData.quotaMath;
+            const activity = territoryData.activityPlan;
+            
+            if (!overview.aeName) {
+                alert('Please complete the Territory Overview first');
+                document.querySelector('[onclick="switchTab(\'overview\')"]').click();
+                return;
+            }
+            
+            const top10 = [...accounts]
+                .sort((a, b) => b.totalScore - a.totalScore)
+                .slice(0, 10);
+            
+            const tier1Count = accounts.filter(a => a.tier === 'tier1').length;
+            const tier2Count = accounts.filter(a => a.tier === 'tier2').length;
+            const tier3Count = accounts.filter(a => a.tier === 'tier3').length;
+            
+            const planHTML = `
+                <div style="font-family: monospace; white-space: pre-wrap; line-height: 1.6;">
+<strong style="font-size: 18px;">TERRITORY PLAN - ${overview.aeName} - ${overview.planningPeriod}</strong>
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<strong>TERRITORY SNAPSHOT:</strong>
+• Total Accounts: ${overview.totalAccounts} | Customers: ${overview.currentCustomers} | Active Opps: ${overview.activeOpps} | Greenfield: ${overview.greenfield}
+• Segment: ${overview.segment.toUpperCase()} | Status: ${overview.salesMotion === 'ramping' ? 'Ramping' : 'Established'}
+${quota.quota ? `• Quarterly Quota: $${quota.quota.toLocaleString()} | Avg ACV: $${quota.acv.toLocaleString()}` : ''}
+
+<strong>TOP 10 PRIORITY ACCOUNTS:</strong>
+${top10.length > 0 ? top10.map((acc, i) => 
+`${i + 1}. ${acc.name} - ${acc.tier.toUpperCase()} - ${acc.status} - Score: ${acc.totalScore}
+   Why: ${acc.why || 'Not specified'}
+   Strategy: ${acc.strategy || 'Not specified'}
+   Next: ${acc.nextAction || 'Not specified'}
+`).join('\n') : 'No accounts added yet'}
+
+<strong>ACCOUNT DISTRIBUTION:</strong>
+• Tier 1 (Strategic): ${tier1Count} accounts (${overview.totalAccounts > 0 ? Math.round(tier1Count/overview.totalAccounts*100) : 0}%) - Target: 5-15%
+• Tier 2 (Growth): ${tier2Count} accounts (${overview.totalAccounts > 0 ? Math.round(tier2Count/overview.totalAccounts*100) : 0}%) - Target: 20-30%
+• Tier 3 (Programmatic): ${tier3Count} accounts (${overview.totalAccounts > 0 ? Math.round(tier3Count/overview.totalAccounts*100) : 0}%) - Target: 40-60%
+
+${quota.touches ? `<strong>PIPELINE GENERATION PLAN:</strong>
+• Weekly Targets: ${Math.ceil(quota.touches/12)} outreach, ${activity.targets?.followup || 15} follow-ups, ${Math.ceil(quota.meetings/12)} meetings
+• Channel Mix: Email (${activity.channels?.email || 40}%), LinkedIn (${activity.channels?.linkedin || 30}%), Calls (${activity.channels?.phone || 20}%), Events (${activity.channels?.events || 10}%)
+• Focus: ${tier1Count} Tier 1 accounts get 60% of time (personalized), ${tier2Count} Tier 2 get 30% (semi-custom), ${tier3Count} Tier 3 get 10% (automated)` : ''}
+
+${quota.opps ? `<strong>KEY METRICS (Quarterly Targets):</strong>
+• Deals Needed: ${quota.deals}
+• Opportunities Needed: ${quota.opps} (Win Rate: ${Math.round(quota.winRate*100)}%)
+• Meetings Needed: ${quota.meetings} (Conversion: ${Math.round(quota.meetingOpp*100)}%)
+• Weekly Activity: ${Math.ceil(quota.touches/12)} touches, ${Math.ceil(quota.meetings/12)} meetings
+• Pipeline Required: $${Math.round(quota.quota * 3).toLocaleString()} (3x coverage)` : ''}
+
+<strong>SUPPORT NEEDED:</strong>
+• SDR Pairing: Needed for top ${Math.min(5, tier1Count)} Tier 1 accounts
+• Marketing: Event invitations for Tier 1, case studies for vertical
+• Executive: Sponsor needed for deals >$100K
+• Product: Demo environments, trial accounts
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+<em>Generated: ${new Date().toLocaleDateString()}</em>
+                </div>
+            `;
+            
+            document.getElementById('fiveMinPlan').innerHTML = planHTML;
+        }
+
+        // Export functions
+        function exportPlanText() {
+            const planElement = document.getElementById('fiveMinPlan');
+            const text = planElement.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✅ Plan copied to clipboard!');
+            }).catch(() => {
+                alert('Please select and copy the text manually');
+            });
+        }
+
+        function exportPlanWord() {
+            alert('💡 Copy the plan text and paste into Word/Google Docs for formatting');
+            exportPlanText();
+        }
+
+        function printPlan() {
+            window.print();
+        }
+
+        // Update dashboard
+        function updateDashboard() {
+            const overview = territoryData.overview;
+            const accounts = territoryData.accounts;
+            const quota = territoryData.quotaMath;
+            
+            document.getElementById('dashTotalAccounts').textContent = accounts.length;
+            
+            const tier1 = accounts.filter(a => a.tier === 'tier1');
+            const tier2 = accounts.filter(a => a.tier === 'tier2');
+            const tier3 = accounts.filter(a => a.tier === 'tier3');
+            
+            document.getElementById('dashTier1').textContent = tier1.length;
+            document.getElementById('dashQuota').textContent = quota.quota ? '$' + quota.quota.toLocaleString() : '$0';
+            
+            document.getElementById('dashAccountDist').textContent = 
+                `${tier1.length} / ${tier2.length} / ${tier3.length}`;
+            
+            document.getElementById('dashWeeklyTarget').textContent = 
+                quota.touches ? Math.ceil(quota.touches / 12) : '-';
+            
+            document.getElementById('dashWinRate').textContent = 
+                quota.winRate ? Math.round(quota.winRate * 100) + '%' : '-';
+            
+            document.getElementById('dashCoverage').textContent = '3-4x';
+            
+            // Tier table
+            if (accounts.length > 0) {
+                const total = accounts.length;
+                const tiers = [
+                    { name: 'Tier 1 - Strategic', count: tier1.length, target: '5-15%', scores: tier1 },
+                    { name: 'Tier 2 - Growth', count: tier2.length, target: '20-30%', scores: tier2 },
+                    { name: 'Tier 3 - Programmatic', count: tier3.length, target: '40-60%', scores: tier3 }
+                ];
+                
+                document.getElementById('tierTableBody').innerHTML = tiers.map(tier => {
+                    const pct = total > 0 ? Math.round(tier.count / total * 100) : 0;
+                    const avg = tier.scores.length > 0 ? 
+                        Math.round(tier.scores.reduce((sum, a) => sum + a.totalScore, 0) / tier.scores.length) : 0;
+                    
+                    return `
+                        <tr>
+                            <td><strong>${tier.name}</strong></td>
+                            <td>${tier.count}</td>
+                            <td>${pct}%</td>
+                            <td>${tier.target}</td>
+                            <td>${avg}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            // Top 10 list
+            const top10 = [...accounts].sort((a, b) => b.totalScore - a.totalScore).slice(0, 10);
+            if (top10.length > 0) {
+                document.getElementById('top10List').innerHTML = top10.map((acc, i) => `
+                    <div style="padding: 15px; border-bottom: 1px solid #e9ecef;">
+                        <strong>${i + 1}. ${acc.name}</strong>
+                        <span class="tier-badge ${acc.tier}" style="margin-left: 10px;">${acc.tier.toUpperCase()}</span>
+                        <span style="float: right; font-weight: 700; color: #1e3c72;">${acc.totalScore}</span>
+                        <div style="font-size: 12px; color: #6c757d; margin-top: 5px;">
+                            ${acc.strategy || 'Strategy not defined'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize
+        updateWeightTotal();
+        updateChannelTotal();
+        updateGreenfield();
+    </script>
+</body>
+</html>

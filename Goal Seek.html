@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal-Seeking Revenue Planner</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .mode-btn {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group.calculated input {
+            background: #e3f2fd;
+            border-color: #2196f3;
+            font-weight: 600;
+            color: #1565c0;
+        }
+
+        .input-group.goal input {
+            background: #fff3e0;
+            border-color: #ff9800;
+            font-weight: 600;
+            color: #e65100;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-card.calculated {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        }
+
+        .stat-card.danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box.warning {
+            background: #fff3e0;
+            border-left-color: #ff9800;
+        }
+
+        .info-box.warning h4 {
+            color: #ff9800;
+        }
+
+        .info-box.success {
+            background: #e8f5e9;
+            border-left-color: #4caf50;
+        }
+
+        .info-box.success h4 {
+            color: #4caf50;
+        }
+
+        .info-box.danger {
+            background: #ffebee;
+            border-left-color: #f44336;
+        }
+
+        .info-box.danger h4 {
+            color: #f44336;
+        }
+
+        .comparison-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .comparison-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .comparison-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .feasibility-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .feasibility-easy {
+            background: #4caf50;
+            color: white;
+        }
+
+        .feasibility-moderate {
+            background: #ff9800;
+            color: white;
+        }
+
+        .feasibility-hard {
+            background: #f44336;
+            color: white;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 25px 0;
+        }
+
+        .scenario-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .scenario-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .scenario-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .scenario-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .scenario-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .scenario-metric:last-child {
+            border-bottom: none;
+        }
+
+        .scenario-metric .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .scenario-metric .value {
+            font-weight: 600;
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mode-toggle {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+
+    <button class="btn" onclick="window.location.href='SaaS-Growth-Sim.html'">SaaS Growth Sim</button>
+    <button class="btn" onclick="window.location.href='Unit-Economics-Calculator.html'">Unit Economics</button>
+
+</div>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Goal-Seeking Revenue Planner</h1>
+            <p>Work backwards from your ARR goal to calculate what's required to hit it</p>
+        </div>
+
+        <!-- Mode Selection -->
+        <div class="card">
+            <div class="section-header">
+                <h2>Planning Mode</h2>
+                <div class="mode-toggle">
+                    <button class="mode-btn active" onclick="switchMode('forward', this)">Forward Planning</button>
+                    <button class="mode-btn" onclick="switchMode('reverse', this)">🎯 Reverse Planning</button>
+                </div>
+            </div>
+
+            <div id="mode-description"></div>
+        </div>
+
+        <!-- Forward Planning Mode -->
+        <div id="forward-mode" class="card">
+            <div class="section-header">
+                <h2>Forward Planning: What Will We Achieve?</h2>
+            </div>
+
+            <div class="info-box">
+                <h4>How It Works</h4>
+                <p>Enter your current capabilities (customers/month, deal size, conversion rates) and see what ARR you'll likely achieve.</p>
+            </div>
+
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>New Customers per Month (Mean)</label>
+                    <input type="number" id="fwd_customers_mean" value="25" min="0">
+                </div>
+                <div class="input-group">
+                    <label>New Customers (Std Dev)</label>
+                    <input type="number" id="fwd_customers_std" value="5" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Avg Deal Size € (Mean)</label>
+                    <input type="number" id="fwd_deal_mean" value="15000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Monthly Churn Rate %</label>
+                    <input type="number" id="fwd_churn" value="2.5" min="0" max="100" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Starting ARR €</label>
+                    <input type="number" id="fwd_starting_arr" value="500000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Months to Forecast</label>
+                    <input type="number" id="fwd_months" value="12" min="1" max="36">
+                </div>
+            </div>
+
+            <button class="btn" onclick="runForwardPlanning()">Calculate Expected ARR</button>
+
+            <div id="forward_results"></div>
+        </div>
+
+        <!-- Reverse Planning Mode -->
+        <div id="reverse-mode" class="card" style="display: none;">
+            <div class="section-header">
+                <h2>🎯 Reverse Planning: What Do We Need to Hit Our Goal?</h2>
+            </div>
+
+            <div class="info-box warning">
+                <h4>How It Works</h4>
+                <p><strong>Start with your goal</strong> and the planner calculates what you need to achieve it.</p>
+                <p>The tool will show you multiple scenarios (conservative, moderate, aggressive) and assess feasibility.</p>
+            </div>
+
+            <h3 style="margin: 20px 0; color: #333;">Step 1: Set Your Goal</h3>
+            <div class="input-grid">
+                <div class="input-group goal">
+                    <label>🎯 Target ARR at Year End €</label>
+                    <input type="number" id="rev_target_arr" value="3000000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Current ARR €</label>
+                    <input type="number" id="rev_starting_arr" value="500000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Months to Goal</label>
+                    <input type="number" id="rev_months" value="12" min="1" max="36">
+                </div>
+            </div>
+
+            <h3 style="margin: 20px 0; color: #333;">Step 2: Current Business Model</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Avg Deal Size € (ACV)</label>
+                    <input type="number" id="rev_deal_size" value="15000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Monthly Churn Rate %</label>
+                    <input type="number" id="rev_churn" value="2.5" min="0" max="100" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Overall Win Rate % (Pipeline)</label>
+                    <input type="number" id="rev_win_rate" value="20" min="0" max="100" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Avg Revenue per Rep (Annual) €</label>
+                    <input type="number" id="rev_rep_revenue" value="600000" min="0">
+                </div>
+            </div>
+
+            <h3 style="margin: 20px 0; color: #333;">Step 3: Time Constraints</h3>
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Sales Cycle Length (Months)</label>
+                    <input type="number" id="rev_sales_cycle" value="3" min="0.5" max="24" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label>Rep Ramp Time (Months to Full Productivity)</label>
+                    <input type="number" id="rev_ramp_time" value="3" min="1" max="12" step="0.5">
+                </div>
+                <div class="input-group">
+                    <label>Ramp Productivity Curve</label>
+                    <select id="rev_ramp_curve" style="padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 16px;">
+                        <option value="linear">Linear (Month 1: 33%, Month 2: 67%, Month 3: 100%)</option>
+                        <option value="slow-start">Slow Start (Month 1: 20%, Month 2: 50%, Month 3: 100%)</option>
+                        <option value="fast-start">Fast Start (Month 1: 50%, Month 2: 80%, Month 3: 100%)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn btn-warning" onclick="calculateReversePlan()">🎯 Calculate What's Required</button>
+
+            <div id="reverse_results"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'forward';
+        let currentChart = null;
+        let forwardPlanningResult = null;
+
+        function switchMode(mode, clickedButton) {
+            currentMode = mode;
+            
+            // Update buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            if (clickedButton) {
+                clickedButton.classList.add('active');
+            } else {
+                // Find and activate the correct button
+                const buttons = document.querySelectorAll('.mode-btn');
+                if (mode === 'forward') {
+                    buttons[0].classList.add('active');
+                } else {
+                    buttons[1].classList.add('active');
+                }
+            }
+
+            // Transfer data when switching to reverse mode
+            if (mode === 'reverse') {
+                // Transfer deal size
+                const fwdDealSize = document.getElementById('fwd_deal_mean').value;
+                if (fwdDealSize) {
+                    document.getElementById('rev_deal_size').value = fwdDealSize;
+                }
+                
+                // Transfer churn rate
+                const fwdChurn = document.getElementById('fwd_churn').value;
+                if (fwdChurn) {
+                    document.getElementById('rev_churn').value = fwdChurn;
+                }
+                
+                // Transfer starting ARR
+                const fwdStarting = document.getElementById('fwd_starting_arr').value;
+                if (fwdStarting) {
+                    document.getElementById('rev_starting_arr').value = fwdStarting;
+                }
+                
+                // Transfer months
+                const fwdMonths = document.getElementById('fwd_months').value;
+                if (fwdMonths) {
+                    document.getElementById('rev_months').value = fwdMonths;
+                }
+            }
+            
+            // Transfer data when switching to forward mode
+            if (mode === 'forward') {
+                // Transfer deal size
+                const revDealSize = document.getElementById('rev_deal_size').value;
+                if (revDealSize) {
+                    document.getElementById('fwd_deal_mean').value = revDealSize;
+                }
+                
+                // Transfer churn rate
+                const revChurn = document.getElementById('rev_churn').value;
+                if (revChurn) {
+                    document.getElementById('fwd_churn').value = revChurn;
+                }
+                
+                // Transfer starting ARR
+                const revStarting = document.getElementById('rev_starting_arr').value;
+                if (revStarting) {
+                    document.getElementById('fwd_starting_arr').value = revStarting;
+                }
+                
+                // Transfer months
+                const revMonths = document.getElementById('rev_months').value;
+                if (revMonths) {
+                    document.getElementById('fwd_months').value = revMonths;
+                }
+            }
+
+            // Show/hide sections
+            if (mode === 'forward') {
+                document.getElementById('forward-mode').style.display = 'block';
+                document.getElementById('reverse-mode').style.display = 'none';
+                document.getElementById('mode-description').innerHTML = `
+                    <div class="info-box">
+                        <p><strong>Forward Planning:</strong> "Given our current performance, what ARR will we achieve?"</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('forward-mode').style.display = 'none';
+                document.getElementById('reverse-mode').style.display = 'block';
+                
+                // Show context from forward planning if available
+                let contextHTML = '';
+                if (forwardPlanningResult) {
+                    contextHTML = `
+                        <div class="info-box success" style="margin-top: 15px;">
+                            <h4>📊 Context from Forward Planning</h4>
+                            <p><strong>Your current trajectory:</strong> ${formatCurrency(forwardPlanningResult.expectedARR)} ARR in ${forwardPlanningResult.months} months</p>
+                            <p><strong>Current inputs:</strong> ${forwardPlanningResult.customersMean.toFixed(0)} customers/month at ${formatCurrency(forwardPlanningResult.dealMean)} ACV</p>
+                            <p>Now set a higher goal below to see what changes you'd need to make.</p>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('mode-description').innerHTML = `
+                    <div class="info-box warning">
+                        <p><strong>Reverse Planning:</strong> "To hit our ARR goal, what do we need to do?"</p>
+                        <p>This is how Revenue Architects actually plan - start with the goal, work backwards to requirements.</p>
+                    </div>
+                    ${contextHTML}
+                `;
+            }
+        }
+
+        function normalRandom(mean, stdDev) {
+            let u1 = Math.random();
+            let u2 = Math.random();
+            let z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            return z0 * stdDev + mean;
+        }
+
+        function calculatePercentile(arr, percentile) {
+            const sorted = arr.slice().sort((a, b) => a - b);
+            const index = (percentile / 100) * (sorted.length - 1);
+            const lower = Math.floor(index);
+            const upper = Math.ceil(index);
+            const weight = index % 1;
+            
+            if (lower === upper) return sorted[lower];
+            return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+        }
+
+        function formatCurrency(value) {
+            return '€' + value.toLocaleString('en-IE', {maximumFractionDigits: 0});
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(1) + '%';
+        }
+
+        function runForwardPlanning() {
+            const customersMean = parseFloat(document.getElementById('fwd_customers_mean').value);
+            const customersStd = parseFloat(document.getElementById('fwd_customers_std').value);
+            const dealMean = parseFloat(document.getElementById('fwd_deal_mean').value);
+            const churnRate = parseFloat(document.getElementById('fwd_churn').value) / 100;
+            const startingARR = parseFloat(document.getElementById('fwd_starting_arr').value);
+            const months = parseInt(document.getElementById('fwd_months').value);
+            const numSims = 10000;
+
+            let finalARRs = [];
+
+            for (let sim = 0; sim < numSims; sim++) {
+                let currentARR = startingARR;
+                
+                for (let month = 0; month < months; month++) {
+                    let newCustomers = Math.max(0, Math.round(normalRandom(customersMean, customersStd)));
+                    let newRevenue = newCustomers * dealMean;
+                    let churnedRevenue = currentARR * churnRate;
+                    currentARR = currentARR - churnedRevenue + newRevenue;
+                }
+                
+                finalARRs.push(currentARR);
+            }
+
+            // Store results for reference
+            forwardPlanningResult = {
+                expectedARR: finalARRs.reduce((a, b) => a + b) / finalARRs.length,
+                startingARR: startingARR,
+                customersMean: customersMean,
+                dealMean: dealMean,
+                months: months
+            };
+
+            displayForwardResults(finalARRs, startingARR, customersMean, dealMean, months);
+        }
+
+        function displayForwardResults(results, startingARR, customersMean, dealMean, months) {
+            const mean = results.reduce((a, b) => a + b) / results.length;
+            const p10 = calculatePercentile(results, 10);
+            const p50 = calculatePercentile(results, 50);
+            const p90 = calculatePercentile(results, 90);
+            const growth = mean - startingARR;
+            const growthPct = ((mean - startingARR) / startingARR) * 100;
+
+            const html = `
+                <div class="results-grid">
+                    <div class="stat-card">
+                        <h3>Expected ARR</h3>
+                        <div class="value">${formatCurrency(mean)}</div>
+                    </div>
+                    <div class="stat-card success">
+                        <h3>ARR Growth</h3>
+                        <div class="value">${formatCurrency(growth)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Growth Rate</h3>
+                        <div class="value">${formatPercent(growthPct)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Range (P10-P90)</h3>
+                        <div class="value" style="font-size: 18px;">${formatCurrency(p10)} - ${formatCurrency(p90)}</div>
+                    </div>
+                </div>
+
+                <div class="info-box success">
+                    <h4>✅ Forward Planning Result</h4>
+                    <p><strong>Given your inputs:</strong> ${customersMean} customers/month at ${formatCurrency(dealMean)} deal size</p>
+                    <p><strong>You can expect:</strong> ${formatCurrency(mean)} ARR after ${months} months</p>
+                    <p><strong>Growth:</strong> +${formatCurrency(growth)} (${formatPercent(growthPct)}) from current ${formatCurrency(startingARR)}</p>
+                </div>
+
+                <div class="info-box warning">
+                    <h4>💡 Want to know what's required to hit a specific goal?</h4>
+                    <p>Switch to <strong>Reverse Planning</strong> mode to work backwards from your target ARR.</p>
+                </div>
+            `;
+
+            document.getElementById('forward_results').innerHTML = html;
+        }
+
+        function calculateReversePlan() {
+            const targetARR = parseFloat(document.getElementById('rev_target_arr').value);
+            const startingARR = parseFloat(document.getElementById('rev_starting_arr').value);
+            const months = parseInt(document.getElementById('rev_months').value);
+            const dealSize = parseFloat(document.getElementById('rev_deal_size').value);
+            const churnRate = parseFloat(document.getElementById('rev_churn').value) / 100;
+            const winRate = parseFloat(document.getElementById('rev_win_rate').value) / 100;
+            const repRevenue = parseFloat(document.getElementById('rev_rep_revenue').value);
+            const salesCycle = parseFloat(document.getElementById('rev_sales_cycle').value);
+            const rampTime = parseFloat(document.getElementById('rev_ramp_time').value);
+            const rampCurve = document.getElementById('rev_ramp_curve').value;
+
+            // Calculate required growth
+            const requiredGrowth = targetARR - startingARR;
+            
+            // Account for churn losses over the period
+            const avgARR = (startingARR + targetARR) / 2;
+            const totalChurnLoss = avgARR * churnRate * months;
+            
+            // New ARR needed = Growth + Churn replacement
+            const newARRNeeded = requiredGrowth + totalChurnLoss;
+            
+            // CRITICAL: Account for sales cycle time
+            // Deals closed in month X were started X-salesCycle months ago
+            // So we only have (months - salesCycle) months of productive selling time
+            const effectiveSellingMonths = Math.max(1, months - salesCycle);
+            
+            // Calculate customers needed
+            const totalCustomersNeeded = Math.ceil(newARRNeeded / dealSize);
+            const customersPerMonth = totalCustomersNeeded / effectiveSellingMonths;
+            
+            // Calculate opportunities needed (accounting for win rate)
+            const totalOpportunitiesNeeded = Math.ceil(totalCustomersNeeded / winRate);
+            const oppsPerMonth = totalOpportunitiesNeeded / effectiveSellingMonths;
+            
+            // CRITICAL: Calculate reps needed accounting for ramp time
+            // Calculate effective rep capacity over the period
+            const monthlyRevenuePerRep = repRevenue / 12;
+            
+            // Calculate how many "fully productive rep months" we need
+            const totalRepMonthsNeeded = newARRNeeded / monthlyRevenuePerRep;
+            
+            // Account for ramp: if we hire a rep in month 1, they don't produce full capacity until after ramp
+            // Calculate average productivity over the planning period
+            let avgProductivityFactor = 1.0;
+            if (rampTime > 0 && rampTime < months) {
+                // Calculate weighted average productivity
+                const rampProductivity = getRampProductivity(rampCurve, rampTime);
+                const fullyProductiveMonths = months - rampTime;
+                avgProductivityFactor = (rampProductivity * rampTime + fullyProductiveMonths * 1.0) / months;
+            }
+            
+            // Adjust rep count for ramp inefficiency
+            const repsNeeded = Math.ceil(totalRepMonthsNeeded / (months * avgProductivityFactor));
+            
+            // Calculate hiring timeline
+            const hiringTimeline = calculateHiringTimeline(repsNeeded, rampTime, months, monthlyRevenuePerRep, newARRNeeded);
+
+            // Create multiple scenarios
+            const scenarios = [
+                {
+                    name: 'Conservative',
+                    customers: Math.ceil(customersPerMonth * 0.8),
+                    opps: Math.ceil(oppsPerMonth * 0.8),
+                    reps: Math.ceil(repsNeeded * 0.8),
+                    dealSize: dealSize,
+                    winRate: winRate * 0.9,
+                    salesCycle: salesCycle * 1.1,
+                    feasibility: 'easy'
+                },
+                {
+                    name: 'Target',
+                    customers: Math.ceil(customersPerMonth),
+                    opps: Math.ceil(oppsPerMonth),
+                    reps: repsNeeded,
+                    dealSize: dealSize,
+                    winRate: winRate,
+                    salesCycle: salesCycle,
+                    feasibility: 'moderate'
+                },
+                {
+                    name: 'Aggressive',
+                    customers: Math.ceil(customersPerMonth * 1.2),
+                    opps: Math.ceil(oppsPerMonth * 1.2),
+                    reps: Math.ceil(repsNeeded * 1.2),
+                    dealSize: dealSize,
+                    winRate: winRate * 1.1,
+                    salesCycle: salesCycle * 0.9,
+                    feasibility: 'hard'
+                }
+            ];
+
+            displayReverseResults(scenarios, targetARR, startingARR, requiredGrowth, totalChurnLoss, months, dealSize, winRate, salesCycle, rampTime, effectiveSellingMonths, hiringTimeline);
+        }
+
+        function getRampProductivity(curve, rampTime) {
+            // Calculate average productivity during ramp period
+            const months = Math.ceil(rampTime);
+            let totalProductivity = 0;
+            
+            for (let month = 1; month <= months; month++) {
+                let productivity;
+                if (curve === 'linear') {
+                    productivity = month / months;
+                } else if (curve === 'slow-start') {
+                    // Exponential curve that starts slow
+                    productivity = Math.pow(month / months, 2);
+                } else if (curve === 'fast-start') {
+                    // Square root curve that starts fast
+                    productivity = Math.sqrt(month / months);
+                }
+                totalProductivity += productivity;
+            }
+            
+            return totalProductivity / months;
+        }
+
+        function calculateHiringTimeline(totalReps, rampTime, totalMonths, monthlyRevPerRep, targetRevenue) {
+            // Calculate when to hire each rep to maximize productivity
+            const timeline = [];
+            
+            // Recommendation: Hire in cohorts to account for ramp
+            // Front-load hiring so reps are productive when needed
+            const cohortSize = Math.max(2, Math.ceil(totalReps / 3));
+            let repsHired = 0;
+            let currentMonth = 0;
+            
+            while (repsHired < totalReps && currentMonth < totalMonths) {
+                const remainingReps = totalReps - repsHired;
+                const hireCount = Math.min(cohortSize, remainingReps);
+                
+                if (hireCount > 0) {
+                    timeline.push({
+                        month: currentMonth,
+                        hireCount: hireCount,
+                        fullyProductiveMonth: currentMonth + rampTime
+                    });
+                    repsHired += hireCount;
+                }
+                
+                // Space out cohorts based on ramp time
+                currentMonth += Math.max(1, Math.floor(rampTime / 2));
+            }
+            
+            return timeline;
+        }
+
+        function displayReverseResults(scenarios, targetARR, startingARR, requiredGrowth, churnLoss, months, dealSize, winRate, salesCycle, rampTime, effectiveMonths, hiringTimeline) {
+            const targetScenario = scenarios[1]; // The "Target" scenario
+
+            const html = `
+                <div class="info-box warning">
+                    <h4>🎯 Your Goal</h4>
+                    <p><strong>Target ARR:</strong> ${formatCurrency(targetARR)} (from current ${formatCurrency(startingARR)})</p>
+                    <p><strong>Required Growth:</strong> ${formatCurrency(requiredGrowth)} over ${months} months</p>
+                    <p><strong>Plus Churn Replacement:</strong> ${formatCurrency(churnLoss)}</p>
+                    <p><strong>Total New ARR Needed:</strong> ${formatCurrency(requiredGrowth + churnLoss)}</p>
+                </div>
+
+                <div class="info-box danger">
+                    <h4>⏱️ Time Constraint Impact</h4>
+                    <p><strong>Sales Cycle Time:</strong> ${salesCycle} months means deals closed in Month ${months} were started in Month ${(months - salesCycle).toFixed(1)}</p>
+                    <p><strong>Effective Selling Window:</strong> Only ${effectiveMonths.toFixed(1)} months of the ${months}-month period can generate closed revenue</p>
+                    <p><strong>Rep Ramp Time:</strong> ${rampTime} months means new hires won't reach full productivity until Month ${rampTime}</p>
+                    <p><strong>⚠️ This significantly increases the required monthly run-rate!</strong></p>
+                </div>
+
+                <h3 style="margin: 25px 0 15px 0; color: #333;">📊 Three Scenarios to Hit Your Goal</h3>
+
+                <div class="scenario-cards">
+                    ${scenarios.map(scenario => `
+                        <div class="scenario-card">
+                            <h3>${scenario.name} Scenario</h3>
+                            <span class="feasibility-indicator feasibility-${scenario.feasibility}">
+                                ${scenario.feasibility === 'easy' ? '✓ Achievable' : scenario.feasibility === 'moderate' ? '⚠ Challenging' : '⚠ High Risk'}
+                            </span>
+                            <div style="margin-top: 15px;">
+                                <div class="scenario-metric">
+                                    <span class="label">Customers/Month:</span>
+                                    <span class="value">${scenario.customers}</span>
+                                </div>
+                                <div class="scenario-metric">
+                                    <span class="label">Opportunities/Month:</span>
+                                    <span class="value">${scenario.opps}</span>
+                                </div>
+                                <div class="scenario-metric">
+                                    <span class="label">Sales Reps Needed:</span>
+                                    <span class="value">${scenario.reps}</span>
+                                </div>
+                                <div class="scenario-metric">
+                                    <span class="label">Required Win Rate:</span>
+                                    <span class="value">${formatPercent(scenario.winRate * 100)}</span>
+                                </div>
+                                <div class="scenario-metric">
+                                    <span class="label">Sales Cycle:</span>
+                                    <span class="value">${scenario.salesCycle.toFixed(1)} months</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <h3 style="margin: 25px 0 15px 0; color: #333;">📅 Recommended Hiring Timeline</h3>
+                
+                <div class="info-box">
+                    <h4>Hiring Strategy (Target Scenario)</h4>
+                    <p><strong>Total Reps Needed:</strong> ${targetScenario.reps}</p>
+                    <p><strong>Ramp Time:</strong> ${rampTime} months to full productivity</p>
+                    <p><strong>Strategy:</strong> Front-load hiring to ensure reps are productive when needed</p>
+                </div>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Hire in Month</th>
+                            <th># of Reps to Hire</th>
+                            <th>Fully Productive By</th>
+                            <th>Rationale</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${hiringTimeline.map((cohort, index) => `
+                            <tr>
+                                <td><strong>Month ${cohort.month}</strong></td>
+                                <td>${cohort.hireCount} reps</td>
+                                <td>Month ${cohort.fullyProductiveMonth.toFixed(0)}</td>
+                                <td>${index === 0 ? 'Initial cohort - hire immediately' : index === hiringTimeline.length - 1 ? 'Final cohort - backfill' : 'Staggered hiring to manage ramp'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+
+                <h3 style="margin: 25px 0 15px 0; color: #333;">🔍 Detailed Requirements (Target Scenario)</h3>
+
+                <div class="results-grid">
+                    <div class="stat-card calculated">
+                        <h3>Customers/Month (During Selling Window)</h3>
+                        <div class="value">${targetScenario.customers}</div>
+                    </div>
+                    <div class="stat-card calculated">
+                        <h3>Opportunities/Month</h3>
+                        <div class="value">${targetScenario.opps}</div>
+                    </div>
+                    <div class="stat-card calculated">
+                        <h3>Sales Reps Needed</h3>
+                        <div class="value">${targetScenario.reps}</div>
+                    </div>
+                    <div class="stat-card warning">
+                        <h3>Effective Selling Months</h3>
+                        <div class="value">${effectiveMonths.toFixed(1)}/${months}</div>
+                    </div>
+                </div>
+
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Requirement</th>
+                            <th>What You Need</th>
+                            <th>Time Constraint Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>New Customers</strong></td>
+                            <td>${targetScenario.customers} per month during selling window</td>
+                            <td>⚠️ ${salesCycle} month sales cycle reduces effective time to ${effectiveMonths.toFixed(1)} months</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Pipeline Opportunities</strong></td>
+                            <td>${targetScenario.opps} per month at ${formatPercent(winRate * 100)} win rate</td>
+                            <td>⚠️ Must start generating from Month 0 to close deals before deadline</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Sales Team Size</strong></td>
+                            <td>${targetScenario.reps} reps at full productivity</td>
+                            <td>⚠️ ${rampTime} month ramp means hire in cohorts starting NOW</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Hiring Start Date</strong></td>
+                            <td>Immediately (Month 0)</td>
+                            <td>⚠️ First cohort won't be fully productive until Month ${rampTime}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marketing Ramp</strong></td>
+                            <td>${targetScenario.opps} qualified leads/month</td>
+                            <td>✓ Can ramp marketing faster than sales (no ramp time)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="info-box ${targetScenario.feasibility === 'easy' ? 'success' : targetScenario.feasibility === 'moderate' ? 'warning' : 'danger'}">
+                    <h4>📈 Feasibility Assessment (Accounting for Time Constraints)</h4>
+                    ${generateFeasibilityText(targetScenario, targetARR, startingARR, months, salesCycle, rampTime, effectiveMonths)}
+                </div>
+
+                <div class="info-box">
+                    <h4>💡 Three Levers to Pull (Time-Adjusted)</h4>
+                    <p><strong>1. Accelerate Hiring:</strong> Hire ${targetScenario.reps} reps in cohorts starting Month 0 (see timeline above)</p>
+                    <p><strong>2. Reduce Sales Cycle:</strong> Cut from ${salesCycle} to ${(salesCycle * 0.8).toFixed(1)} months = Gain ${(salesCycle * 0.2).toFixed(1)} more months of selling time</p>
+                    <p><strong>3. Improve Ramp Speed:</strong> Reduce ramp from ${rampTime} to ${(rampTime * 0.67).toFixed(1)} months = Reps productive ${(rampTime * 0.33).toFixed(1)} months earlier</p>
+                    <p><strong>4. Front-Load Pipeline:</strong> Generate ${Math.ceil(targetScenario.opps * 1.5)}+ opps/month in early months to fill pipeline before deadline</p>
+                </div>
+            `;
+
+            document.getElementById('reverse_results').innerHTML = html;
+        }
+
+        function generateFeasibilityText(scenario, targetARR, startingARR, months, salesCycle, rampTime, effectiveMonths) {
+            const growthMultiple = targetARR / startingARR;
+            const monthlyGrowthRate = (Math.pow(growthMultiple, 1/months) - 1) * 100;
+            const timeCompressionFactor = months / effectiveMonths;
+
+            let feasibilityHTML = '';
+
+            if (growthMultiple < 1.5) {
+                feasibilityHTML = `
+                    <p><strong>✅ ACHIEVABLE WITH GOOD EXECUTION</strong></p>
+                    <p>This represents ${formatPercent((growthMultiple - 1) * 100)} growth over ${months} months (${formatPercent(monthlyGrowthRate)}/month).</p>
+                `;
+            } else if (growthMultiple < 2.5) {
+                feasibilityHTML = `
+                    <p><strong>⚠ CHALLENGING BUT POSSIBLE</strong></p>
+                    <p>This represents ${formatPercent((growthMultiple - 1) * 100)} growth over ${months} months (${formatPercent(monthlyGrowthRate)}/month).</p>
+                `;
+            } else {
+                feasibilityHTML = `
+                    <p><strong>⚠ HIGH RISK - REQUIRES TRANSFORMATION</strong></p>
+                    <p>This represents ${formatPercent((growthMultiple - 1) * 100)} growth over ${months} months (${formatPercent(monthlyGrowthRate)}/month).</p>
+                `;
+            }
+
+            // Add time constraint warnings
+            feasibilityHTML += `
+                <p><strong>⏱️ Time Constraint Impact:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li><strong>Sales Cycle (${salesCycle} months):</strong> Reduces effective selling time to ${effectiveMonths.toFixed(1)} months. This means you need ${formatPercent((timeCompressionFactor - 1) * 100)} MORE monthly capacity than if you had the full ${months} months.</li>
+                    <li><strong>Rep Ramp (${rampTime} months):</strong> New hires won't contribute fully until Month ${rampTime}. You must hire ${scenario.reps} reps IMMEDIATELY and in cohorts to ensure coverage.</li>
+            `;
+
+            if (salesCycle >= months * 0.5) {
+                feasibilityHTML += `
+                    <li><strong>⚠️ CRITICAL:</strong> Your ${salesCycle}-month sales cycle consumes ${formatPercent((salesCycle / months) * 100)} of your timeline! This dramatically increases required run-rate.</li>
+                `;
+            }
+
+            if (rampTime >= months * 0.4) {
+                feasibilityHTML += `
+                    <li><strong>⚠️ CRITICAL:</strong> Your ${rampTime}-month ramp time is ${formatPercent((rampTime / months) * 100)} of your timeline! You cannot wait to hire - must start NOW.</li>
+                `;
+            }
+
+            feasibilityHTML += `</ul>`;
+
+            // Add recommendations
+            feasibilityHTML += `
+                <p style="margin-top: 15px;"><strong>Key Actions:</strong></p>
+                <ul style="margin-left: 20px; margin-top: 10px;">
+                    <li>Begin hiring first cohort of ${Math.ceil(scenario.reps / 3)} reps in Month 0</li>
+                    <li>Front-load pipeline generation to fill sales cycle lag</li>
+            `;
+
+            if (salesCycle > 2) {
+                feasibilityHTML += `<li>Consider initiatives to reduce sales cycle from ${salesCycle} to ${(salesCycle * 0.8).toFixed(1)} months</li>`;
+            }
+
+            if (rampTime > 2) {
+                feasibilityHTML += `<li>Invest in enablement to reduce ramp from ${rampTime} to ${(rampTime * 0.75).toFixed(1)} months</li>`;
+            }
+
+            feasibilityHTML += `
+                    <li>Track leading indicators weekly - can't wait for lagging metrics</li>
+                </ul>
+            `;
+
+            return feasibilityHTML;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            switchMode('forward');
+        });
+    </script>
+</body>
+</html>

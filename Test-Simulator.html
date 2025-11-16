@@ -1,0 +1,113 @@
+<script>
+// ---------- Apply assumptions helper (shared by Presets & Load JSON) ----------
+function applyAssumptions(obj){
+  // globals
+  if(obj.startARR!=null) startArr.value=(obj.startARR/1e6);
+  if(obj.targetARR!=null) targetArr.value=(obj.targetARR/1e6);
+  if(obj.churnPct!=null) churn.value=(obj.churnPct*100);
+  if(obj.expansionPct!=null) expansion.value=(obj.expansionPct*100);
+  if(obj.iters!=null) itersEl.value=obj.iters;
+  if(obj.baseCycle!=null) baseCycle.value=obj.baseCycle;
+
+  if(Array.isArray(obj.season) && obj.season.length===12){
+    obj.season.forEach((v,i)=>{
+      if(seasonInputs[i]) {
+        seasonInputs[i].value=v;
+        const lab=document.getElementById(`sval${i}`); if(lab) lab.textContent=parseFloat(v).toFixed(2);
+      }
+    });
+  }
+
+  // teams
+  const t=obj.team||{}; const M=t.MM||{}, E=t.ENT||{};
+  // MM
+  if(M.pipeMean!=null) mmPipe.value=(M.pipeMean/1e6);
+  if(M.startPipe!=null) mmStartPipe.value=(M.startPipe/1e6);
+  if(M.wrMean!=null) mmWr.value=M.wrMean;
+  if(M.aspMedianK!=null) mmAsp.value=Math.round(M.aspMedianK/1000);
+  if(M.cycDelta!=null) mmCyc.value=M.cycDelta;
+  if(M.quotaK!=null) mmQuota.value=Math.round(M.quotaK/1000);
+  if(M.attMean!=null) mmAtt.value=M.attMean;
+  if(M.aeStart!=null) mmAeStart.value=M.aeStart;
+  if(M.aeMid!=null) mmAeMid.value=M.aeMid;
+  if(M.aeEnd!=null) mmAeEnd.value=M.aeEnd;
+  if(M.midMonth!=null) mmMidMonth.value=M.midMonth;
+  // ENT
+  if(E.pipeMean!=null) entPipe.value=(E.pipeMean/1e6);
+  if(E.startPipe!=null) entStartPipe.value=(E.startPipe/1e6);
+  if(E.wrMean!=null) entWr.value=E.wrMean;
+  if(E.aspMedianK!=null) entAsp.value=Math.round(E.aspMedianK/1000);
+  if(E.cycDelta!=null) entCyc.value=E.cycDelta;
+  if(E.quotaK!=null) entQuota.value=Math.round(E.quotaK/1000);
+  if(E.attMean!=null) entAtt.value=E.attMean;
+  if(E.aeStart!=null) entAeStart.value=E.aeStart;
+  if(E.aeMid!=null) entAeMid.value=E.aeMid;
+  if(E.aeEnd!=null) entAeEnd.value=E.aeEnd;
+  if(E.midMonth!=null) entMidMonth.value=E.midMonth;
+
+  // UI niceties (optional)
+  if(obj.ui){
+    if(obj.ui.shockPct!=null) shockPct.value=obj.ui.shockPct;
+    if(obj.ui.sortImpact!=null) sortImpact.checked=!!obj.ui.sortImpact;
+    if(obj.ui.theme){ document.documentElement.setAttribute("data-theme", obj.ui.theme); themeToggle.checked=(obj.ui.theme==="dark"); }
+  }
+
+  syncLabels();
+  runMain();
+}
+
+// ---------- Replace loadJSON() to reuse the helper ----------
+function loadJSON(){
+  const txt=prompt("Paste assumptions JSON:"); if(!txt) return;
+  try{ const obj=JSON.parse(txt); applyAssumptions(obj); }
+  catch(e){ alert("Invalid JSON: "+e.message); }
+}
+
+// ---------- Presets (relative “what-if” moves with caps) ----------
+const presetSelect = document.getElementById("presetSelect");
+const applyPresetBtn = document.getElementById("applyPresetBtn");
+
+// Build a preset object by *modifying current inputs* (non-destructive baseline)
+function buildPreset(name){
+  const base = getInputs(); // current UI values
+
+  // helpers
+  const cap = (x, lo, hi)=>Math.max(lo, Math.min(hi, x));
+  function teamAdj(team, f){
+    // multiplicative tweaks with sensible caps
+    const wr = cap(team.wrMean * f.wr, 0.02, 0.95);
+    const pipe = cap(team.pipeMean * f.pipe, 1e5, 1e9);
+    const asp  = cap(team.aspMedianK * f.asp, 5e3, 5e6);
+    const att  = cap(team.attMean * f.att, 0.3, 1.5);
+    const cyc  = team.cycDelta + f.cycDelta; // cycle delta is additive around base
+    return { ...team, wrMean: wr, pipeMean: pipe, aspMedianK: asp, attMean: att, cycDelta: cyc };
+  }
+
+  if(name==="stretch"){
+    const MM = teamAdj(base.team.MM, { wr:1.05, pipe:1.15, asp:1.10, att:1.05, cycDelta:-0.2 });
+    const ENT= teamAdj(base.team.ENT,{ wr:1.06, pipe:1.15, asp:1.12, att:1.06, cycDelta:-0.3 });
+    const churn = cap(base.churnPct * 0.85, 0, 0.5);
+    const expansion = cap(base.expansionPct * 1.25, 0, 3.0);
+    const baseCycle = cap(base.baseCycle * 0.95, 0.5, 12);
+    return { ...base, churnPct: churn, expansionPct: expansion, baseCycle, team:{ MM, ENT } };
+  }
+
+  if(name==="downside"){
+    const MM = teamAdj(base.team.MM, { wr:0.90, pipe:0.85, asp:0.95, att:0.90, cycDelta:+0.3 });
+    const ENT= teamAdj(base.team.ENT,{ wr:0.90, pipe:0.80, asp:0.93, att:0.90, cycDelta:+0.5 });
+    const churn = cap(base.churnPct * 1.25, 0, 0.8);
+    const expansion = cap(base.expansionPct * 0.70, 0, 3.0);
+    const baseCycle = cap(base.baseCycle * 1.10, 0.5, 12);
+    return { ...base, churnPct: churn, expansionPct: expansion, baseCycle, team:{ MM, ENT } };
+  }
+
+  // baseline = no change (re-apply snaps labels & reruns)
+  return base;
+}
+
+applyPresetBtn.addEventListener("click", ()=>{
+  const name = (presetSelect.value||"baseline").toLowerCase();
+  const obj = buildPreset(name);
+  applyAssumptions(obj);
+});
+</script>

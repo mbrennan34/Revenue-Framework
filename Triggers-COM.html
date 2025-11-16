@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discovery Sequence Builder - BearOps</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2942 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #667eea;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .controls-bar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .trigger-selector {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .trigger-selector label {
+            font-weight: 600;
+            color: #667eea;
+            white-space: nowrap;
+        }
+
+        .trigger-selector select {
+            flex: 1;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .trigger-selector select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .trigger-selector select option {
+            background: #1a2942;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn-new {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-delete {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-export {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
+        }
+
+        .save-indicator {
+            text-align: right;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .discovery-grid {
+            display: grid;
+            gap: 25px;
+        }
+
+        .discovery-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .discovery-card:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+
+        .discovery-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .discovery-number {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .discovery-title {
+            flex: 1;
+        }
+
+        .discovery-title h3 {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .discovery-title p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .discovery-content {
+            margin-bottom: 20px;
+        }
+
+        .discovery-content label {
+            display: block;
+            font-weight: 600;
+            color: #48bb78;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .discovery-content textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .discovery-content textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .discovery-content textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .questions-section {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .questions-section h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .questions-section textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-radius: 8px;
+            color: white;
+            font-family: inherit;
+            font-size: 0.9rem;
+            line-height: 1.8;
+            resize: vertical;
+        }
+
+        .questions-section textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.15);
+        }
+
+        .example-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border-left: 3px solid #48bb78;
+        }
+
+        .example-box strong {
+            color: #48bb78;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .example-box p {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1a2942 0%, #0A1628 100%);
+            border: 2px solid rgba(102, 126, 234, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-header p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #48bb78;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @media print {
+            .controls-bar, .back-button, .btn {
+                display: none !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .controls-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                justify-content: stretch;
+            }
+
+            .btn {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="Index.html" class="back-button">← Back to Index</a>
+            <div class="logo">🔍 Discovery Sequence Builder</div>
+        </div>
+
+        <div class="controls-bar">
+            <div class="controls-grid">
+                <div class="trigger-selector">
+                    <label>Sales Trigger:</label>
+                    <select id="trigger-select" onchange="switchTrigger(this.value)">
+                        <!-- Options populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-new" onclick="showNewTriggerModal()">+ New Trigger</button>
+                    <button class="btn btn-delete" onclick="deleteTrigger()">🗑️ Delete</button>
+                    <button class="btn btn-export" onclick="exportToPDF()">📄 Export</button>
+                    <button class="btn btn-save" onclick="manualSave()">💾 Save</button>
+                </div>
+            </div>
+            <div class="save-indicator">
+                <span id="save-indicator">🟢 Auto-save enabled</span>
+            </div>
+        </div>
+
+        <div class="discovery-grid" id="discovery-grid">
+            <!-- Discovery cards populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- New Trigger Modal -->
+    <div id="new-trigger-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Create New Sales Trigger</h2>
+                <p>Define a new sales trigger event and its discovery sequence</p>
+            </div>
+            <div class="form-group">
+                <label>Trigger Name</label>
+                <input type="text" id="new-trigger-name" placeholder="e.g., New Funding Round, Leadership Change, Expansion">
+            </div>
+            <div class="form-group">
+                <label>Trigger Description</label>
+                <input type="text" id="new-trigger-description" placeholder="e.g., Company raises Series A/B funding">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-new" onclick="createTrigger()">Create Trigger</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Discovery sequence template structure
+        const discoverySequenceTemplate = [
+            {
+                step: 1,
+                title: "Current State",
+                description: "What's happening today? What's working? What's not?",
+                defaultQuestions: "• Can you walk me through how you're handling [process] today?\n• What's working well with your current approach?\n• What challenges are you experiencing?\n• How long have you been doing it this way?",
+                examples: "Example: 'How are you currently managing your sales forecasting process? What tools or spreadsheets are you using?'"
+            },
+            {
+                step: 2,
+                title: "Problems & Pain Points",
+                description: "What specific challenges are you facing?",
+                defaultQuestions: "• What are the biggest pain points with your current approach?\n• Where do you see gaps or inefficiencies?\n• What keeps you up at night about this?\n• What would happen if you don't address this?",
+                examples: "Example: 'When you miss your forecast, what downstream effects does that have on the business?'"
+            },
+            {
+                step: 3,
+                title: "Business Impact",
+                description: "What's the business impact of those problems?",
+                defaultQuestions: "• How is this affecting your revenue/costs/efficiency?\n• What's the financial impact of this problem?\n• How does this impact other departments or teams?\n• What metrics or KPIs are being affected?",
+                examples: "Example: 'Can you quantify the cost of inaccurate forecasts? Both in terms of missed opportunities and wasted resources?'"
+            },
+            {
+                step: 4,
+                title: "Root Cause Analysis",
+                description: "Why do these problems exist?",
+                defaultQuestions: "• What's causing these issues?\n• Why hasn't this been solved before?\n• What have you tried in the past?\n• What prevented previous solutions from working?",
+                examples: "Example: 'Why do you think your current system struggles with real-time visibility? Is it a data issue, a process issue, or a technology limitation?'"
+            },
+            {
+                step: 5,
+                title: "Decision Criteria",
+                description: "What would an ideal solution look like?",
+                defaultQuestions: "• What capabilities are must-haves vs. nice-to-haves?\n• How will you evaluate potential solutions?\n• What are your top 3 decision criteria?\n• What would make you choose one solution over another?",
+                examples: "Example: 'If you could wave a magic wand and have the perfect solution, what would it include? What would it NOT include?'"
+            },
+            {
+                step: 6,
+                title: "Required Outcomes",
+                description: "What results would make this a success?",
+                defaultQuestions: "• What specific outcomes do you need to achieve?\n• How will you measure success?\n• What would success look like in 6 months? 12 months?\n• What would justify the investment for you?\n• Who else needs to see value from this?",
+                examples: "Example: 'In 12 months, what would need to be different for you to consider this project a success? What metrics would you point to?'"
+            }
+        ];
+
+        let triggers = {};
+        let currentTriggerId = null;
+
+        function createEmptySequence() {
+            return discoverySequenceTemplate.map(step => ({
+                step: step.step,
+                title: step.title,
+                description: step.description,
+                questions: step.defaultQuestions,
+                examples: step.examples,
+                notes: ""
+            }));
+        }
+
+        function createSampleTriggers() {
+            const sampleTriggers = [
+                {
+                    name: "New Funding Round",
+                    description: "Company raises Series A/B/C funding"
+                },
+                {
+                    name: "Leadership Change",
+                    description: "New C-level executive joins (CRO, CFO, CEO)"
+                },
+                {
+                    name: "Market Expansion",
+                    description: "Company expanding to new markets or regions"
+                },
+                {
+                    name: "Product Launch",
+                    description: "Company launching new product or service line"
+                }
+            ];
+
+            // Base samples using default sequence
+            sampleTriggers.forEach(trigger => {
+                const id = 'trigger-' + Date.now() + Math.random();
+                triggers[id] = {
+                    id: id,
+                    name: trigger.name,
+                    description: trigger.description,
+                    sequence: createEmptySequence()
+                };
+            });
+
+            // Special sample: Manual Reporting Processes
+            const manualId = 'trigger-manual-reporting-' + Date.now();
+            triggers[manualId] = {
+                id: manualId,
+                name: "Manual Reporting Processes",
+                description: "Company relies heavily on spreadsheets and manual consolidation for reporting",
+                sequence: [
+                    {
+                        step: 1,
+                        title: "Current State",
+                        description: "What's happening today? What's working? What's not?",
+                        questions: "• How are you currently generating your weekly/monthly reports?\n• Which spreadsheets, templates, or data sources are used today?\n• How many people are involved in preparing reports?\n• How long does the reporting cycle typically take?\n• What works well today, if anything?",
+                        examples: "Example: 'Walk me through the process of pulling your weekly revenue forecast. Who contributes, and what tools are they using?'",
+                        notes: ""
+                    },
+                    {
+                        step: 2,
+                        title: "Problems & Pain Points",
+                        description: "What specific challenges are you facing?",
+                        questions: "• Where does the reporting process typically break down?\n• What errors or inaccuracies happen most often?\n• What’s the most time-consuming part of the workflow?\n• What risks does manual reporting create?\n• What causes rework, delays, or last-minute fire drills?",
+                        examples: "Example: 'What are the common errors that force you to redo reports or validate numbers manually?'",
+                        notes: ""
+                    },
+                    {
+                        step: 3,
+                        title: "Business Impact",
+                        description: "What's the business impact of those problems?",
+                        questions: "• How does manual reporting affect leadership decision-making?\n• How much time is lost each week/month to gathering and validating data?\n• How does this impact forecasting accuracy?\n• Is revenue, spend, or headcount planning ever impacted by inaccurate reports?\n• What is the cost of delays or misalignment?",
+                        examples: "Example: 'If reports are late or inaccurate, what downstream effects does that create for planning, budgeting, or forecasting meetings?'",
+                        notes: ""
+                    },
+                    {
+                        step: 4,
+                        title: "Root Cause Analysis",
+                        description: "Why do these problems exist?",
+                        questions: "• What systems do you pull data from today?\n• Are there data integration or data availability gaps?\n• Are definitions or metrics inconsistent across teams?\n• Why is the process still manual — tool limitations, resources, ownership, or data complexity?\n• Have attempts to automate reporting been made before? Why did they fall short?",
+                        examples: "Example: 'Why do you think the current tech stack makes it hard to automate reporting? Data availability? Process complexity? Limited integrations?'",
+                        notes: ""
+                    },
+                    {
+                        step: 5,
+                        title: "Decision Criteria",
+                        description: "What would an ideal solution look like?",
+                        questions: "• What capabilities would be must-have in an automated reporting solution?\n• What level of real-time visibility do you need?\n• How customizable should dashboards, KPIs, and metrics be?\n• What internal teams need access (Sales, Finance, Ops, Exec)?\n• How would you evaluate different automation solutions?",
+                        examples: "Example: 'If you could wave a magic wand, what would the reporting automation process look like from data sync all the way to executive dashboards?'",
+                        notes: ""
+                    },
+                    {
+                        step: 6,
+                        title: "Required Outcomes",
+                        description: "What results would make this a success?",
+                        questions: "• What reduction in reporting time would you want (e.g., 4 days ⇒ 30 minutes)?\n• What metrics or KPIs need to be automated first?\n• How will you judge success in 3–6 months?\n• What ROI or time-savings metrics matter most to you?\n• Who internally needs to see value for this to be approved?",
+                        examples: "Example: 'If we revisited this in 6 months, what specific metrics or reporting outcomes would signal that this project had been successful?'",
+                        notes: ""
+                    }
+                ]
+            };
+
+            currentTriggerId = manualId; // Start on the Manual Reporting sample
+            saveToStorage();
+        }
+
+        function initializeData() {
+            try {
+                const saved = localStorage.getItem('discoverySequences');
+                if (saved) {
+                    triggers = JSON.parse(saved);
+
+                    // Defensive: ensure structure is valid
+                    if (!triggers || typeof triggers !== 'object') {
+                        triggers = {};
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to parse discoverySequences from localStorage', e);
+                triggers = {};
+            }
+
+            // If nothing valid in storage, create fresh samples
+            if (!triggers || Object.keys(triggers).length === 0) {
+                createSampleTriggers();
+            } else {
+                // Ensure every trigger has a valid sequence array
+                Object.values(triggers).forEach(t => {
+                    if (!Array.isArray(t.sequence)) {
+                        t.sequence = createEmptySequence();
+                    }
+                });
+
+                // Ensure we have a currentTriggerId
+                if (!currentTriggerId || !triggers[currentTriggerId]) {
+                    currentTriggerId = Object.keys(triggers)[0];
+                }
+
+                saveToStorage();
+            }
+
+            renderTriggerSelector();
+            loadTrigger(currentTriggerId);
+        }
+
+        function renderTriggerSelector() {
+            const select = document.getElementById('trigger-select');
+            const entries = Object.entries(triggers);
+
+            if (entries.length === 0) {
+                select.innerHTML = '<option>No triggers defined</option>';
+                return;
+            }
+
+            if (!currentTriggerId || !triggers[currentTriggerId]) {
+                currentTriggerId = entries[0][0];
+            }
+
+            select.innerHTML = entries.map(([id, trigger]) =>
+                `<option value="${id}" ${id === currentTriggerId ? 'selected' : ''}>
+                    ${trigger.name} - ${trigger.description}
+                </option>`
+            ).join('');
+        }
+
+        function switchTrigger(id) {
+            saveCurrentTrigger();
+            currentTriggerId = id;
+            loadTrigger(id);
+        }
+
+        function loadTrigger(id) {
+            const trigger = triggers[id];
+            if (!trigger) return;
+
+            if (!Array.isArray(trigger.sequence)) {
+                trigger.sequence = createEmptySequence();
+                saveToStorage();
+            }
+
+            const grid = document.getElementById('discovery-grid');
+            grid.innerHTML = trigger.sequence.map((item, index) => `
+                <div class="discovery-card">
+                    <div class="discovery-header">
+                        <div class="discovery-number">${item.step}</div>
+                        <div class="discovery-title">
+                            <h3>${item.title}</h3>
+                            <p>${item.description}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="discovery-content">
+                        <label>📝 Your Notes & Approach</label>
+                        <textarea id="notes-${index}" placeholder="Add your specific approach, context, or notes for this discovery step...">${item.notes || ''}</textarea>
+                    </div>
+
+                    <div class="questions-section">
+                        <h4>💬 Discovery Questions</h4>
+                        <textarea id="questions-${index}" placeholder="List your discovery questions (one per line)...">${item.questions || ''}</textarea>
+                        
+                        <div class="example-box">
+                            <strong>💡 Example Usage:</strong>
+                            <p>${item.examples || ''}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveCurrentTrigger() {
+            if (!currentTriggerId || !triggers[currentTriggerId]) return;
+            
+            const trigger = triggers[currentTriggerId];
+
+            if (!Array.isArray(trigger.sequence)) {
+                trigger.sequence = createEmptySequence();
+            }
+
+            trigger.sequence.forEach((item, index) => {
+                const notesEl = document.getElementById(`notes-${index}`);
+                const questionsEl = document.getElementById(`questions-${index}`);
+                
+                if (notesEl) item.notes = notesEl.value;
+                if (questionsEl) item.questions = questionsEl.value;
+            });
+            
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('discoverySequences', JSON.stringify(triggers));
+            } catch (e) {
+                console.error('Failed to save discoverySequences to localStorage', e);
+            }
+            const indicator = document.getElementById('save-indicator');
+            if (indicator) {
+                indicator.innerHTML = '✓ Saved';
+                setTimeout(() => {
+                    indicator.innerHTML = '🟢 Auto-save enabled';
+                }, 2000);
+            }
+        }
+
+        function showNewTriggerModal() {
+            document.getElementById('new-trigger-modal').style.display = 'block';
+            document.getElementById('new-trigger-name').value = '';
+            document.getElementById('new-trigger-description').value = '';
+            document.getElementById('new-trigger-name').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('new-trigger-modal').style.display = 'none';
+        }
+
+        function createTrigger() {
+            const name = document.getElementById('new-trigger-name').value.trim();
+            const description = document.getElementById('new-trigger-description').value.trim();
+
+            if (!name) {
+                alert('Please enter a trigger name');
+                return;
+            }
+
+            const id = 'trigger-' + Date.now();
+            triggers[id] = {
+                id: id,
+                name: name,
+                description: description || 'Custom sales trigger',
+                sequence: createEmptySequence()
+            };
+
+            currentTriggerId = id;
+            saveToStorage();
+            renderTriggerSelector();
+            loadTrigger(id);
+            closeModal();
+        }
+
+        function deleteTrigger() {
+            const keys = Object.keys(triggers);
+            if (keys.length <= 1) {
+                alert('Cannot delete the last trigger. Create a new one first.');
+                return;
+            }
+
+            const trigger = triggers[currentTriggerId];
+            if (!confirm(`Delete trigger "${trigger.name}"? This cannot be undone.`)) {
+                return;
+            }
+
+            delete triggers[currentTriggerId];
+            currentTriggerId = Object.keys(triggers)[0];
+            saveToStorage();
+            renderTriggerSelector();
+            loadTrigger(currentTriggerId);
+        }
+
+        function manualSave() {
+            saveCurrentTrigger();
+            alert('All changes saved!');
+        }
+
+        function exportToPDF() {
+            saveCurrentTrigger();
+            window.print();
+        }
+
+        // Auto-save on textarea input
+        document.addEventListener('input', function(e) {
+            if (e.target.tagName === 'TEXTAREA') {
+                clearTimeout(window.saveTimer);
+                window.saveTimer = setTimeout(() => {
+                    saveCurrentTrigger();
+                }, 2000);
+            }
+        });
+
+        // Save on page unload
+        window.addEventListener('beforeunload', function() {
+            saveCurrentTrigger();
+        });
+
+        // Close modal on outside click
+        document.getElementById('new-trigger-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', initializeData);
+    </script>
+</body>
+</html>

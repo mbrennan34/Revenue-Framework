@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editable Sales Framework Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background: rgba(76, 175, 80, 0.8);
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .framework-section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .framework-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .edit-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .edit-mode .edit-indicator {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #4a5568;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title.editable {
+            border: 2px dashed transparent;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .section-title.editable:hover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .description {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .description.editable {
+            border: 2px dashed transparent;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .description.editable:hover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(103, 126, 234, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-mode .card {
+            border: 2px dashed rgba(76, 175, 80, 0.3);
+        }
+
+        .card-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: none;
+            gap: 5px;
+        }
+
+        .edit-mode .card-actions {
+            display: flex;
+        }
+
+        .action-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #d32f2f;
+        }
+
+        .action-btn.add {
+            background: #4CAF50;
+        }
+
+        .action-btn.add:hover {
+            background: #388e3c;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .card-title.editable {
+            border: 2px dashed transparent;
+            padding: 5px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .card-title.editable:hover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .card-content {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .card-content.editable {
+            border: 2px dashed transparent;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            min-height: 50px;
+        }
+
+        .edit-mode .card-content.editable:hover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        .tier1 { background: #e6fffa; color: #00695c; border: 1px solid #00695c; }
+        .tier2 { background: #fff3e0; color: #e65100; border: 1px solid #e65100; }
+        .tier3 { background: #f3e5f5; color: #6a1b9a; border: 1px solid #6a1b9a; }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .messaging-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .edit-mode .messaging-card {
+            border: 2px dashed rgba(76, 175, 80, 0.3);
+        }
+
+        .add-section-btn {
+            width: 100%;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            background: transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #666;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .edit-mode .add-section-btn {
+            display: block;
+        }
+
+        .add-section-btn:hover {
+            border-color: #4CAF50;
+            color: #4CAF50;
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Modal for editing */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .navigation, .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sales Framework Dashboard</h1>
+            <p>Complete Sales Planning & Execution Framework</p>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" id="editToggle" onclick="toggleEditMode()">
+                🖊️ Enable Editing
+            </button>
+            <button class="control-btn" onclick="saveData()">
+                💾 Save Changes
+            </button>
+            <button class="control-btn" onclick="loadData()">
+                📂 Load Data
+            </button>
+            <button class="control-btn" onclick="exportData()">
+                📤 Export Data
+            </button>
+            <button class="control-btn" onclick="resetData()">
+                🔄 Reset to Default
+            </button>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn active" onclick="showSection('sales-equation')">Sales Equation</button>
+            <button class="nav-btn" onclick="showSection('customer-profile')">Customer Profile</button>
+            <button class="nav-btn" onclick="showSection('personas')">Personas</button>
+            <button class="nav-btn" onclick="showSection('messaging')">Messaging</button>
+            <button class="nav-btn" onclick="showSection('trigger-events')">Trigger Events</button>
+            <button class="nav-btn" onclick="showSection('analytics')">Analytics</button>
+        </div>
+
+        <!-- Sales Equation Section -->
+        <div id="sales-equation" class="framework-section active">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false" data-original="Your Sales Equation">Your Sales Equation</h2>
+                <p class="description editable" contenteditable="false" data-original="Use this calculator to develop your personal sales equation and find out the activities you need to hit your quota.">Use this calculator to develop your personal sales equation and find out the activities you need to hit your quota.</p>
+                
+                <button class="add-section-btn" onclick="addCard('sales-equation')">+ Add New Metric Card</button>
+                
+                <div class="grid" id="sales-equation-grid">
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Quota Settings</h3>
+                        <div class="card-content">
+                            <label>Annual Revenue Quota ($)</label>
+                            <input type="number" class="input-field" id="quota" value="1000000" onchange="calculateSalesEquation()">
+                            
+                            <label>Average Deal Size ($)</label>
+                            <input type="number" class="input-field" id="dealSize" value="40000" onchange="calculateSalesEquation()">
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Conversion Rates</h3>
+                        <div class="card-content">
+                            <label>Lead to Opportunity (%)</label>
+                            <input type="number" class="input-field" id="leadToOpp" value="15" onchange="calculateSalesEquation()">
+                            
+                            <label>Opportunity to Close (%)</label>
+                            <input type="number" class="input-field" id="oppToClose" value="25" onchange="calculateSalesEquation()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metrics-grid" id="salesMetrics">
+                    <!-- Metrics will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Customer Profile Section -->
+        <div id="customer-profile" class="framework-section">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false">Ideal Customer Profile</h2>
+                <p class="description editable" contenteditable="false">Identify detailed characteristics of your Ideal Customer Profile and segment them into Tier 1, 2, and 3 characteristics.</p>
+                
+                <button class="add-section-btn" onclick="addCard('customer-profile')">+ Add New Characteristic</button>
+                
+                <div class="grid" id="customer-profile-grid">
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Location</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <span class="tier-badge tier1">Tier 1</span>Boston, NYC, San Francisco, Chicago, Austin, Atlanta, Toronto
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Industry</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <span class="tier-badge tier1">Tier 1</span>Computer & Network Security, Software, IT Services, Internet
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Annual Revenue</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <span class="tier-badge tier1">Tier 1</span>$10,000,000+<br>
+                            <span class="tier-badge tier2">Tier 2</span>$5,000,000 - $10,000,000<br>
+                            <span class="tier-badge tier3">Tier 3</span>$1,000,000 - $5,000,000
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Company Headcount</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <span class="tier-badge tier1">Tier 1</span>200-5000<br>
+                            <span class="tier-badge tier2">Tier 2</span>50-200<br>
+                            <span class="tier-badge tier3">Tier 3</span>10-50
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personas Section -->
+        <div id="personas" class="framework-section">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false">Target Personas</h2>
+                <p class="description editable" contenteditable="false">Key decision makers and influencers in your target accounts.</p>
+                
+                <button class="add-section-btn" onclick="addCard('personas')">+ Add New Persona</button>
+                
+                <div class="grid" id="personas-grid">
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">CTO / VP Engineering</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <strong>Pain Points:</strong> Technical debt, scalability challenges, security concerns<br>
+                            <strong>Goals:</strong> Modern architecture, team productivity, system reliability<br>
+                            <strong>Influence:</strong> High technical decision-making authority
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">CEO / Founder</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <strong>Pain Points:</strong> Growth bottlenecks, operational efficiency, competitive advantage<br>
+                            <strong>Goals:</strong> Revenue growth, market leadership, operational excellence<br>
+                            <strong>Influence:</strong> Final budget approval and strategic direction
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Messaging Section -->
+        <div id="messaging" class="framework-section">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false">Sales-Ready Messaging</h2>
+                <p class="description editable" contenteditable="false">Proven messaging frameworks for different scenarios and touchpoints.</p>
+                
+                <button class="add-section-btn" onclick="addMessagingCard()">+ Add New Message</button>
+                
+                <div id="messaging-container">
+                    <div class="messaging-card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this.parentElement)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Value Proposition</h3>
+                        <p class="card-content editable" contenteditable="false">We help fast-growing technology companies scale their operations efficiently by providing enterprise-grade solutions that eliminate technical debt and accelerate innovation.</p>
+                    </div>
+                    
+                    <div class="messaging-card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this.parentElement)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Pain Point Messaging</h3>
+                        <p class="card-content editable" contenteditable="false"><strong>Problem:</strong> "Are you finding that your current systems are slowing down your ability to ship new features and scale with demand?"<br><br><strong>Impact:</strong> "This typically costs growing companies 20-30% in lost productivity and delayed time-to-market."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trigger Events Section -->
+        <div id="trigger-events" class="framework-section">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false">Trigger Events</h2>
+                <p class="description editable" contenteditable="false">Key events that indicate a prospect may be ready to buy.</p>
+                
+                <button class="add-section-btn" onclick="addCard('trigger-events')">+ Add New Trigger Category</button>
+                
+                <div class="grid" id="trigger-events-grid">
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Company Growth</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <ul style="margin: 0; padding-left: 20px;">
+                                <li>Recent funding announcements</li>
+                                <li>Rapid headcount expansion</li>
+                                <li>New market entry</li>
+                                <li>Product launches</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-actions">
+                            <button class="action-btn" onclick="removeCard(this)">×</button>
+                        </div>
+                        <h3 class="card-title editable" contenteditable="false">Leadership Changes</h3>
+                        <div class="card-content editable" contenteditable="false">
+                            <ul style="margin: 0; padding-left: 20px;">
+                                <li>New CTO or VP Engineering</li>
+                                <li>New CEO or founder</li>
+                                <li>Technical leadership expansion</li>
+                                <li>Board changes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analytics" class="framework-section">
+            <div class="section-card">
+                <div class="edit-indicator">✏️ Editable</div>
+                <h2 class="section-title editable" contenteditable="false">Sales Analytics</h2>
+                <p class="description editable" contenteditable="false">Track your progress and optimize your sales performance.</p>
+                
+                <div class="metrics-grid" id="analytics-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value editable" contenteditable="false">73%</div>
+                        <div class="metric-label editable" contenteditable="false">Pipeline Health Score</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 73%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card">
+                        <div class="metric-value editable" contenteditable="false">18</div>
+                        <div class="metric-label editable" contenteditable="false">Active Opportunities</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 60%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Content</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="form-group">
+                <label for="editTitle">Title:</label>
+                <input type="text" id="editTitle" class="input-field">
+            </div>
+            <div class="form-group">
+                <label for="editContent">Content:</label>
+                <textarea id="editContent"></textarea>
+            </div>
+            <button class="btn-primary" onclick="saveEdit()">Save Changes</button>
+        </div>
+    </div>
+
+    <script>
+        let isEditMode = false;
+        let currentEditElement = null;
+
+        // Toggle edit mode
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const body = document.body;
+            const editToggle = document.getElementById('editToggle');
+            
+            if (isEditMode) {
+                body.classList.add('edit-mode');
+                editToggle.textContent = '🔒 Disable Editing';
+                editToggle.classList.add('active');
+                enableInlineEditing();
+                showToast('Edit mode enabled - click on any text to edit');
+            } else {
+                body.classList.remove('edit-mode');
+                editToggle.textContent = '🖊️ Enable Editing';
+                editToggle.classList.remove('active');
+                disableInlineEditing();
+                showToast('Edit mode disabled');
+            }
+        }
+
+        // Enable inline editing for all editable elements
+        function enableInlineEditing() {
+            const editableElements = document.querySelectorAll('.editable');
+            editableElements.forEach(element => {
+                element.contentEditable = true;
+                element.addEventListener('click', handleEditClick);
+                element.addEventListener('blur', handleEditBlur);
+                element.addEventListener('keydown', handleEditKeydown);
+            });
+        }
+
+        // Disable inline editing
+        function disableInlineEditing() {
+            const editableElements = document.querySelectorAll('.editable');
+            editableElements.forEach(element => {
+                element.contentEditable = false;
+                element.removeEventListener('click', handleEditClick);
+                element.removeEventListener('blur', handleEditBlur);
+                element.removeEventListener('keydown', handleEditKeydown);
+            });
+        }
+
+        // Handle edit click
+        function handleEditClick(event) {
+            if (!isEditMode) return;
+            event.stopPropagation();
+            currentEditElement = event.target;
+            event.target.focus();
+        }
+
+        // Handle edit blur (when user clicks away)
+        function handleEditBlur(event) {
+            if (currentEditElement === event.target) {
+                saveInlineEdit(event.target);
+            }
+        }
+
+        // Handle keyboard shortcuts
+        function handleEditKeydown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                event.target.blur();
+            }
+            if (event.key === 'Escape') {
+                event.target.innerHTML = event.target.dataset.original || event.target.innerHTML;
+                event.target.blur();
+            }
+        }
+
+        // Save inline edit
+        function saveInlineEdit(element) {
+            const newContent = element.innerHTML.trim();
+            element.dataset.original = newContent;
+            showToast('Content updated');
+        }
+
+        // Show section
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.framework-section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Add new card to any section
+        function addCard(sectionType) {
+            const templates = {
+                'customer-profile': {
+                    title: 'New Characteristic',
+                    content: '<span class="tier-badge tier1">Tier 1</span>Click to edit this characteristic'
+                },
+                'personas': {
+                    title: 'New Persona',
+                    content: '<strong>Pain Points:</strong> Click to edit<br><strong>Goals:</strong> Click to edit<br><strong>Influence:</strong> Click to edit'
+                },
+                'trigger-events': {
+                    title: 'New Trigger Category',
+                    content: '<ul style="margin: 0; padding-left: 20px;"><li>Click to add trigger events</li></ul>'
+                },
+                'sales-equation': {
+                    title: 'New Metric',
+                    content: '<label>Metric Name</label><input type="text" class="input-field" placeholder="Enter value">'
+                }
+            };
+
+            const template = templates[sectionType] || {
+                title: 'New Card',
+                content: 'Click to edit this content'
+            };
+
+            const grid = document.getElementById(sectionType + '-grid');
+            const newCard = document.createElement('div');
+            newCard.className = 'card';
+            newCard.innerHTML = `
+                <div class="card-actions">
+                    <button class="action-btn" onclick="removeCard(this.parentElement.parentElement)">×</button>
+                </div>
+                <h3 class="card-title editable" contenteditable="${isEditMode}" data-original="${template.title}">${template.title}</h3>
+                <div class="card-content editable" contenteditable="${isEditMode}" data-original="${template.content}">${template.content}</div>
+            `;
+
+            grid.appendChild(newCard);
+            
+            if (isEditMode) {
+                const titleElement = newCard.querySelector('.card-title');
+                const contentElement = newCard.querySelector('.card-content');
+                
+                titleElement.addEventListener('click', handleEditClick);
+                titleElement.addEventListener('blur', handleEditBlur);
+                titleElement.addEventListener('keydown', handleEditKeydown);
+                
+                contentElement.addEventListener('click', handleEditClick);
+                contentElement.addEventListener('blur', handleEditBlur);
+                contentElement.addEventListener('keydown', handleEditKeydown);
+            }
+
+            showToast('New card added');
+        }
+
+        // Add messaging card
+        function addMessagingCard() {
+            const container = document.getElementById('messaging-container');
+            const newCard = document.createElement('div');
+            newCard.className = 'messaging-card';
+            newCard.innerHTML = `
+                <div class="card-actions">
+                    <button class="action-btn" onclick="removeCard(this.parentElement)">×</button>
+                </div>
+                <h3 class="card-title editable" contenteditable="${isEditMode}" data-original="New Message">New Message</h3>
+                <p class="card-content editable" contenteditable="${isEditMode}" data-original="Click to edit this message">Click to edit this message</p>
+            `;
+
+            container.appendChild(newCard);
+            
+            if (isEditMode) {
+                const titleElement = newCard.querySelector('.card-title');
+                const contentElement = newCard.querySelector('.card-content');
+                
+                titleElement.addEventListener('click', handleEditClick);
+                titleElement.addEventListener('blur', handleEditBlur);
+                titleElement.addEventListener('keydown', handleEditKeydown);
+                
+                contentElement.addEventListener('click', handleEditClick);
+                contentElement.addEventListener('blur', handleEditBlur);
+                contentElement.addEventListener('keydown', handleEditKeydown);
+            }
+
+            showToast('New message added');
+        }
+
+        // Remove card
+        function removeCard(card) {
+            if (confirm('Are you sure you want to remove this card?')) {
+                card.remove();
+                showToast('Card removed');
+            }
+        }
+
+        // Calculate sales equation
+        function calculateSalesEquation() {
+            const quota = parseFloat(document.getElementById('quota').value) || 1000000;
+            const dealSize = parseFloat(document.getElementById('dealSize').value) || 40000;
+            const leadToOpp = parseFloat(document.getElementById('leadToOpp').value) || 15;
+            const oppToClose = parseFloat(document.getElementById('oppToClose').value) || 25;
+            
+            const dealsNeeded = Math.ceil(quota / dealSize);
+            const dealsPerMonth = Math.ceil(dealsNeeded / 12);
+            const oppNeeded = Math.ceil(dealsNeeded / (oppToClose / 100));
+            const leadsNeeded = Math.ceil(oppNeeded / (leadToOpp / 100));
+            const leadsPerMonth = Math.ceil(leadsNeeded / 12);
+            const leadsPerWeek = Math.ceil(leadsPerMonth / 4);
+            const leadsPerDay = Math.ceil(leadsPerWeek / 5);
+            
+            const metricsContainer = document.getElementById('salesMetrics');
+            metricsContainer.innerHTML = `
+                <div class="metric-card">
+                    <div class="metric-value">${dealsNeeded}</div>
+                    <div class="metric-label">Deals Needed/Year</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${dealsPerMonth}</div>
+                    <div class="metric-label">Deals Needed/Month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${oppNeeded}</div>
+                    <div class="metric-label">Opportunities Needed</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${leadsNeeded}</div>
+                    <div class="metric-label">Leads Needed/Year</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${leadsPerMonth}</div>
+                    <div class="metric-label">Leads Needed/Month</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${leadsPerWeek}</div>
+                    <div class="metric-label">Leads Needed/Week</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${leadsPerDay}</div>
+                    <div class="metric-label">Leads Needed/Day</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value">${(oppToClose * leadToOpp / 10000 * 100).toFixed(1)}%</div>
+                    <div class="metric-label">Overall Conversion Rate</div>
+                </div>
+            `;
+        }
+
+        // Save all data to localStorage
+        function saveData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                sections: {}
+            };
+
+            // Save each section
+            const sections = document.querySelectorAll('.framework-section');
+            sections.forEach(section => {
+                const sectionId = section.id;
+                const sectionData = {
+                    title: section.querySelector('.section-title')?.innerHTML || '',
+                    description: section.querySelector('.description')?.innerHTML || '',
+                    cards: []
+                };
+
+                // Save cards
+                const cards = section.querySelectorAll('.card, .messaging-card');
+                cards.forEach(card => {
+                    const cardData = {
+                        title: card.querySelector('.card-title')?.innerHTML || '',
+                        content: card.querySelector('.card-content')?.innerHTML || ''
+                    };
+                    sectionData.cards.push(cardData);
+                });
+
+                // Save input values for sales equation
+                if (sectionId === 'sales-equation') {
+                    sectionData.inputs = {
+                        quota: document.getElementById('quota')?.value || '',
+                        dealSize: document.getElementById('dealSize')?.value || '',
+                        leadToOpp: document.getElementById('leadToOpp')?.value || '',
+                        oppToClose: document.getElementById('oppToClose')?.value || ''
+                    };
+                }
+
+                data.sections[sectionId] = sectionData;
+            });
+
+            try {
+                const dataStr = JSON.stringify(data, null, 2);
+                localStorage.setItem('salesFrameworkData', dataStr);
+                showToast('✅ Data saved successfully!');
+            } catch (error) {
+                showToast('❌ Error saving data: ' + error.message);
+            }
+        }
+
+        // Load data from localStorage
+        function loadData() {
+            try {
+                const savedData = localStorage.getItem('salesFrameworkData');
+                if (!savedData) {
+                    showToast('No saved data found');
+                    return;
+                }
+
+                const data = JSON.parse(savedData);
+                
+                // Restore each section
+                Object.keys(data.sections).forEach(sectionId => {
+                    const sectionData = data.sections[sectionId];
+                    const section = document.getElementById(sectionId);
+                    
+                    if (section) {
+                        // Restore title and description
+                        const titleElement = section.querySelector('.section-title');
+                        const descElement = section.querySelector('.description');
+                        
+                        if (titleElement && sectionData.title) {
+                            titleElement.innerHTML = sectionData.title;
+                            titleElement.dataset.original = sectionData.title;
+                        }
+                        
+                        if (descElement && sectionData.description) {
+                            descElement.innerHTML = sectionData.description;
+                            descElement.dataset.original = sectionData.description;
+                        }
+
+                        // Restore input values for sales equation
+                        if (sectionId === 'sales-equation' && sectionData.inputs) {
+                            Object.keys(sectionData.inputs).forEach(inputId => {
+                                const input = document.getElementById(inputId);
+                                if (input) {
+                                    input.value = sectionData.inputs[inputId];
+                                }
+                            });
+                            calculateSalesEquation();
+                        }
+                    }
+                });
+
+                showToast('✅ Data loaded successfully!');
+            } catch (error) {
+                showToast('❌ Error loading data: ' + error.message);
+            }
+        }
+
+        // Export data as JSON file
+        function exportData() {
+            const data = JSON.stringify(getAllData(), null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `sales-framework-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            showToast('📤 Data exported successfully!');
+        }
+
+        // Get all current data
+        function getAllData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                sections: {}
+            };
+
+            const sections = document.querySelectorAll('.framework-section');
+            sections.forEach(section => {
+                const sectionId = section.id;
+                const sectionData = {
+                    title: section.querySelector('.section-title')?.innerHTML || '',
+                    description: section.querySelector('.description')?.innerHTML || '',
+                    cards: []
+                };
+
+                const cards = section.querySelectorAll('.card, .messaging-card');
+                cards.forEach(card => {
+                    const cardData = {
+                        title: card.querySelector('.card-title')?.innerHTML || '',
+                        content: card.querySelector('.card-content')?.innerHTML || ''
+                    };
+                    sectionData.cards.push(cardData);
+                });
+
+                if (sectionId === 'sales-equation') {
+                    sectionData.inputs = {
+                        quota: document.getElementById('quota')?.value || '',
+                        dealSize: document.getElementById('dealSize')?.value || '',
+                        leadToOpp: document.getElementById('leadToOpp')?.value || '',
+                        oppToClose: document.getElementById('oppToClose')?.value || ''
+                    };
+                }
+
+                data.sections[sectionId] = sectionData;
+            });
+
+            return data;
+        }
+
+        // Reset to default data
+        function resetData() {
+            if (confirm('Are you sure you want to reset all data to default values? This cannot be undone.')) {
+                localStorage.removeItem('salesFrameworkData');
+                location.reload();
+            }
+        }
+
+        // Show toast notification
+        function showToast(message) {
+            // Remove existing toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            // Create new toast
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #333;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                z-index: 10000;
+                animation: slideInRight 0.3s ease-out;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                backdrop-filter: blur(10px);
+            `;
+
+            // Add animation styles
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            if (!document.querySelector('style[data-toast]')) {
+                style.setAttribute('data-toast', 'true');
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.style.animation = 'slideOutRight 0.3s ease-out';
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            calculateSalesEquation();
+            
+            // Try to load saved data
+            const savedData = localStorage.getItem('salesFrameworkData');
+            if (savedData) {
+                showToast('💡 Saved data detected - click "Load Data" to restore');
+            }
+
+            // Add drag and drop functionality for file import
+            document.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+
+            document.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const file = files[0];
+                    if (file.type === 'application/json') {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            try {
+                                const data = JSON.parse(e.target.result);
+                                // Process imported data here
+                                showToast('📁 File imported successfully!');
+                            } catch (error) {
+                                showToast('❌ Invalid JSON file');
+                            }
+                        };
+                        reader.readAsText(file);
+                    } else {
+                        showToast('❌ Please drop a JSON file');
+                    }
+                }
+            });
+
+            // Auto-save every 30 seconds when in edit mode
+            setInterval(() => {
+                if (isEditMode) {
+                    saveData();
+                }
+            }, 30000);
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case 's':
+                        e.preventDefault();
+                        saveData();
+                        break;
+                    case 'e':
+                        e.preventDefault();
+                        toggleEditMode();
+                        break;
+                    case 'l':
+                        e.preventDefault();
+                        loadData();
+                        break;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

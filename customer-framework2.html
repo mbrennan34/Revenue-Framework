@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Use Case Framework</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 3px solid #2c5aa0;
+            overflow-x: auto;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+        
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #2c5aa0;
+        }
+        
+        .nav-tab.active {
+            background: #2c5aa0;
+            color: white;
+        }
+        
+        .content-area {
+            padding: 30px;
+            min-height: 600px;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid #2c5aa0;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: #2c5aa0;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #2c5aa0;
+            outline: none;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1e3d72;
+        }
+        
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .data-table {
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .data-table th {
+            background: #2c5aa0;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .data-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .data-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-resolved { background: #d1ecf1; color: #0c5460; }
+        .status-high { background: #f8d7da; color: #721c24; }
+        .status-medium { background: #fff3cd; color: #856404; }
+        .status-low { background: #d4edda; color: #155724; }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-left: 4px solid #2c5aa0;
+        }
+        
+        .dashboard-card h3 {
+            font-size: 2.5em;
+            color: #2c5aa0;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .dashboard-card p {
+            color: #666;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.9em;
+        }
+        
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+            display: none;
+        }
+        
+        .export-section {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1>🎯 Customer Use Case Framework</h1>
+            <p>Track challenges, measure outcomes, manage references</p>
+        </div>
+        
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('customers')">👥 Customers</button>
+            <button class="nav-tab" onclick="showTab('challenges')">⚠️ Challenges</button>
+            <button class="nav-tab" onclick="showTab('outcomes')">📈 Outcomes</button>
+            <button class="nav-tab" onclick="showTab('references')">🌟 References</button>
+            <button class="nav-tab" onclick="showTab('dashboard')">📊 Dashboard</button>
+        </div>
+        
+        <div class="content-area">
+            <div id="successMessage" class="success-message">
+                Data saved successfully! ✅
+            </div>
+            
+            <!-- Customers Tab -->
+            <div id="customers" class="tab-content active">
+                <div class="form-section">
+                    <h2>➕ Add New Customer</h2>
+                    <form id="customerForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="companyName">Company Name *</label>
+                                <input type="text" id="companyName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="industry">Industry</label>
+                                <select id="industry">
+                                    <option value="">Select Industry</option>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Healthcare">Healthcare</option>
+                                    <option value="Manufacturing">Manufacturing</option>
+                                    <option value="Financial Services">Financial Services</option>
+                                    <option value="Retail">Retail</option>
+                                    <option value="Education">Education</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="companySize">Company Size</label>
+                                <select id="companySize">
+                                    <option value="">Select Size</option>
+                                    <option value="SMB (1-49)">SMB (1-49)</option>
+                                    <option value="Small (50-249)">Small (50-249)</option>
+                                    <option value="Mid-Market (250-999)">Mid-Market (250-999)</option>
+                                    <option value="Enterprise (1000+)">Enterprise (1000+)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="primaryContact">Primary Contact</label>
+                                <input type="text" id="primaryContact">
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Contact Email</label>
+                                <input type="email" id="contactEmail">
+                            </div>
+                            <div class="form-group">
+                                <label for="annualRevenue">Annual Revenue ($)</label>
+                                <input type="number" id="annualRevenue">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Customer</button>
+                    </form>
+                </div>
+                
+                <div class="data-table" id="customersTable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Company</th>
+                                <th>Industry</th>
+                                <th>Size</th>
+                                <th>Contact</th>
+                                <th>Revenue</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customersTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Challenges Tab -->
+            <div id="challenges" class="tab-content">
+                <div class="form-section">
+                    <h2>⚠️ Log New Challenge</h2>
+                    <form id="challengeForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="challengeCustomer">Customer *</label>
+                                <select id="challengeCustomer" required>
+                                    <option value="">Select Customer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="challengeCategory">Category</label>
+                                <select id="challengeCategory">
+                                    <option value="">Select Category</option>
+                                    <option value="Operational">Operational</option>
+                                    <option value="Technical">Technical</option>
+                                    <option value="Financial">Financial</option>
+                                    <option value="Strategic">Strategic</option>
+                                    <option value="Compliance">Compliance</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="impactLevel">Impact Level</label>
+                                <select id="impactLevel">
+                                    <option value="">Select Impact</option>
+                                    <option value="High">High</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Low">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="challengeDescription">Challenge Description *</label>
+                                <textarea id="challengeDescription" rows="3" required></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="businessImpact">Business Impact ($)</label>
+                                <input type="number" id="businessImpact">
+                            </div>
+                            <div class="form-group">
+                                <label for="resolutionStatus">Status</label>
+                                <select id="resolutionStatus">
+                                    <option value="Open">Open</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Challenge</button>
+                    </form>
+                </div>
+                
+                <div class="data-table" id="challengesTable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Challenge</th>
+                                <th>Category</th>
+                                <th>Impact</th>
+                                <th>Status</th>
+                                <th>Business Impact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="challengesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Outcomes Tab -->
+            <div id="outcomes" class="tab-content">
+                <div class="form-section">
+                    <h2>📈 Record Outcome</h2>
+                    <form id="outcomeForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="outcomeCustomer">Customer *</label>
+                                <select id="outcomeCustomer" required>
+                                    <option value="">Select Customer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="outcomeCategory">Outcome Type</label>
+                                <select id="outcomeCategory">
+                                    <option value="">Select Type</option>
+                                    <option value="Cost Savings">Cost Savings</option>
+                                    <option value="Revenue Impact">Revenue Impact</option>
+                                    <option value="Efficiency Gain">Efficiency Gain</option>
+                                    <option value="Quality Improvement">Quality Improvement</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="metricType">Metric</label>
+                                <input type="text" id="metricType" placeholder="e.g., Processing Time">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="baselineValue">Baseline Value</label>
+                                <input type="number" id="baselineValue" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="actualResult">Actual Result</label>
+                                <input type="number" id="actualResult" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="roiValue">ROI ($)</label>
+                                <input type="number" id="roiValue">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Outcome</button>
+                    </form>
+                </div>
+                
+                <div class="data-table" id="outcomesTable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Outcome Type</th>
+                                <th>Metric</th>
+                                <th>Baseline</th>
+                                <th>Result</th>
+                                <th>Improvement</th>
+                                <th>ROI</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="outcomesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- References Tab -->
+            <div id="references" class="tab-content">
+                <div class="form-section">
+                    <h2>🌟 Manage Reference</h2>
+                    <form id="referenceForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="referenceCustomer">Customer *</label>
+                                <select id="referenceCustomer" required>
+                                    <option value="">Select Customer</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="referenceTier">Reference Tier</label>
+                                <select id="referenceTier">
+                                    <option value="">Select Tier</option>
+                                    <option value="Tier 1">Tier 1 - Public</option>
+                                    <option value="Tier 2">Tier 2 - Private</option>
+                                    <option value="Tier 3">Tier 3 - Internal</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="primaryUseCase">Primary Use Case</label>
+                                <input type="text" id="primaryUseCase">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="willingToSpeak"> Willing to Speak
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="caseStudyPermission"> Case Study Permission
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="logoUsage"> Logo Usage
+                                </label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">💾 Save Reference</button>
+                    </form>
+                </div>
+                
+                <div class="data-table" id="referencesTable">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Tier</th>
+                                <th>Use Case</th>
+                                <th>Speaking</th>
+                                <th>Case Study</th>
+                                <th>Logo</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="referencesTableBody">
+                            <!-- Dynamic content -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content">
+                <h2>📊 Key Performance Indicators</h2>
+                
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3 id="totalCustomers">0</h3>
+                        <p>Total Customers</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 id="openChallenges">0</h3>
+                        <p>Open Challenges</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 id="totalROI">$0</h3>
+                        <p>Total ROI</p>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3 id="activeReferences">0</h3>
+                        <p>Active References</p>
+                    </div>
+                </div>
+                
+                <div class="export-section">
+                    <h3>📥 Export Data</h3>
+                    <p>Download your data for external analysis</p>
+                    <br>
+                    <button class="btn btn-success" onclick="exportToCSV('customers')">📊 Export Customers CSV</button>
+                    <button class="btn btn-success" onclick="exportToCSV('challenges')">📊 Export Challenges CSV</button>
+                    <button class="btn btn-success" onclick="exportToCSV('outcomes')">📊 Export Outcomes CSV</button>
+                    <button class="btn btn-primary" onclick="exportAllData()">📋 Export All Data</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Storage
+        let customers = [];
+        let challenges = [];
+        let outcomes = [];
+        let references = [];
+
+        // Initialize app with sample data
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSampleData();
+            updateDashboard();
+            populateCustomerDropdowns();
+        });
+
+        // Tab Management
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+
+            if (tabName === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Customer Management
+        document.getElementById('customerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const customer = {
+                id: 'CUST' + (customers.length + 1).toString().padStart(3, '0'),
+                companyName: document.getElementById('companyName').value,
+                industry: document.getElementById('industry').value,
+                companySize: document.getElementById('companySize').value,
+                primaryContact: document.getElementById('primaryContact').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                annualRevenue: parseFloat(document.getElementById('annualRevenue').value) || 0,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            customers.push(customer);
+            this.reset();
+            showSuccessMessage();
+            renderCustomersTable();
+            populateCustomerDropdowns();
+            updateDashboard();
+        });
+
+        function renderCustomersTable() {
+            const tbody = document.getElementById('customersTableBody');
+            tbody.innerHTML = customers.map(customer => `
+                <tr>
+                    <td><strong>${customer.companyName}</strong></td>
+                    <td>${customer.industry || 'N/A'}</td>
+                    <td>${customer.companySize || 'N/A'}</td>
+                    <td>${customer.primaryContact || 'N/A'}</td>
+                    <td>$${customer.annualRevenue.toLocaleString()}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteCustomer('${customer.id}')">🗑️ Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Challenge Management
+        document.getElementById('challengeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const challenge = {
+                id: 'CH' + (challenges.length + 1).toString().padStart(3, '0'),
+                customerId: document.getElementById('challengeCustomer').value,
+                category: document.getElementById('challengeCategory').value,
+                description: document.getElementById('challengeDescription').value,
+                impactLevel: document.getElementById('impactLevel').value,
+                businessImpact: parseFloat(document.getElementById('businessImpact').value) || 0,
+                status: document.getElementById('resolutionStatus').value,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            challenges.push(challenge);
+            this.reset();
+            showSuccessMessage();
+            renderChallengesTable();
+            updateDashboard();
+        });
+
+        function renderChallengesTable() {
+            const tbody = document.getElementById('challengesTableBody');
+            tbody.innerHTML = challenges.map(challenge => {
+                const customer = customers.find(c => c.id === challenge.customerId);
+                return `
+                    <tr>
+                        <td>${customer ? customer.companyName : 'Unknown'}</td>
+                        <td>${challenge.description}</td>
+                        <td>${challenge.category || 'N/A'}</td>
+                        <td><span class="status-badge status-${challenge.impactLevel?.toLowerCase()}">${challenge.impactLevel || 'N/A'}</span></td>
+                        <td><span class="status-badge status-${challenge.status === 'Resolved' ? 'resolved' : challenge.status === 'In Progress' ? 'pending' : 'active'}">${challenge.status}</span></td>
+                        <td>$${challenge.businessImpact.toLocaleString()}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteChallenge('${challenge.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Utility Functions
+        function populateCustomerDropdowns() {
+            const dropdowns = ['challengeCustomer', 'outcomeCustomer', 'referenceCustomer'];
+            dropdowns.forEach(dropdownId => {
+                const dropdown = document.getElementById(dropdownId);
+                dropdown.innerHTML = '<option value="">Select Customer</option>' + 
+                    customers.map(customer => `<option value="${customer.id}">${customer.companyName}</option>`).join('');
+            });
+        }
+
+        function updateDashboard() {
+            document.getElementById('totalCustomers').textContent = customers.length;
+            document.getElementById('openChallenges').textContent = challenges.filter(c => c.status !== 'Resolved').length;
+            document.getElementById('totalROI').textContent = '
+        }
+
+        // Outcome Management
+        document.getElementById('outcomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const baseline = parseFloat(document.getElementById('baselineValue').value) || 0;
+            const result = parseFloat(document.getElementById('actualResult').value) || 0;
+            const improvement = baseline > 0 ? ((Math.abs(result - baseline) / baseline) * 100).toFixed(1) : 0;
+            
+            const outcome = {
+                id: 'OUT' + (outcomes.length + 1).toString().padStart(3, '0'),
+                customerId: document.getElementById('outcomeCustomer').value,
+                category: document.getElementById('outcomeCategory').value,
+                metricType: document.getElementById('metricType').value,
+                baselineValue: baseline,
+                actualResult: result,
+                improvement: improvement,
+                roi: parseFloat(document.getElementById('roiValue').value) || 0,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            outcomes.push(outcome);
+            this.reset();
+            showSuccessMessage();
+            renderOutcomesTable();
+            updateDashboard();
+        });
+
+        function renderOutcomesTable() {
+            const tbody = document.getElementById('outcomesTableBody');
+            tbody.innerHTML = outcomes.map(outcome => {
+                const customer = customers.find(c => c.id === outcome.customerId);
+                return `
+                    <tr>
+                        <td>${customer ? customer.companyName : 'Unknown'}</td>
+                        <td>${outcome.category || 'N/A'}</td>
+                        <td>${outcome.metricType || 'N/A'}</td>
+                        <td>${outcome.baselineValue}</td>
+                        <td>${outcome.actualResult}</td>
+                        <td><strong>${outcome.improvement}%</strong></td>
+                        <td><strong>$${outcome.roi.toLocaleString()}</strong></td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteOutcome('${outcome.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Reference Management
+        document.getElementById('referenceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const reference = {
+                id: 'REF' + (references.length + 1).toString().padStart(3, '0'),
+                customerId: document.getElementById('referenceCustomer').value,
+                tier: document.getElementById('referenceTier').value,
+                primaryUseCase: document.getElementById('primaryUseCase').value,
+                willingToSpeak: document.getElementById('willingToSpeak').checked,
+                caseStudyPermission: document.getElementById('caseStudyPermission').checked,
+                logoUsage: document.getElementById('logoUsage').checked,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            references.push(reference);
+            this.reset();
+            showSuccessMessage();
+            renderReferencesTable();
+            updateDashboard();
+        });
+
+        function renderReferencesTable() {
+            const tbody = document.getElementById('referencesTableBody');
+            tbody.innerHTML = references.map(reference => {
+                const customer = customers.find(c => c.id === reference.customerId);
+                return `
+                    <tr>
+                        <td>${customer ? customer.companyName : 'Unknown'}</td>
+                        <td><span class="status-badge ${reference.tier === 'Tier 1' ? 'status-active' : reference.tier === 'Tier 2' ? 'status-pending' : 'status-low'}">${reference.tier || 'N/A'}</span></td>
+                        <td>${reference.primaryUseCase || 'N/A'}</td>
+                        <td>${reference.willingToSpeak ? '✅ Yes' : '❌ No'}</td>
+                        <td>${reference.caseStudyPermission ? '✅ Yes' : '❌ No'}</td>
+                        <td>${reference.logoUsage ? '✅ Yes' : '❌ No'}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteReference('${reference.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join(''); + outcomes.reduce((sum, o) => sum + o.roi, 0).toLocaleString();
+            document.getElementById('activeReferences').textContent = references.filter(r => r.tier === 'Tier 1').length;
+        }
+
+        function showSuccessMessage() {
+            const message = document.getElementById('successMessage');
+            message.style.display = 'block';
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+
+        // Delete Functions
+        function deleteCustomer(id) {
+            if (confirm('Are you sure you want to delete this customer?')) {
+                customers = customers.filter(c => c.id !== id);
+                renderCustomersTable();
+                populateCustomerDropdowns();
+                updateDashboard();
+            }
+        }
+
+        function deleteChallenge(id) {
+            if (confirm('Are you sure you want to delete this challenge?')) {
+                challenges = challenges.filter(c => c.id !== id);
+                renderChallengesTable();
+                updateDashboard();
+            }
+        }
+
+        function deleteOutcome(id) {
+            if (confirm('Are you sure you want to delete this outcome?')) {
+                outcomes = outcomes.filter(o => o.id !== id);
+                renderOutcomesTable();
+                updateDashboard();
+            }
+        }
+
+        function deleteReference(id) {
+            if (confirm('Are you sure you want to delete this reference?')) {
+                references = references.filter(r => r.id !== id);
+                renderReferencesTable();
+                updateDashboard();
+            }
+        }
+
+        // Export Functions
+        function exportToCSV(dataType) {
+            let data, filename;
+            
+            switch(dataType) {
+                case 'customers':
+                    data = customers;
+                    filename = 'customers.csv';
+                    break;
+                case 'challenges':
+                    data = challenges.map(challenge => ({
+                        ...challenge,
+                        customerName: customers.find(c => c.id === challenge.customerId)?.companyName || 'Unknown'
+                    }));
+                    filename = 'challenges.csv';
+                    break;
+                case 'outcomes':
+                    data = outcomes.map(outcome => ({
+                        ...outcome,
+                        customerName: customers.find(c => c.id === outcome.customerId)?.companyName || 'Unknown'
+                    }));
+                    filename = 'outcomes.csv';
+                    break;
+                default:
+                    return;
+            }
+
+            if (data.length === 0) {
+                alert('No data to export');
+                return;
+            }
+
+            const csv = convertToCSV(data);
+            downloadCSV(csv, filename);
+        }
+
+        function convertToCSV(data) {
+            const headers = Object.keys(data[0]);
+            const csvContent = [
+                headers.join(','),
+                ...data.map(row => headers.map(header => JSON.stringify(row[header] || '')).join(','))
+            ].join('\n');
+            
+            return csvContent;
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function exportAllData() {
+            const allData = {
+                customers,
+                challenges,
+                outcomes,
+                references,
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(allData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'customer_framework_data.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+
+        // Load Sample Data
+        function loadSampleData() {
+            customers = [
+                {
+                    id: 'CUST001',
+                    companyName: 'TechCorp Solutions',
+                    industry: 'Technology',
+                    companySize: 'Enterprise (1000+)',
+                    primaryContact: 'John Smith',
+                    contactEmail: 'john.smith@techcorp.com',
+                    annualRevenue: 2500000,
+                    dateAdded: '1/15/2024'
+                },
+                {
+                    id: 'CUST002',
+                    companyName: 'Healthcare Plus',
+                    industry: 'Healthcare',
+                    companySize: 'Mid-Market (250-999)',
+                    primaryContact: 'Sarah Johnson',
+                    contactEmail: 'sarah.j@healthplus.com',
+                    annualRevenue: 850000,
+                    dateAdded: '11/20/2023'
+                }
+            ];
+
+            challenges = [
+                {
+                    id: 'CH001',
+                    customerId: 'CUST001',
+                    category: 'Operational',
+                    description: 'Manual data entry causing delays and errors',
+                    impactLevel: 'High',
+                    businessImpact: 125000,
+                    status: 'Resolved',
+                    dateAdded: '1/20/2024'
+                },
+                {
+                    id: 'CH002',
+                    customerId: 'CUST002',
+                    category: 'Strategic',
+                    description: 'Lack of real-time reporting for decision making',
+                    impactLevel: 'High',
+                    businessImpact: 200000,
+                    status: 'In Progress',
+                    dateAdded: '11/25/2023'
+                }
+            ];
+
+            outcomes = [
+                {
+                    id: 'OUT001',
+                    customerId: 'CUST001',
+                    category: 'Cost Savings',
+                    metricType: 'Process Efficiency',
+                    baselineValue: 40,
+                    actualResult: 8,
+                    improvement: '80.0',
+                    roi: 180000,
+                    dateAdded: '6/30/2024'
+                }
+            ];
+
+            references = [
+                {
+                    id: 'REF001',
+                    customerId: 'CUST001',
+                    tier: 'Tier 1',
+                    primaryUseCase: 'Process Automation',
+                    willingToSpeak: true,
+                    caseStudyPermission: true,
+                    logoUsage: true,
+                    dateAdded: '7/1/2024'
+                }
+            ];
+
+            renderCustomersTable();
+            renderChallengesTable();
+            renderOutcomesTable();
+            renderReferencesTable();
+        }
+    </script>
+</body>
+</html>
+        }
+
+        // Outcome Management
+        document.getElementById('outcomeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const baseline = parseFloat(document.getElementById('baselineValue').value) || 0;
+            const result = parseFloat(document.getElementById('actualResult').value) || 0;
+            const improvement = baseline > 0 ? ((Math.abs(result - baseline) / baseline) * 100).toFixed(1) : 0;
+            
+            const outcome = {
+                id: 'OUT' + (outcomes.length + 1).toString().padStart(3, '0'),
+                customerId: document.getElementById('outcomeCustomer').value,
+                category: document.getElementById('outcomeCategory').value,
+                metricType: document.getElementById('metricType').value,
+                baselineValue: baseline,
+                actualResult: result,
+                improvement: improvement,
+                roi: parseFloat(document.getElementById('roiValue').value) || 0,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            outcomes.push(outcome);
+            this.reset();
+            showSuccessMessage();
+            renderOutcomesTable();
+            updateDashboard();
+        });
+
+        function renderOutcomesTable() {
+            const tbody = document.getElementById('outcomesTableBody');
+            tbody.innerHTML = outcomes.map(outcome => {
+                const customer = customers.find(c => c.id === outcome.customerId);
+                return `
+                    <tr>
+                        <td>${customer ? customer.companyName : 'Unknown'}</td>
+                        <td>${outcome.category || 'N/A'}</td>
+                        <td>${outcome.metricType || 'N/A'}</td>
+                        <td>${outcome.baselineValue}</td>
+                        <td>${outcome.actualResult}</td>
+                        <td><strong>${outcome.improvement}%</strong></td>
+                        <td><strong>$${outcome.roi.toLocaleString()}</strong></td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteOutcome('${outcome.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Reference Management
+        document.getElementById('referenceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const reference = {
+                id: 'REF' + (references.length + 1).toString().padStart(3, '0'),
+                customerId: document.getElementById('referenceCustomer').value,
+                tier: document.getElementById('referenceTier').value,
+                primaryUseCase: document.getElementById('primaryUseCase').value,
+                willingToSpeak: document.getElementById('willingToSpeak').checked,
+                caseStudyPermission: document.getElementById('caseStudyPermission').checked,
+                logoUsage: document.getElementById('logoUsage').checked,
+                dateAdded: new Date().toLocaleDateString()
+            };
+
+            references.push(reference);
+            this.reset();
+            showSuccessMessage();
+            renderReferencesTable();
+            updateDashboard();
+        });
+
+        function renderReferencesTable() {
+            const tbody = document.getElementById('referencesTableBody');
+            tbody.innerHTML = references.map(reference => {
+                const customer = customers.find(c => c.id === reference.customerId);
+                return `
+                    <tr>
+                        <td>${customer ? customer.companyName : 'Unknown'}</td>
+                        <td><span class="status-badge ${reference.tier === 'Tier 1' ? 'status-active' : reference.tier === 'Tier 2' ? 'status-pending' : 'status-low'}">${reference.tier || 'N/A'}</span></td>
+                        <td>${reference.primaryUseCase || 'N/A'}</td>
+                        <td>${reference.willingToSpeak ? '✅ Yes' : '❌ No'}</td>
+                        <td>${reference.caseStudyPermission ? '✅ Yes' : '❌ No'}</td>
+                        <td>${reference.logoUsage ? '✅ Yes' : '❌ No'}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="deleteReference('${reference.id}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');

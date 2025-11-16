@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BearOps Revenue Engine Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2942 100%);
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: rgba(10, 22, 40, 0.9);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+        }
+
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #a5b4fc;
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 2.1rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #63b3ed 0%, #a5b4fc 30%, #fbb6ce 70%, #f6e05e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #cbd5f5;
+            max-width: 650px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .theme-toggle {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.9);
+            background: rgba(15, 23, 42, 0.9);
+            color: #e2e8f0;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            cursor: pointer;
+        }
+
+        .theme-toggle:hover {
+            border-color: rgba(129, 230, 217, 0.9);
+        }
+
+        /* PILLAR CARDS SECTION */
+        .pillars-intro {
+            text-align: center;
+            margin: 40px auto 24px;
+            max-width: 800px;
+        }
+
+        .pillars-intro h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #a5b4fc;
+            margin-bottom: 12px;
+        }
+
+        .pillars-intro p {
+            font-size: 1rem;
+            color: #cbd5f5;
+            opacity: 0.9;
+        }
+
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 32px 0 48px;
+        }
+
+        .pillar-card {
+            background: rgba(15, 23, 42, 0.92);
+            border-radius: 20px;
+            border: 2px solid rgba(148, 163, 184, 0.4);
+            padding: 32px 28px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pillar-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .pillar-card.vision {
+            border-color: rgba(99, 179, 237, 0.6);
+        }
+
+        .pillar-card.vision::before {
+            background: radial-gradient(circle at top left, rgba(99, 179, 237, 0.15), transparent 70%);
+        }
+
+        .pillar-card.process {
+            border-color: rgba(72, 187, 120, 0.6);
+        }
+
+        .pillar-card.process::before {
+            background: radial-gradient(circle at top left, rgba(72, 187, 120, 0.15), transparent 70%);
+        }
+
+        .pillar-card.tech {
+            border-color: rgba(251, 191, 36, 0.6);
+        }
+
+        .pillar-card.tech::before {
+            background: radial-gradient(circle at top left, rgba(251, 191, 36, 0.15), transparent 70%);
+        }
+
+        .pillar-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+        }
+
+        .pillar-card:hover::before {
+            opacity: 1;
+        }
+
+        .pillar-card.vision:hover {
+            border-color: rgba(99, 179, 237, 0.9);
+            box-shadow: 0 25px 50px rgba(59, 130, 246, 0.4);
+        }
+
+        .pillar-card.process:hover {
+            border-color: rgba(72, 187, 120, 0.9);
+            box-shadow: 0 25px 50px rgba(34, 197, 94, 0.4);
+        }
+
+        .pillar-card.tech:hover {
+            border-color: rgba(251, 191, 36, 0.9);
+            box-shadow: 0 25px 50px rgba(245, 158, 11, 0.4);
+        }
+
+        .pillar-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .pillar-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .pillar-card.vision .pillar-icon {
+            filter: drop-shadow(0 4px 12px rgba(59, 130, 246, 0.5));
+        }
+
+        .pillar-card.process .pillar-icon {
+            filter: drop-shadow(0 4px 12px rgba(34, 197, 94, 0.5));
+        }
+
+        .pillar-card.tech .pillar-icon {
+            filter: drop-shadow(0 4px 12px rgba(245, 158, 11, 0.5));
+        }
+
+        .pillar-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 0.02em;
+        }
+
+        .pillar-card.vision .pillar-title {
+            color: #63b3ed;
+        }
+
+        .pillar-card.process .pillar-title {
+            color: #48bb78;
+        }
+
+        .pillar-card.tech .pillar-title {
+            color: #fbbf24;
+        }
+
+        .pillar-subtitle {
+            font-size: 0.95rem;
+            color: #cbd5f5;
+            margin-bottom: 18px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+
+        .pillar-features {
+            list-style: none;
+            margin: 0;
+        }
+
+        .pillar-features li {
+            margin-bottom: 10px;
+        }
+
+        .pillar-features a {
+            display: block;
+            font-size: 0.88rem;
+            color: #e2e8f0;
+            padding: 8px 12px 8px 28px;
+            position: relative;
+            opacity: 0.9;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .pillar-features a::before {
+            content: '→';
+            position: absolute;
+            left: 8px;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        .pillar-features a:hover {
+            opacity: 1;
+            padding-left: 32px;
+        }
+
+        .pillar-features a:hover::before {
+            transform: translateX(2px);
+        }
+
+        .pillar-card.vision .pillar-features a::before {
+            color: #63b3ed;
+        }
+
+        .pillar-card.vision .pillar-features a:hover {
+            background: rgba(99, 179, 237, 0.15);
+            color: #93c5fd;
+        }
+
+        .pillar-card.process .pillar-features a::before {
+            color: #48bb78;
+        }
+
+        .pillar-card.process .pillar-features a:hover {
+            background: rgba(72, 187, 120, 0.15);
+            color: #6ee7b7;
+        }
+
+        .pillar-card.tech .pillar-features a::before {
+            color: #fbbf24;
+        }
+
+        .pillar-card.tech .pillar-features a:hover {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fcd34d;
+        }
+
+        /* TOOLS GRID */
+        .tools-section-header {
+            text-align: center;
+            margin: 48px auto 32px;
+            max-width: 800px;
+        }
+
+        .tools-section-header h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .tools-section-header p {
+            font-size: 1rem;
+            color: #cbd5f5;
+            opacity: 0.9;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+            gap: 24px;
+            margin-top: 32px;
+            align-items: stretch;
+        }
+
+        @media (max-width: 1024px) {
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tool-card {
+            background: radial-gradient(circle at top left, rgba(99, 179, 237, 0.18), transparent 55%),
+                        radial-gradient(circle at bottom right, rgba(129, 230, 217, 0.12), transparent 55%),
+                        rgba(15, 23, 42, 0.92);
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            padding: 28px 26px 26px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12) 0%, rgba(118, 75, 162, 0.12) 100%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(129, 230, 217, 0.8);
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 1);
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .featured {
+            grid-row: span 2;
+        }
+
+        @media (max-width: 1024px) {
+            .featured {
+                grid-row: auto;
+            }
+        }
+
+        .tool-icon {
+            font-size: 2.0rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            border-radius: 999px;
+            background: radial-gradient(circle at 30% 30%, rgba(248, 250, 252, 0.9), transparent 60%),
+                        linear-gradient(135deg, #6366f1, #0ea5e9);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.6);
+            margin-bottom: 14px;
+        }
+
+        .tool-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .tool-description {
+            font-size: 0.93rem;
+            color: #e2e8f0;
+            margin-bottom: 14px;
+            opacity: 0.9;
+        }
+
+        .tool-features {
+            list-style: none;
+            margin-bottom: 16px;
+        }
+
+        .tool-features li {
+            font-size: 0.9rem;
+            color: #cbd5f5;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .tool-features li::before {
+            content: '•';
+            color: #63b3ed;
+            margin-top: 1px;
+        }
+
+        .tool-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, #6366f1, #0ea5e9);
+            color: #f9fafb;
+            text-decoration: none;
+            border: 1px solid rgba(191, 219, 254, 0.8);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.8);
+            transition: all 0.2s ease;
+            margin-top: 4px;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 40px rgba(37, 99, 235, 0.95);
+            background: linear-gradient(135deg, #4f46e5, #0284c7);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .featured .tool-title {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .resources {
+            margin-top: 40px;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 20px;
+            padding: 26px 24px 28px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.9);
+        }
+
+        .resources h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #a5b4fc;
+        }
+
+        .resources p {
+            font-size: 0.9rem;
+            color: #cbd5f5;
+            opacity: 0.9;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .resource-link {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: radial-gradient(circle at top left, rgba(99, 102, 241, 0.22), transparent 60%);
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            font-size: 0.86rem;
+            color: #e2e8f0;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .resource-link:hover {
+            border-color: rgba(96, 165, 250, 0.9);
+            box-shadow: 0 12px 30px rgba(30, 64, 175, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .footer {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            opacity: 0.85;
+        }
+
+        /* LIGHT THEME OVERRIDES */
+        body.light-theme {
+            background: linear-gradient(135deg, #e5edff 0%, #f9fafb 100%);
+            color: #0f172a;
+        }
+
+        body.light-theme .header {
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(148, 163, 184, 0.5);
+            box-shadow: 0 16px 35px rgba(15, 23, 42, 0.15);
+        }
+
+        body.light-theme .logo {
+            color: #4f46e5;
+        }
+
+        body.light-theme .subtitle {
+            color: #4b5563;
+        }
+
+        body.light-theme .pillars-intro h2 {
+            color: #4f46e5;
+        }
+
+        body.light-theme .pillars-intro p {
+            color: #4b5563;
+        }
+
+        body.light-theme .pillar-card {
+            background: #ffffff;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.1);
+        }
+
+        body.light-theme .pillar-subtitle {
+            color: #4b5563;
+        }
+
+        body.light-theme .pillar-features li {
+            color: #374151;
+        }
+
+        body.light-theme .tool-card {
+            background: #ffffff;
+            border-color: rgba(148, 163, 184, 0.5);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        body.light-theme .tool-description {
+            color: #4b5563;
+        }
+
+        body.light-theme .tool-features li {
+            color: #4b5563;
+        }
+
+        body.light-theme .resources {
+            background: #ffffff;
+            border-color: rgba(148, 163, 184, 0.6);
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        body.light-theme .resources h2 {
+            color: #4f46e5;
+        }
+
+        body.light-theme .resources p {
+            color: #4b5563;
+        }
+
+        body.light-theme .resource-link {
+            background: #f9fafb;
+            border-color: rgba(148, 163, 184, 0.8);
+            color: #111827;
+        }
+
+        body.light-theme .footer {
+            color: #6b7280;
+        }
+
+        body.light-theme .theme-toggle {
+            background: #ffffff;
+            color: #111827;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+<!-- Overlaid logo (doesn't change layout) -->
+        <img src="BearOps_Logo_Default.png" alt="BearOps Logo" class="page-logo">
+
+            <div class="tagline">Revenue Engine Hub</div>
+            <div class="subtitle">
+                Clarity that Scales, Structure that Performs
+            </div>
+        </div>
+
+        <!-- THREE PILLARS SECTION -->
+        <div class="pillars-intro">
+            <h2>Three Pillars That Build Revenue Engines</h2>
+            <p>
+                BearOps helps funded startups build the foundation for scalable, repeatable revenue             </p>
+        </div>
+
+        <div class="pillars-grid">
+            <!-- Vision & Alignment Pillar -->
+            <div class="pillar-card vision">
+                <span class="pillar-icon">🎯</span>
+                <h3 class="pillar-title">Vision & Alignment</h3>
+                <p class="pillar-subtitle">BearOps • Vision & Alignment</p>
+                <ul class="pillar-features">
+                    <li><a href="VTO-Builder.html">Vision Alignment & Purpose Activation</a></li>
+                    <li><a href="strategic_priorities.html">Strategic Priorities & Focus</a></li>
+                    <li><a href="accountability_chart.html">Accountability & High-Trust Team Building</a></li>
+                </ul>
+            </div>
+
+            <!-- Process & People Pillar -->
+            <div class="pillar-card process">
+                <span class="pillar-icon">⚙️</span>
+                <h3 class="pillar-title">Process & People</h3>
+                <p class="pillar-subtitle">BearOps • Process & People</p>
+                <ul class="pillar-features">
+                    <li><a href="Index.html">Playbook & Performance Rhythm </a></li>
+                    <li><a href="accountability_chart.html">Role clarity, comp plan design, hiring diagnostics (ACF Fit)</a></li>
+                    <li><a href="Lead-Cash.html">Campaign and lifecycle workflow alignment (Marketing → Sales → CS)</a></li>
+                </ul>
+            </div>
+
+            <!-- Tech Stack Pillar -->
+            <div class="pillar-card tech">
+                <span class="pillar-icon">⚡</span>
+                <h3 class="pillar-title">Tech Stack</h3>
+                <p class="pillar-subtitle">BearOps • Tech Stack</p>
+                <ul class="pillar-features">
+                    <li><a href="crm_deployment.html">CRM/CS/Data Stack deployment with ownership maps</a></li>
+                    <li><a href="Unit-Economics-Calculator.html">Standard reporting layer (Scorecards, CAC Payback, NRR, Burn Multiple)</a></li>
+                    <li><a href="lifecycle_instrumentation.html">Lifecycle instrumentation (Snowplow, HubSpot, Tableau, etc.)</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="resources">
+            <h2>📚 EOS Tools & Guides</h2>
+            <p style="margin-bottom: 20px;">
+                Supporting resources to help you implement EOS consistently across the company.
+            </p>
+            <div class="resources-grid">
+                <a href="eos_implementation_checklist.html" class="resource-link">
+                    ✅ EOS Implementation Checklist
+                </a>
+                <a href="90_day_world_guide.html" class="resource-link">
+                    🗓 90-Day World Quick Guide
+                </a>
+                <a href="l10_playbook.html" class="resource-link">
+                    🧩 Leadership L10 Playbook
+                </a>
+                <a href="quarterly_planning_workshop.html" class="resource-link">
+                    📌 Quarterly Planning Workshop Pack
+                </a>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>BearOps EOS Engine • Built for Funded Startups</p>
+            <p style="margin-top: 10px;">
+                Helping leadership teams turn EOS into a repeatable operating system
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const THEME_KEY = 'eosTheme';
+
+        function setTheme(theme) {
+            const body = document.body;
+            const btn = document.querySelector('.theme-toggle');
+
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                if (btn) btn.textContent = '☀️ Light';
+            } else {
+                body.classList.remove('light-theme');
+                if (btn) btn.textContent = '🌙 Dark';
+            }
+            localStorage.setItem(THEME_KEY, theme);
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem(THEME_KEY) || 'dark';
+            setTheme(current === 'dark' ? 'light' : 'dark');
+        }
+
+        (function initTheme() {
+            const stored = localStorage.getItem(THEME_KEY) || 'dark';
+            setTheme(stored);
+        })();
+    </script>
+</body>
+</html>

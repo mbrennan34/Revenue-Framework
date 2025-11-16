@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BearOps TAM / SAM / SOM Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, #1e3a8a 0, #4f46e5 35%, #7c3aed 70%, #020617 100%);
+      color: #0f172a;
+    }
+
+    .wrapper {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(248, 250, 252, 0.97);
+      border-radius: 18px;
+      padding: 22px 22px 26px;
+      box-shadow:
+        0 18px 45px rgba(15, 23, 42, 0.35),
+        0 0 0 1px rgba(148, 163, 184, 0.15);
+      backdrop-filter: blur(10px);
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      letter-spacing: 0.02em;
+      color: #111827;
+    }
+
+    header .tagline {
+      font-size: 0.88rem;
+      color: #4b5563;
+      max-width: 420px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.75rem;
+      background: #eef2ff;
+      color: #4338ca;
+      font-weight: 500;
+    }
+
+    .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #4f46e5;
+    }
+
+    h2.section-title {
+      margin: 18px 0 10px;
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #111827;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 4px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #4f46e5, #7c3aed);
+    }
+
+    p.helper {
+      font-size: 0.88rem;
+      color: #6b7280;
+      margin: 0 0 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 14px 14px 16px;
+      box-shadow: 0 1px 3px rgba(15,23,42,0.08);
+      border: 1px solid rgba(148,163,184,0.35);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(79,70,229,0.06), transparent);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease-out;
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+      color: #111827;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-bottom: 3px;
+      font-weight: 500;
+      color: #374151;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 7px 9px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      background: #f9fafb;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      border-color: #4f46e5;
+      box-shadow: 0 0 0 1px rgba(79,70,229,0.35);
+      background: #ffffff;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      background: #eef2ff;
+      color: #4338ca;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .badge-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .explanation {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .inline-inputs {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+    }
+
+    .btn-primary {
+      margin-top: 12px;
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: none;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 18px rgba(79,70,229,0.45);
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.05);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    .output-number {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin: 3px 0 2px;
+      color: #111827;
+    }
+
+    .chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .chip {
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      font-size: 0.75rem;
+      color: #4b5563;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.83rem;
+    }
+
+    th, td {
+      padding: 6px 6px;
+      text-align: right;
+      border-bottom: 1px solid #e5e7eb;
+      white-space: nowrap;
+    }
+
+    th:first-child, td:first-child {
+      text-align: left;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+      font-weight: 600;
+      background: #f9fafb;
+    }
+
+    .totals-label {
+      color: #111827;
+    }
+
+    @media (max-width: 768px) {
+      .summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div>
+      <div class="pill">
+        <span class="pill-dot"></span>
+        BearOps • Market Sizing Framework
+      </div>
+      <h1>TAM / SAM / SOM – Multi-Segment Calculator</h1>
+    </div>
+    <div class="tagline">
+      Clarity → Consistency → Confidence.  
+      Define segments, apply constraints, and translate sales capacity into investor-grade TAM/SAM/SOM.
+    </div>
+  </header>
+
+  <!-- 1. Segment definitions -->
+  <h2 class="section-title">1. Define Your Segments (Bottom-Up)</h2>
+  <p class="helper">
+    Start by defining up to three segments (e.g. Enterprise, Mid-Market, SMB). For each, estimate how many
+    potential customers match your ICP and your average revenue per customer (ARPC).
+  </p>
+
+  <div class="grid">
+    <!-- Segment 0 -->
+    <div class="card">
+      <span class="badge">Segment 1</span>
+      <h3>Enterprise</h3>
+      <label for="seg0_name">Segment name</label>
+      <input type="text" id="seg0_name" value="Enterprise">
+
+      <label for="seg0_customers" style="margin-top:6px;">
+        # of potential customers in this segment
+      </label>
+      <input type="number" id="seg0_customers" value="1200" min="0">
+
+      <label for="seg0_arpc" style="margin-top:6px;">
+        ARPC / Year (average revenue per customer)
+      </label>
+      <input type="number" id="seg0_arpc" value="350000" min="0">
+
+      <p class="explanation">
+        Segment TAM = customers × ARPC.
+      </p>
+    </div>
+
+    <!-- Segment 1 -->
+    <div class="card">
+      <span class="badge">Segment 2</span>
+      <h3>Mid-Market</h3>
+      <label for="seg1_name">Segment name</label>
+      <input type="text" id="seg1_name" value="Mid-Market">
+
+      <label for="seg1_customers" style="margin-top:6px;">
+        # of potential customers in this segment
+      </label>
+      <input type="number" id="seg1_customers" value="8500" min="0">
+
+      <label for="seg1_arpc" style="margin-top:6px;">
+        ARPC / Year
+      </label>
+      <input type="number" id="seg1_arpc" value="90000" min="0">
+
+      <p class="explanation">
+        Use LinkedIn / Census / IBISWorld data to make this grounded, not hand-wavy.
+      </p>
+    </div>
+
+    <!-- Segment 2 -->
+    <div class="card">
+      <span class="badge">Segment 3</span>
+      <h3>SMB / Long Tail</h3>
+      <label for="seg2_name">Segment name</label>
+      <input type="text" id="seg2_name" value="SMB">
+
+      <label for="seg2_customers" style="margin-top:6px;">
+        # of potential customers in this segment
+      </label>
+      <input type="number" id="seg2_customers" value="25000" min="0">
+
+      <label for="seg2_arpc" style="margin-top:6px;">
+        ARPC / Year
+      </label>
+      <input type="number" id="seg2_arpc" value="15000" min="0">
+
+      <p class="explanation">
+        For SMB, you can keep ARPC lower and focus on volume-driven models.
+      </p>
+    </div>
+  </div>
+
+  <!-- 2. Global constraints -->
+  <h2 class="section-title">2. Apply Constraints → SAM</h2>
+  <p class="helper">
+    Apply realistic constraints that limit which parts of your TAM you can serve today (e.g. geography,
+    regulation, distribution, product/tech fit). These factors will be applied across all segments.
+  </p>
+
+  <div class="card">
+    <span class="badge badge-secondary">Constraints (applied to each segment)</span>
+    <h3>What % of your TAM is truly serviceable right now?</h3>
+    <div class="inline-inputs" style="margin-top:6px;">
+      <div>
+        <label for="geoFilter">Geography %</label>
+        <input type="number" id="geoFilter" value="40" min="0" max="100">
+      </div>
+      <div>
+        <label for="complianceFilter">Compliance / Regulation %</label>
+        <input type="number" id="complianceFilter" value="80" min="0" max="100">
+      </div>
+      <div>
+        <label for="distributionFilter">Distribution / GTM %</label>
+        <input type="number" id="distributionFilter" value="70" min="0" max="100">
+      </div>
+      <div>
+        <label for="productFilter">Product / Tech-Fit %</label>
+        <input type="number" id="productFilter" value="60" min="0" max="100">
+      </div>
+    </div>
+    <p class="explanation">
+      For example, if you only sell in North America and that’s ~40% of your TAM, enter 40 for Geography.
+      SAM per segment = Segment TAM × all four percentages (as decimals).
+    </p>
+  </div>
+
+  <!-- 3. SOM per segment -->
+  <h2 class="section-title">3. SOM: Target Share & Capacity by Segment</h2>
+  <p class="helper">
+    For each segment, you can define a target market share and / or a sales capacity model
+    (reps × quota × attainment). The tool will show both SOM-by-share and SOM-by-capacity.
+  </p>
+
+  <div class="grid">
+    <!-- Segment 0 SOM -->
+    <div class="card">
+      <span class="badge">Segment 1 SOM</span>
+      <h3>Enterprise</h3>
+      <label for="seg0_share">
+        Target market share (% of Enterprise SAM in 3–5 years)
+      </label>
+      <input type="number" id="seg0_share" value="0.8" min="0" max="100">
+
+      <div class="inline-inputs" style="margin-top:6px;">
+        <div>
+          <label for="seg0_reps"># of reps for this segment</label>
+          <input type="number" id="seg0_reps" value="6" min="0">
+        </div>
+        <div>
+          <label for="seg0_quota">Quota / rep / year</label>
+          <input type="number" id="seg0_quota" value="1800000" min="0">
+        </div>
+        <div>
+          <label for="seg0_attainment">Quota attainment %</label>
+          <input type="number" id="seg0_attainment" value="85" min="0" max="150">
+        </div>
+      </div>
+      <p class="explanation">
+        Use this to sanity-check “we’ll get X% of the market” against actual sales capacity.
+      </p>
+    </div>
+
+    <!-- Segment 1 SOM -->
+    <div class="card">
+      <span class="badge">Segment 2 SOM</span>
+      <h3>Mid-Market</h3>
+      <label for="seg1_share">
+        Target market share (% of Mid-Market SAM)
+      </label>
+      <input type="number" id="seg1_share" value="1.2" min="0" max="100">
+
+      <div class="inline-inputs" style="margin-top:6px;">
+        <div>
+          <label for="seg1_reps"># of reps for this segment</label>
+          <input type="number" id="seg1_reps" value="10" min="0">
+        </div>
+        <div>
+          <label for="seg1_quota">Quota / rep / year</label>
+          <input type="number" id="seg1_quota" value="1200000" min="0">
+        </div>
+        <div>
+          <label for="seg1_attainment">Quota attainment %</label>
+          <input type="number" id="seg1_attainment" value="85" min="0" max="150">
+        </div>
+      </div>
+      <p class="explanation">
+        Different segments can have different quota expectations and win-rates.
+      </p>
+    </div>
+
+    <!-- Segment 2 SOM -->
+    <div class="card">
+      <span class="badge">Segment 3 SOM</span>
+      <h3>SMB / Long Tail</h3>
+      <label for="seg2_share">
+        Target market share (% of SMB SAM)
+      </label>
+      <input type="number" id="seg2_share" value="0.5" min="0" max="100">
+
+      <div class="inline-inputs" style="margin-top:6px;">
+        <div>
+          <label for="seg2_reps"># of reps for this segment</label>
+          <input type="number" id="seg2_reps" value="6" min="0">
+        </div>
+        <div>
+          <label for="seg2_quota">Quota / rep / year</label>
+          <input type="number" id="seg2_quota" value="800000" min="0">
+        </div>
+        <div>
+          <label for="seg2_attainment">Quota attainment %</label>
+          <input type="number" id="seg2_attainment" value="80" min="0" max="150">
+        </div>
+      </div>
+      <p class="explanation">
+        Here you can model higher volume / lower ACV motions.
+      </p>
+    </div>
+  </div>
+
+  <!-- 4. Top-down + results -->
+  <h2 class="section-title">4. Top-Down Sanity Check & Results</h2>
+  <p class="helper">
+    Optional: plug in an industry figure from Gartner / IBISWorld etc. to sanity-check your
+    bottom-up TAM. Then hit “Recalculate” to see per-segment and total TAM/SAM/SOM.
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <span class="badge badge-secondary">Top-Down</span>
+      <h3>Industry TAM (optional)</h3>
+      <label for="industrySize">
+        Industry market size (e.g. from Gartner, IDC, IBISWorld)
+      </label>
+      <input type="number" id="industrySize" value="0" min="0">
+
+      <label for="topDownShare" style="margin-top:6px;">
+        % of that industry that is relevant to your ICP
+      </label>
+      <input type="number" id="topDownShare" value="0" min="0" max="100">
+
+      <p class="explanation">
+        Top-down TAM = Industry size × Relevant %.  
+        We use this for comparison only – the primary TAM here is bottom-up.
+      </p>
+
+      <button class="btn-primary" id="recalcBtn">Recalculate TAM / SAM / SOM</button>
+    </div>
+
+    <div class="card">
+      <span class="badge">Total TAM & SAM</span>
+      <div class="output-number" id="tamTotalValue">–</div>
+      <p class="explanation" id="tamExplanation"></p>
+      <hr style="margin:10px 0;">
+      <span class="badge badge-secondary">Top-Down TAM (Check)</span>
+      <div class="output-number" id="tamTopDownValue">–</div>
+      <p class="explanation" id="tamTopDownExplanation"></p>
+      <hr style="margin:10px 0;">
+      <span class="badge">Total SAM</span>
+      <div class="output-number" id="samTotalValue">–</div>
+      <p class="explanation" id="samExplanation"></p>
+      <div class="chips-row" id="samChips"></div>
+    </div>
+
+    <div class="card">
+      <span class="badge">Total SOM</span>
+      <div class="output-number" id="somTotalShareValue">–</div>
+      <p class="explanation" id="somShareExplanation"></p>
+      <hr style="margin:10px 0;">
+      <span class="badge badge-secondary">Sales Capacity SOM</span>
+      <div class="output-number" id="somTotalCapacityValue">–</div>
+      <p class="explanation" id="somCapacityExplanation"></p>
+    </div>
+  </div>
+
+  <!-- Segment breakdown table -->
+  <div class="summary-grid">
+    <div class="card">
+      <span class="badge badge-secondary">Per-Segment Breakdown</span>
+      <h3 style="margin-top:4px;">TAM / SAM / SOM by Segment</h3>
+      <table>
+        <thead>
+        <tr>
+          <th>Segment</th>
+          <th>TAM</th>
+          <th>SAM</th>
+          <th>SOM (Target Share)</th>
+          <th>SOM (Capacity)</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td id="seg0_name_out">Enterprise</td>
+          <td id="seg0_tam_out">–</td>
+          <td id="seg0_sam_out">–</td>
+          <td id="seg0_som_share_out">–</td>
+          <td id="seg0_som_cap_out">–</td>
+        </tr>
+        <tr>
+          <td id="seg1_name_out">Mid-Market</td>
+          <td id="seg1_tam_out">–</td>
+          <td id="seg1_sam_out">–</td>
+          <td id="seg1_som_share_out">–</td>
+          <td id="seg1_som_cap_out">–</td>
+        </tr>
+        <tr>
+          <td id="seg2_name_out">SMB</td>
+          <td id="seg2_tam_out">–</td>
+          <td id="seg2_sam_out">–</td>
+          <td id="seg2_som_share_out">–</td>
+          <td id="seg2_som_cap_out">–</td>
+        </tr>
+        <tr>
+          <td class="totals-label">TOTAL</td>
+          <td id="total_tam_row">–</td>
+          <td id="total_sam_row">–</td>
+          <td id="total_som_share_row">–</td>
+          <td id="total_som_cap_row">–</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <span class="badge badge-secondary">Narrative Hints</span>
+      <h3 style="margin-top:4px;">How to Talk to Investors About This Slide</h3>
+      <ul style="padding-left:18px; margin:6px 0; font-size:0.83rem; color:#4b5563;">
+        <li>Lead with the <strong>bottom-up TAM</strong> and show you’ve segmented Enterprise / Mid-Market / SMB.</li>
+        <li>Explain how constraints create SAM (“today we can serve X% of TAM due to geo & product limits”).</li>
+        <li>Anchor SOM in <strong>sales capacity</strong>, not a random “we’ll get 5% of the market”.</li>
+        <li>Use the top-down TAM only as a <strong>sanity check</strong>, not your primary story.</li>
+        <li>Show how SAM and SOM expand over time as you unlock new regions, integrations, and channels.</li>
+      </ul>
+      <p class="explanation">
+        You can copy numbers from the table into your deck and keep this tool as your internal “truth source”.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SEGMENTS = [0, 1, 2];
+
+  function num(id, fallback = 0) {
+    const v = parseFloat(document.getElementById(id).value);
+    return isNaN(v) ? fallback : v;
+  }
+
+  function formatCurrency(value) {
+    if (!isFinite(value) || value < 0) return "–";
+    if (value >= 1_000_000_000) {
+      return "€" + (value / 1_000_000_000).toFixed(2) + "B";
+    } else if (value >= 1_000_000) {
+      return "€" + (value / 1_000_000).toFixed(2) + "M";
+    } else if (value >= 1_000) {
+      return "€" + (value / 1_000).toFixed(2) + "K";
+    }
+    return "€" + value.toFixed(0);
+  }
+
+  function recalc() {
+    // Global constraints
+    const geo = num("geoFilter") / 100;
+    const compliance = num("complianceFilter") / 100;
+    const distribution = num("distributionFilter") / 100;
+    const productFit = num("productFilter") / 100;
+
+    let totalTam = 0;
+    let totalSam = 0;
+    let totalSomShare = 0;
+    let totalSomCapacity = 0;
+
+    SEGMENTS.forEach(i => {
+      const nameInput = document.getElementById(`seg${i}_name`);
+      const segName = nameInput.value || `Segment ${i + 1}`;
+      document.getElementById(`seg${i}_name_out`).textContent = segName;
+
+      const customers = num(`seg${i}_customers`);
+      const arpc = num(`seg${i}_arpc`);
+      const segTam = customers * arpc;
+
+      const segSam = segTam * geo * compliance * distribution * productFit;
+
+      const targetShare = num(`seg${i}_share`) / 100;
+      const reps = num(`seg${i}_reps`);
+      const quota = num(`seg${i}_quota`);
+      const attainment = num(`seg${i}_attainment`) / 100;
+
+      const segSomShare = segSam * targetShare;
+      const segSomCapacity = reps * quota * attainment;
+
+      totalTam += segTam;
+      totalSam += segSam;
+      totalSomShare += segSomShare;
+      totalSomCapacity += segSomCapacity;
+
+      document.getElementById(`seg${i}_tam_out`).textContent = formatCurrency(segTam);
+      document.getElementById(`seg${i}_sam_out`).textContent = formatCurrency(segSam);
+      document.getElementById(`seg${i}_som_share_out`).textContent = formatCurrency(segSomShare);
+      document.getElementById(`seg${i}_som_cap_out`).textContent = formatCurrency(segSomCapacity);
+    });
+
+    // Totals in the table
+    document.getElementById("total_tam_row").textContent = formatCurrency(totalTam);
+    document.getElementById("total_sam_row").textContent = formatCurrency(totalSam);
+    document.getElementById("total_som_share_row").textContent = formatCurrency(totalSomShare);
+    document.getElementById("total_som_cap_row").textContent = formatCurrency(totalSomCapacity);
+
+    // Top-down TAM (optional)
+    const industrySize = num("industrySize");
+    const topDownShare = num("topDownShare") / 100;
+    const topDownTAM = industrySize * topDownShare;
+
+    document.getElementById("tamTopDownValue").textContent =
+      (industrySize > 0 && topDownShare > 0) ? formatCurrency(topDownTAM) : "–";
+
+    if (industrySize > 0 && topDownShare > 0) {
+      document.getElementById("tamTopDownExplanation").textContent =
+        `Top-down TAM = €${industrySize.toLocaleString()} × ${(topDownShare * 100).toFixed(1)}% relevant segment.`;
+    } else {
+      document.getElementById("tamTopDownExplanation").textContent =
+        "Enter industry size and relevant % to generate a top-down TAM for comparison.";
+    }
+
+    // Total TAM explanation
+    document.getElementById("tamTotalValue").textContent = formatCurrency(totalTam);
+    document.getElementById("tamExplanation").textContent =
+      "Total bottom-up TAM = sum of segment TAMs across all defined segments.";
+
+    // SAM totals & explanation
+    document.getElementById("samTotalValue").textContent = formatCurrency(totalSam);
+    document.getElementById("samExplanation").textContent =
+      `SAM is TAM reduced by constraints: ${ (geo*100).toFixed(1) }% geo × ${ (compliance*100).toFixed(1) }% compliance × ` +
+      `${ (distribution*100).toFixed(1) }% distribution × ${ (productFit*100).toFixed(1) }% product/tech-fit (applied across segments).`;
+
+    const chipsRow = document.getElementById("samChips");
+    chipsRow.innerHTML = "";
+    const factors = [
+      { label: "Geo", value: geo },
+      { label: "Compliance", value: compliance },
+      { label: "Distribution", value: distribution },
+      { label: "Product fit", value: productFit }
+    ];
+    factors.forEach(f => {
+      const chip = document.createElement("div");
+      chip.className = "chip";
+      chip.textContent = `${f.label}: ${(f.value * 100).toFixed(1)}%`;
+      chipsRow.appendChild(chip);
+    });
+
+    // SOM totals & explanations
+    const somSharePct = totalSam > 0 ? (totalSomShare / totalSam) * 100 : 0;
+    const somCapacityPct = totalSam > 0 ? (totalSomCapacity / totalSam) * 100 : 0;
+
+    document.getElementById("somTotalShareValue").textContent = formatCurrency(totalSomShare);
+    document.getElementById("somShareExplanation").textContent =
+      totalSam > 0
+        ? `SOM (target-share method) totals ${somSharePct.toFixed(2)}% of SAM across all segments.`
+        : "Enter segment and constraint values to see SOM as a % of SAM.";
+
+    document.getElementById("somTotalCapacityValue").textContent = formatCurrency(totalSomCapacity);
+    document.getElementById("somCapacityExplanation").textContent =
+      totalSam > 0
+        ? `SOM (capacity method) totals ${somCapacityPct.toFixed(2)}% of SAM based on reps × quota × attainment across segments.`
+        : "Capacity-based SOM will appear once TAM and SAM are > 0.";
+  }
+
+  document.getElementById("recalcBtn").addEventListener("click", recalc);
+  // Initial calculation on load
+  recalc();
+</script>
+</body>
+</html>

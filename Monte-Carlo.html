@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Revenue Architecture Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .flow-diagram {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .flow-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .flow-step {
+            flex: 1;
+            min-width: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .flow-step h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .flow-step p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .section-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .section-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #ffeaa7;
+            color: #d63031;
+        }
+
+        .status-ready {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .status-complete {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-group input:disabled {
+            background: #f8f9fa;
+            color: #666;
+            cursor: not-allowed;
+        }
+
+        .linked-value {
+            background: #e3f2fd !important;
+            border-color: #2196f3 !important;
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-reset {
+            background: #dc3545;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .stat-card.linked {
+            background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+            position: relative;
+        }
+
+        .stat-card.linked::before {
+            content: "🔗";
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 18px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 25px 0;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .info-box h4 {
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .info-box p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box.linked {
+            border-left-color: #2196f3;
+        }
+
+        .info-box.linked h4 {
+            color: #2196f3;
+        }
+
+        .data-flow-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+
+        .data-flow-table th,
+        .data-flow-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-flow-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .data-flow-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .link-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #2196f3;
+            color: white;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-container {
+                height: 300px;
+            }
+
+            .flow-arrow {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn" onclick="window.location.href='Goal Seek.html'">Goal Seek</button>
+    <button class="btn" onclick="window.location.href='SaaS-Growth-Sim.html'">SaaS Growth Sim</button>
+<button class="btn" onclick="window.location.href='Unit-Economics-Calculator.html'">Unit Economics</button>
+
+</div>
+    <div class="container">
+        <div class="header">
+            <h1>🔗 Integrated Revenue Architecture Simulator</h1>
+            <p>Connected Monte Carlo simulations - outputs flow from Revenue → Pipeline → Quota</p>
+        </div>
+
+        <!-- Flow Diagram -->
+        <div class="flow-diagram">
+            <div class="flow-steps">
+                <div class="flow-step">
+                    <h3>Step 1: Revenue Forecast</h3>
+                    <p>Model new customer acquisition and ARR growth</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h3>Step 2: Pipeline Analysis</h3>
+                    <p>Convert opportunities to closed revenue</p>
+                </div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">
+                    <h3>Step 3: Quota Attainment</h3>
+                    <p>Allocate revenue across sales team</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 1: Revenue Forecast -->
+        <div class="card">
+            <div class="section-header">
+                <h2>Step 1: Revenue Forecast</h2>
+                <span class="section-status status-ready">Start Here</span>
+            </div>
+
+            <div class="info-box">
+                <h4>🎯 Objective</h4>
+                <p>Model your expected new ARR from customer acquisition. This will determine how many opportunities flow into your sales pipeline.</p>
+                <p><strong>Output:</strong> Expected new customers per month → feeds into Pipeline (Step 2)</p>
+            </div>
+
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>New Customers per Month (Mean)</label>
+                    <input type="number" id="rev_customers_mean" value="25" min="0">
+                </div>
+                <div class="input-group">
+                    <label>New Customers (Std Dev)</label>
+                    <input type="number" id="rev_customers_std" value="5" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Avg Deal Size (Mean) €</label>
+                    <input type="number" id="rev_deal_mean" value="15000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Deal Size (Std Dev) €</label>
+                    <input type="number" id="rev_deal_std" value="3000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Monthly Churn Rate %</label>
+                    <input type="number" id="rev_churn" value="2.5" min="0" max="100" step="0.1">
+                </div>
+                <div class="input-group">
+                    <label>Starting ARR €</label>
+                    <input type="number" id="rev_starting" value="500000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Simulation Months</label>
+                    <input type="number" id="rev_months" value="12" min="1" max="36">
+                </div>
+                <div class="input-group">
+                    <label>Number of Simulations</label>
+                    <input type="number" id="rev_simulations" value="10000" min="100" max="50000">
+                </div>
+            </div>
+
+            <button class="btn" onclick="runRevenueSimulation()">Run Revenue Forecast</button>
+            <button class="btn btn-success" onclick="exportResults('revenue')">Export Results</button>
+
+            <div id="revenue_results"></div>
+        </div>
+
+        <!-- Step 2: Sales Pipeline -->
+        <div class="card">
+            <div class="section-header">
+                <h2>Step 2: Sales Pipeline Analysis</h2>
+                <span class="section-status status-pending" id="pipeline_status">Waiting for Step 1</span>
+            </div>
+
+            <div class="info-box linked">
+                <h4>🔗 Data Flow Integration</h4>
+                <p><strong>Linked Input:</strong> Closed customers from Step 1 + your win rate calculates required opportunities</p>
+                <p><strong>Formula:</strong> Required Opportunities = Closed Customers ÷ (Stage1% × Stage2% × Stage3% × Stage4%)</p>
+                <p><strong>Example:</strong> If you close 25 customers/month with 20% overall win rate, you need 125 opportunities</p>
+                <p><strong>Output:</strong> Expected closed revenue per rep → feeds into Quota (Step 3)</p>
+            </div>
+
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>🔗 Required Opportunities per Month</label>
+                    <input type="number" id="pipe_opps" class="linked-value" value="0" min="1" disabled>
+                </div>
+                <div class="input-group">
+                    <label>📊 Overall Win Rate %</label>
+                    <input type="number" id="pipe_win_rate" class="linked-value" value="0" min="0" max="100" step="0.1" disabled>
+                </div>
+                <div class="input-group">
+                    <label>Avg Deal Size (Mean) €</label>
+                    <input type="number" id="pipe_deal_mean" value="50000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Deal Size (Std Dev) €</label>
+                    <input type="number" id="pipe_deal_std" value="15000" min="0">
+                </div>
+                <div class="input-group">
+                    <label>Discovery → Demo %</label>
+                    <input type="number" id="pipe_stage1" value="60" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Demo → Proposal %</label>
+                    <input type="number" id="pipe_stage2" value="50" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Proposal → Negotiation %</label>
+                    <input type="number" id="pipe_stage3" value="70" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Negotiation → Close %</label>
+                    <input type="number" id="pipe_stage4" value="80" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Number of Simulations</label>
+                    <input type="number" id="pipe_simulations" value="10000" min="100" max="50000">
+                </div>
+            </div>
+
+            <button class="btn" onclick="runPipelineSimulation()" id="pipeline_btn" disabled>Run Pipeline Analysis</button>
+            <button class="btn btn-success" onclick="exportResults('pipeline')">Export Results</button>
+
+            <div id="pipeline_results"></div>
+        </div>
+
+        <!-- Step 3: Quota Attainment -->
+        <div class="card">
+            <div class="section-header">
+                <h2>Step 3: Team Quota Attainment</h2>
+                <span class="section-status status-pending" id="quota_status">Waiting for Step 2</span>
+            </div>
+
+            <div class="info-box linked">
+                <h4>🔗 Data Flow Integration</h4>
+                <p><strong>Linked Input:</strong> Expected revenue per rep from Step 2 becomes the quota target</p>
+                <p><strong>How it works:</strong> Your pipeline closed revenue sets realistic quota targets based on actual conversion data</p>
+                <p><strong>Output:</strong> Team attainment probability and revenue forecast</p>
+            </div>
+
+            <div class="input-grid">
+                <div class="input-group">
+                    <label>Number of Reps</label>
+                    <input type="number" id="quota_reps" value="10" min="1" max="100">
+                </div>
+                <div class="input-group">
+                    <label>🔗 Individual Quota € (from Step 2)</label>
+                    <input type="number" id="quota_target" class="linked-value" value="0" min="0" disabled>
+                </div>
+                <div class="input-group">
+                    <label>Avg Performance % (Mean)</label>
+                    <input type="number" id="quota_perf_mean" value="95" min="0" max="200">
+                </div>
+                <div class="input-group">
+                    <label>Performance Variability (Std Dev) %</label>
+                    <input type="number" id="quota_perf_std" value="25" min="0" max="100">
+                </div>
+                <div class="input-group">
+                    <label>Number of Simulations</label>
+                    <input type="number" id="quota_simulations" value="10000" min="100" max="50000">
+                </div>
+            </div>
+
+            <button class="btn" onclick="runQuotaSimulation()" id="quota_btn" disabled>Run Quota Analysis</button>
+            <button class="btn btn-success" onclick="exportResults('quota')">Export Results</button>
+
+            <div id="quota_results"></div>
+        </div>
+
+        <!-- Integrated Summary -->
+        <div class="card" id="integrated_summary" style="display: none;">
+            <div class="section-header">
+                <h2>🎯 Integrated Revenue Summary</h2>
+                <span class="section-status status-complete">Complete</span>
+            </div>
+
+            <div class="info-box">
+                <h4>End-to-End Revenue Model</h4>
+                <p>This summary shows how your entire revenue engine flows from customer acquisition through quota attainment.</p>
+            </div>
+
+            <div id="integrated_content"></div>
+
+            <button class="btn btn-reset" onclick="resetAllSimulations()">Reset All Simulations</button>
+        </div>
+    </div>
+
+    <script>
+        let simulationData = {
+            revenue: null,
+            pipeline: null,
+            quota: null
+        };
+        let currentChart = null;
+
+        // Box-Muller transform for normal distribution
+        function normalRandom(mean, stdDev) {
+            let u1 = Math.random();
+            let u2 = Math.random();
+            let z0 = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+            return z0 * stdDev + mean;
+        }
+
+        function calculatePercentile(arr, percentile) {
+            const sorted = arr.slice().sort((a, b) => a - b);
+            const index = (percentile / 100) * (sorted.length - 1);
+            const lower = Math.floor(index);
+            const upper = Math.ceil(index);
+            const weight = index % 1;
+            
+            if (lower === upper) return sorted[lower];
+            return sorted[lower] * (1 - weight) + sorted[upper] * weight;
+        }
+
+        function formatCurrency(value) {
+            return '€' + value.toLocaleString('en-IE', {maximumFractionDigits: 0});
+        }
+
+        function formatPercent(value) {
+            return value.toFixed(1) + '%';
+        }
+
+        function runRevenueSimulation() {
+            const customersMean = parseFloat(document.getElementById('rev_customers_mean').value);
+            const customersStd = parseFloat(document.getElementById('rev_customers_std').value);
+            const dealMean = parseFloat(document.getElementById('rev_deal_mean').value);
+            const dealStd = parseFloat(document.getElementById('rev_deal_std').value);
+            const churnRate = parseFloat(document.getElementById('rev_churn').value) / 100;
+            const startingARR = parseFloat(document.getElementById('rev_starting').value);
+            const months = parseInt(document.getElementById('rev_months').value);
+            const numSims = parseInt(document.getElementById('rev_simulations').value);
+
+            let finalARRs = [];
+            let monthlyCustomers = [];
+
+            for (let sim = 0; sim < numSims; sim++) {
+                let currentARR = startingARR;
+                let totalNewCustomers = 0;
+                
+                for (let month = 0; month < months; month++) {
+                    let newCustomers = Math.max(0, Math.round(normalRandom(customersMean, customersStd)));
+                    totalNewCustomers += newCustomers;
+                    
+                    let newRevenue = 0;
+                    for (let i = 0; i < newCustomers; i++) {
+                        newRevenue += Math.max(0, normalRandom(dealMean, dealStd));
+                    }
+                    
+                    let churnedRevenue = currentARR * churnRate;
+                    currentARR = currentARR - churnedRevenue + newRevenue;
+                }
+                
+                finalARRs.push(currentARR);
+                monthlyCustomers.push(Math.round(totalNewCustomers / months));
+            }
+
+            // Store results
+            simulationData.revenue = {
+                finalARR: finalARRs,
+                monthlyCustomers: monthlyCustomers,
+                avgMonthlyCustomers: monthlyCustomers.reduce((a, b) => a + b) / monthlyCustomers.length
+            };
+
+            displayRevenueResults(finalARRs, startingARR, monthlyCustomers);
+            
+            // Calculate overall win rate from pipeline stages
+            const stage1 = parseFloat(document.getElementById('pipe_stage1').value) / 100;
+            const stage2 = parseFloat(document.getElementById('pipe_stage2').value) / 100;
+            const stage3 = parseFloat(document.getElementById('pipe_stage3').value) / 100;
+            const stage4 = parseFloat(document.getElementById('pipe_stage4').value) / 100;
+            const overallWinRate = stage1 * stage2 * stage3 * stage4;
+            
+            // Calculate required opportunities based on closed customers and win rate
+            const requiredOpps = Math.round(simulationData.revenue.avgMonthlyCustomers / overallWinRate);
+            
+            // Enable pipeline simulation and link data
+            document.getElementById('pipe_opps').value = requiredOpps;
+            document.getElementById('pipe_win_rate').value = (overallWinRate * 100).toFixed(1);
+            document.getElementById('pipeline_btn').disabled = false;
+            document.getElementById('pipeline_status').textContent = 'Ready to Run';
+            document.getElementById('pipeline_status').className = 'section-status status-ready';
+        }
+
+        function displayRevenueResults(results, startingARR, monthlyCustomers) {
+            const mean = results.reduce((a, b) => a + b) / results.length;
+            const p10 = calculatePercentile(results, 10);
+            const p50 = calculatePercentile(results, 50);
+            const p90 = calculatePercentile(results, 90);
+            const avgMonthlyCustomers = Math.round(monthlyCustomers.reduce((a, b) => a + b) / monthlyCustomers.length);
+            const growth = ((mean - startingARR) / startingARR) * 100;
+
+            const html = `
+                <div class="results-grid">
+                    <div class="stat-card">
+                        <h3>Expected ARR</h3>
+                        <div class="value">${formatCurrency(mean)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Growth Rate</h3>
+                        <div class="value">${formatPercent(growth)}</div>
+                    </div>
+                    <div class="stat-card linked">
+                        <h3>Closed Customers/Month</h3>
+                        <div class="value">${avgMonthlyCustomers}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Best Case (P90)</h3>
+                        <div class="value">${formatCurrency(p90)}</div>
+                    </div>
+                </div>
+
+                <div class="info-box linked">
+                    <h4>🔗 Data Flowing to Pipeline</h4>
+                    <p><strong>Closed customers per month: ${avgMonthlyCustomers}</strong></p>
+                    <p><strong>Calculation for Step 2:</strong> Required opportunities = ${avgMonthlyCustomers} closed customers ÷ overall win rate</p>
+                    <p>The simulator will calculate how many opportunities you need based on your conversion rates in Step 2.</p>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+
+                <table class="data-flow-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Expected ARR</td>
+                            <td>${formatCurrency(mean)}</td>
+                            <td><span class="link-indicator">Internal Use</span></td>
+                        </tr>
+                        <tr>
+                            <td>Closed Customers/Month</td>
+                            <td>${avgMonthlyCustomers}</td>
+                            <td><span class="link-indicator">→ Step 2</span></td>
+                        </tr>
+                        <tr>
+                            <td>P10 ARR (Conservative)</td>
+                            <td>${formatCurrency(p10)}</td>
+                            <td><span class="link-indicator">Internal Use</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('revenue_results').innerHTML = html;
+            createHistogram('revenueChart', results, 'ARR Distribution');
+        }
+
+        function runPipelineSimulation() {
+            const numOpps = parseInt(document.getElementById('pipe_opps').value);
+            const dealMean = parseFloat(document.getElementById('pipe_deal_mean').value);
+            const dealStd = parseFloat(document.getElementById('pipe_deal_std').value);
+            const stage1 = parseFloat(document.getElementById('pipe_stage1').value) / 100;
+            const stage2 = parseFloat(document.getElementById('pipe_stage2').value) / 100;
+            const stage3 = parseFloat(document.getElementById('pipe_stage3').value) / 100;
+            const stage4 = parseFloat(document.getElementById('pipe_stage4').value) / 100;
+            const numSims = parseInt(document.getElementById('pipe_simulations').value);
+
+            let closedRevenues = [];
+            let closedCounts = [];
+
+            for (let sim = 0; sim < numSims; sim++) {
+                let totalRevenue = 0;
+                let closedDeals = 0;
+
+                for (let i = 0; i < numOpps; i++) {
+                    if (Math.random() > stage1) continue;
+                    if (Math.random() > stage2) continue;
+                    if (Math.random() > stage3) continue;
+                    if (Math.random() > stage4) continue;
+
+                    closedDeals++;
+                    totalRevenue += Math.max(0, normalRandom(dealMean, dealStd));
+                }
+
+                closedRevenues.push(totalRevenue);
+                closedCounts.push(closedDeals);
+            }
+
+            // Store results
+            const avgMonthlyRevenue = closedRevenues.reduce((a, b) => a + b) / closedRevenues.length;
+            const avgClosedDeals = closedCounts.reduce((a, b) => a + b) / closedCounts.length;
+            
+            simulationData.pipeline = {
+                revenues: closedRevenues,
+                counts: closedCounts,
+                avgMonthlyRevenue: avgMonthlyRevenue,
+                avgRevenuePerDeal: avgMonthlyRevenue / avgClosedDeals
+            };
+
+            displayPipelineResults(closedRevenues, closedCounts, numOpps);
+            
+            // Enable quota simulation and link data
+            // Annual quota = Monthly closed revenue * 12 months
+            const annualQuota = Math.round(avgMonthlyRevenue * 12);
+            document.getElementById('quota_target').value = annualQuota;
+            document.getElementById('quota_btn').disabled = false;
+            document.getElementById('quota_status').textContent = 'Ready to Run';
+            document.getElementById('quota_status').className = 'section-status status-ready';
+        }
+
+        function displayPipelineResults(revenues, counts, totalOpps) {
+            const meanRevenue = revenues.reduce((a, b) => a + b) / revenues.length;
+            const meanCount = counts.reduce((a, b) => a + b) / counts.length;
+            const conversionRate = (meanCount / totalOpps) * 100;
+            
+            const p10Rev = calculatePercentile(revenues, 10);
+            const p50Rev = calculatePercentile(revenues, 50);
+            const p90Rev = calculatePercentile(revenues, 90);
+
+            const annualRevenue = meanRevenue * 12;
+
+            const html = `
+                <div class="results-grid">
+                    <div class="stat-card">
+                        <h3>Expected Monthly Revenue</h3>
+                        <div class="value">${formatCurrency(meanRevenue)}</div>
+                    </div>
+                    <div class="stat-card linked">
+                        <h3>Annual Revenue per Rep</h3>
+                        <div class="value">${formatCurrency(annualRevenue)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Win Rate</h3>
+                        <div class="value">${formatPercent(conversionRate)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Avg Deals Closed/Month</h3>
+                        <div class="value">${meanCount.toFixed(1)}</div>
+                    </div>
+                </div>
+
+                <div class="info-box linked">
+                    <h4>🔗 Data Flowing to Quota Attainment</h4>
+                    <p><strong>Annual revenue per rep (${formatCurrency(annualRevenue)})</strong> will automatically become the individual quota target in Step 3.</p>
+                    <p>This ensures quota targets are based on actual pipeline conversion data, not arbitrary numbers.</p>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="pipelineChart"></canvas>
+                </div>
+
+                <table class="data-flow-table">
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Monthly Closed Revenue</td>
+                            <td>${formatCurrency(meanRevenue)}</td>
+                            <td><span class="link-indicator">Internal Use</span></td>
+                        </tr>
+                        <tr>
+                            <td>Annual Revenue (12 months)</td>
+                            <td>${formatCurrency(annualRevenue)}</td>
+                            <td><span class="link-indicator">→ Step 3</span></td>
+                        </tr>
+                        <tr>
+                            <td>Win Rate</td>
+                            <td>${formatPercent(conversionRate)}</td>
+                            <td><span class="link-indicator">Internal Use</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('pipeline_results').innerHTML = html;
+            createHistogram('pipelineChart', revenues, 'Monthly Closed Revenue Distribution');
+        }
+
+        function runQuotaSimulation() {
+            const numReps = parseInt(document.getElementById('quota_reps').value);
+            const quotaTarget = parseFloat(document.getElementById('quota_target').value);
+            const perfMean = parseFloat(document.getElementById('quota_perf_mean').value) / 100;
+            const perfStd = parseFloat(document.getElementById('quota_perf_std').value) / 100;
+            const numSims = parseInt(document.getElementById('quota_simulations').value);
+
+            let teamAttainments = [];
+            let repsAboveQuota = [];
+            let teamRevenues = [];
+
+            for (let sim = 0; sim < numSims; sim++) {
+                let teamTotal = 0;
+                let repsHit = 0;
+
+                for (let rep = 0; rep < numReps; rep++) {
+                    let performance = Math.max(0, normalRandom(perfMean, perfStd));
+                    let repRevenue = quotaTarget * performance;
+                    teamTotal += repRevenue;
+                    
+                    if (performance >= 1.0) repsHit++;
+                }
+
+                let teamAttainment = (teamTotal / (quotaTarget * numReps));
+                teamAttainments.push(teamAttainment);
+                repsAboveQuota.push(repsHit);
+                teamRevenues.push(teamTotal);
+            }
+
+            simulationData.quota = {
+                attainments: teamAttainments,
+                repsHit: repsAboveQuota,
+                teamRevenues: teamRevenues
+            };
+
+            displayQuotaResults(teamAttainments, repsAboveQuota, teamRevenues, numReps, quotaTarget);
+            
+            // Show integrated summary
+            displayIntegratedSummary();
+        }
+
+        function displayQuotaResults(attainments, repsHit, teamRevenues, numReps, quotaTarget) {
+            const meanAttainment = attainments.reduce((a, b) => a + b) / attainments.length;
+            const meanRepsHit = repsHit.reduce((a, b) => a + b) / repsHit.length;
+            const meanTeamRevenue = teamRevenues.reduce((a, b) => a + b) / teamRevenues.length;
+            const probTeamHitsQuota = (attainments.filter(a => a >= 1.0).length / attainments.length) * 100;
+            
+            const p10 = calculatePercentile(attainments, 10);
+            const p50 = calculatePercentile(attainments, 50);
+            const p90 = calculatePercentile(attainments, 90);
+
+            const teamTarget = quotaTarget * numReps;
+
+            const html = `
+                <div class="results-grid">
+                    <div class="stat-card">
+                        <h3>Expected Attainment</h3>
+                        <div class="value">${formatPercent(meanAttainment * 100)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Prob. Hit Team Quota</h3>
+                        <div class="value">${formatPercent(probTeamHitsQuota)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Avg Reps Hit Quota</h3>
+                        <div class="value">${meanRepsHit.toFixed(1)} / ${numReps}</div>
+                    </div>
+                    <div class="stat-card linked">
+                        <h3>Expected Team Revenue</h3>
+                        <div class="value">${formatCurrency(meanTeamRevenue)}</div>
+                    </div>
+                </div>
+
+                <div class="info-box linked">
+                    <h4>🔗 Integrated Revenue Model Complete</h4>
+                    <p><strong>Your end-to-end model is now complete!</strong> Scroll down to see the integrated summary showing how customer acquisition flows through to team revenue.</p>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="quotaChart"></canvas>
+                </div>
+
+                <table class="data-flow-table">
+                    <thead>
+                        <tr>
+                            <th>Scenario</th>
+                            <th>Team Attainment</th>
+                            <th>Total Revenue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Pessimistic (P10)</td>
+                            <td>${formatPercent(p10 * 100)}</td>
+                            <td>${formatCurrency(teamTarget * p10)}</td>
+                        </tr>
+                        <tr>
+                            <td>Expected (P50)</td>
+                            <td>${formatPercent(p50 * 100)}</td>
+                            <td>${formatCurrency(teamTarget * p50)}</td>
+                        </tr>
+                        <tr>
+                            <td>Optimistic (P90)</td>
+                            <td>${formatPercent(p90 * 100)}</td>
+                            <td>${formatCurrency(teamTarget * p90)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('quota_results').innerHTML = html;
+            
+            const attainmentsPct = attainments.map(a => a * 100);
+            createHistogram('quotaChart', attainmentsPct, 'Team Quota Attainment Distribution (%)', true);
+        }
+
+        function displayIntegratedSummary() {
+            if (!simulationData.revenue || !simulationData.pipeline || !simulationData.quota) {
+                return;
+            }
+
+            const numReps = parseInt(document.getElementById('quota_reps').value);
+            const quotaTarget = parseFloat(document.getElementById('quota_target').value);
+            
+            const avgMonthlyCustomers = simulationData.revenue.avgMonthlyCustomers;
+            const winRate = parseFloat(document.getElementById('pipe_win_rate').value) / 100;
+            const requiredOpps = Math.round(avgMonthlyCustomers / winRate);
+            const avgMonthlyRevenue = simulationData.pipeline.avgMonthlyRevenue;
+            const avgAnnualRevPerRep = avgMonthlyRevenue * 12;
+            const meanTeamRevenue = simulationData.quota.teamRevenues.reduce((a,b) => a + b) / simulationData.quota.teamRevenues.length;
+            const meanAttainment = simulationData.quota.attainments.reduce((a,b) => a + b) / simulationData.quota.attainments.length;
+
+            const html = `
+                <div class="info-box">
+                    <h4>Your Integrated Revenue Model</h4>
+                    <p>This model connects all three stages of your revenue engine with data flowing automatically between simulations.</p>
+                </div>
+
+                <table class="data-flow-table">
+                    <thead>
+                        <tr>
+                            <th>Stage</th>
+                            <th>Key Metric</th>
+                            <th>Value</th>
+                            <th>Flows To</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. Revenue Forecast</strong></td>
+                            <td>Closed Customers/Month</td>
+                            <td><strong>${Math.round(avgMonthlyCustomers)}</strong></td>
+                            <td>Pipeline Calculation →</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Pipeline Analysis</strong></td>
+                            <td>Required Opportunities (Win Rate: ${formatPercent(winRate * 100)})</td>
+                            <td><strong>${requiredOpps} opps/month</strong></td>
+                            <td>Annual Revenue →</td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Pipeline Analysis</strong></td>
+                            <td>Annual Revenue per Rep</td>
+                            <td><strong>${formatCurrency(avgAnnualRevPerRep)}</strong></td>
+                            <td>Individual Quota →</td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Quota Attainment</strong></td>
+                            <td>Expected Team Revenue</td>
+                            <td><strong>${formatCurrency(meanTeamRevenue)}</strong></td>
+                            <td>Final Forecast</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="results-grid">
+                    <div class="stat-card">
+                        <h3>Closed Customers</h3>
+                        <div class="value">${Math.round(avgMonthlyCustomers)}/mo</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Required Opportunities</h3>
+                        <div class="value">${requiredOpps}/mo</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Overall Win Rate</h3>
+                        <div class="value">${formatPercent(winRate * 100)}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Team Revenue</h3>
+                        <div class="value">${formatCurrency(meanTeamRevenue)}</div>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h4>💡 Key Insights</h4>
+                    <p><strong>Revenue Flow:</strong> ${Math.round(avgMonthlyCustomers)} closed customers/month requires ${requiredOpps} opportunities at ${formatPercent(winRate * 100)} win rate</p>
+                    <p><strong>Pipeline Math:</strong> ${requiredOpps} opportunities × ${formatPercent(winRate * 100)} win rate = ${Math.round(avgMonthlyCustomers)} closed deals → ${formatCurrency(avgMonthlyRevenue)}/month</p>
+                    <p><strong>Team Revenue:</strong> ${formatCurrency(avgMonthlyRevenue)} monthly pipeline × 12 months × ${numReps} reps = ${formatCurrency(meanTeamRevenue)} annual team revenue</p>
+                    <p><strong>Attainment:</strong> Team is expected to achieve ${formatPercent(meanAttainment * 100)} of quota (${numReps} reps × ${formatCurrency(quotaTarget)} quota)</p>
+                </div>
+
+                <div class="info-box linked">
+                    <h4>🎯 How to Use This Model</h4>
+                    <p><strong>For Planning:</strong> Adjust customer acquisition targets in Step 1 and see how it impacts team revenue in Step 3</p>
+                    <p><strong>For Hiring:</strong> Change "Number of Reps" in Step 3 to model different team sizes</p>
+                    <p><strong>For Process Improvement:</strong> Adjust conversion rates in Step 2 to see impact on quota attainment</p>
+                    <p><strong>For Forecasting:</strong> Use P10/P50/P90 values from each stage to build conservative/expected/optimistic scenarios</p>
+                </div>
+            `;
+
+            document.getElementById('integrated_content').innerHTML = html;
+            document.getElementById('integrated_summary').style.display = 'block';
+        }
+
+        function createHistogram(canvasId, data, title, isPercentage = false) {
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const numBins = 50;
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            const binWidth = (max - min) / numBins;
+            
+            const bins = new Array(numBins).fill(0);
+            const binLabels = [];
+            
+            for (let i = 0; i < numBins; i++) {
+                binLabels.push((min + i * binWidth).toFixed(0));
+            }
+            
+            data.forEach(value => {
+                const binIndex = Math.min(Math.floor((value - min) / binWidth), numBins - 1);
+                bins[binIndex]++;
+            });
+
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            currentChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: binLabels,
+                    datasets: [{
+                        label: 'Frequency',
+                        data: bins,
+                        backgroundColor: 'rgba(102, 126, 234, 0.6)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: title,
+                            font: { size: 16, weight: 'bold' }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Frequency'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: isPercentage ? 'Attainment (%)' : 'Value (€)'
+                            },
+                            ticks: {
+                                maxTicksLimit: 10
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportResults(simulationType) {
+            if (!simulationData[simulationType]) {
+                alert('Please run this simulation first!');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            if (simulationType === 'revenue') {
+                csvContent += "Simulation,Final_ARR,Monthly_Customers\n";
+                simulationData.revenue.finalARR.forEach((value, index) => {
+                    csvContent += `${index + 1},${value.toFixed(2)},${simulationData.revenue.monthlyCustomers[index]}\n`;
+                });
+            } else if (simulationType === 'pipeline') {
+                csvContent += "Simulation,Closed_Revenue,Deals_Closed\n";
+                simulationData.pipeline.revenues.forEach((value, index) => {
+                    csvContent += `${index + 1},${value.toFixed(2)},${simulationData.pipeline.counts[index]}\n`;
+                });
+            } else if (simulationType === 'quota') {
+                csvContent += "Simulation,Team_Attainment_Pct,Reps_Hit_Quota,Team_Revenue\n";
+                simulationData.quota.attainments.forEach((value, index) => {
+                    csvContent += `${index + 1},${(value * 100).toFixed(2)},${simulationData.quota.repsHit[index]},${simulationData.quota.teamRevenues[index].toFixed(2)}\n`;
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `integrated_${simulationType}_results.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function resetAllSimulations() {
+            if (confirm('Are you sure you want to reset all simulations? This will clear all results.')) {
+                simulationData = {
+                    revenue: null,
+                    pipeline: null,
+                    quota: null
+                };
+
+                document.getElementById('revenue_results').innerHTML = '';
+                document.getElementById('pipeline_results').innerHTML = '';
+                document.getElementById('quota_results').innerHTML = '';
+                document.getElementById('integrated_summary').style.display = 'none';
+
+                document.getElementById('pipe_opps').value = 0;
+                document.getElementById('quota_target').value = 0;
+                
+                document.getElementById('pipeline_btn').disabled = true;
+                document.getElementById('quota_btn').disabled = true;
+                
+                document.getElementById('pipeline_status').textContent = 'Waiting for Step 1';
+                document.getElementById('pipeline_status').className = 'section-status status-pending';
+                document.getElementById('quota_status').textContent = 'Waiting for Step 2';
+                document.getElementById('quota_status').className = 'section-status status-pending';
+
+                if (currentChart) {
+                    currentChart.destroy();
+                    currentChart = null;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

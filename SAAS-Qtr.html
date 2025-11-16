@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SaaS Monte Carlo — Segments + Quarterly + Seasonality + AE Ramp + CSV/PDF + Sensitivity</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --ok:#34d399; --warn:#f59e0b; --bad:#f87171; --border:#1f2937; --chip:#334155; --chipText:#cbd5e1; --inputBg:#0b1220; }
+    [data-theme="light"]{ --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --muted:#475569; --accent:#2563eb; --ok:#059669; --warn:#b45309; --bad:#b91c1c; --border:#e5e7eb; --chip:#e2e8f0; --chipText:#334155; --inputBg:#ffffff; }
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica Neue,Arial}
+    .container{max-width:1280px;margin:0 auto}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .title{font-size:clamp(20px,3vw,28px);font-weight:800}
+    .subtitle{color:var(--muted);font-size:14px}
+    .row{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
+    .row-1{display:grid;grid-template-columns:1fr;gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    .card h3{margin:0 0 12px;font-size:16px}
+    .controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .control{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .control label{display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:8px;color:var(--muted);gap:8px}
+    .control .val{color:var(--text);font-weight:700}
+    .control input[type="range"]{width:100%}
+    .control input[type="number"], .control select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{background:var(--chip);color:var(--chipText);border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px}
+    .btnbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    button{cursor:pointer;border:1px solid var(--border);background:var(--accent);color:#fff;font-weight:700;padding:10px 14px;border-radius:10px}
+    button.secondary{background:transparent;color:var(--text)}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .stat{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .stat .k{font-size:12px;color:var(--muted)}
+    .stat .v{font-size:20px;font-weight:800}
+    .badge{padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;display:inline-block}
+    .ok{background:color-mix(in oklab,var(--ok) 18%,transparent);color:var(--ok);border:1px solid color-mix(in oklab,var(--ok) 40%,transparent)}
+    .warn{background:color-mix(in oklab,var(--warn) 18%,transparent);color:var(--warn);border:1px solid color-mix(in oklab,var(--warn) 40%,transparent)}
+    .bad{background:color-mix(in oklab,var(--bad) 18%,transparent);color:var(--bad);border:1px solid color-mix(in oklab,var(--bad) 40%,transparent)}
+    canvas{width:100%;height:320px !important}
+    .footer{margin-top:18px;color:var(--muted);font-size:12px;text-align:center}
+    .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);border:1px solid var(--border);padding:8px 10px;border-radius:999px;background:var(--card)}
+    details{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    details summary{cursor:pointer;color:var(--muted);font-weight:700;margin:-12px -12px 8px -12px;padding:12px}
+    .season-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .season-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px}
+    .season-cell label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .seg-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .seg-box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .seg-box h4{margin:0 0 8px;font-size:14px}
+    .inline-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+    .inline-controls select,.inline-controls label{font-size:13px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="title">SaaS Monte Carlo — Segments + Quarterly + Sensitivity</div>
+        <div class="subtitle">Revenue Forecast • Pipeline • Quota • Seasonality • AE Ramp • CSV/PDF • Per-segment charts • Tornado</div>
+      </div>
+      <div class="btnbar">
+        <span class="switch">
+          <input id="themeToggle" type="checkbox" aria-label="Toggle theme"/>
+          <span>Light / Dark</span>
+        </span>
+        <button id="runBtn">Run Simulation</button>
+        <button id="exportBtn" class="secondary">Export CSV</button>
+        <button id="pdfBtn" class="secondary">Export PDF</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- LEFT: Inputs -->
+      <div class="card">
+        <h3>Core Inputs</h3>
+        <div class="controls-grid" style="margin-top:8px;">
+          <div class="control"><label>Monthly Pipeline (mean, $m) <span class="val">$<span id="pipeVal">2.1</span>m</span></label><input type="range" id="pipe" min="0.5" max="6" step="0.1" value="2.1"><div class="chips"><span class="chip">Normal ±25%</span><span class="chip">Seasonality applies</span></div></div>
+          <div class="control"><label>AE Attainment (mean) <span class="val"><span id="attVal">0.85</span></span></label><input type="range" id="att" min="0.5" max="1.2" step="0.01" value="0.85"><div class="chips"><span class="chip">Caps capacity</span><span class="chip">Normal, clipped</span></div></div>
+          <div class="control"><label>Sales Cycle (months, baseline) <span class="val"><span id="cycleVal">3.0</span></span></label><input type="range" id="cycle" min="1" max="6" step="0.1" value="3.0"><div class="chips"><span class="chip">Normal ±0.8</span><span class="chip">Per-segment delta</span></div></div>
+          <div class="control"><label>Starting ARR ($m)</label><input type="number" id="startArr" value="12" step="0.1" min="0"></div>
+          <div class="control"><label>Target Exit ARR ($m)</label><input type="number" id="targetArr" value="20.5" step="0.1" min="0"></div>
+          <div class="control"><label>Starting Qualified Pipeline ($m)</label><input type="number" id="startPipe" value="5" step="0.1" min="0"></div>
+          <div class="control"><label>AE Headcount (Start)</label><input type="number" id="aeStart" value="12" step="1" min="1"></div>
+          <div class="control"><label>AE Headcount (Mid)</label><input type="number" id="aeMid" value="18" step="1" min="1"></div>
+          <div class="control"><label>AE Headcount (End)</label><input type="number" id="aeEnd" value="24" step="1" min="1"></div>
+          <div class="control"><label>Mid Month (1–12)</label><input type="number" id="aeMidMonth" value="6" step="1" min="1" max="12"></div>
+          <div class="control"><label>Quota per AE ($k ARR / yr)</label><input type="number" id="quota" value="600" step="10" min="100"></div>
+          <div class="control"><label>Churn % (annual GRR loss)</label><input type="number" id="churn" value="6" step="0.5" min="0" max="40"></div>
+          <div class="control"><label>Expansion % (annual)</label><input type="number" id="expansion" value="22" step="1" min="0" max="200"></div>
+        </div>
+
+        <!-- Seasonality -->
+        <details style="margin-top:12px" open>
+          <summary>Monthly Seasonality (multiplier, default 1.00)</summary>
+          <div class="season-grid" id="seasonGrid"></div>
+          <div class="chips"><span class="chip">Normalized to mean ≈ 1.00</span><span class="chip">E.g., Q4 push 1.2×; trim earlier months</span></div>
+        </details>
+
+        <!-- Segments -->
+        <details style="margin-top:12px" open>
+          <summary>Segment Mix & Performance (SMB / Mid-Market / Enterprise)</summary>
+          <div class="seg-grid">
+            <div class="seg-box">
+              <h4>SMB</h4>
+              <div class="control"><label>Mix % of Pipeline <span class="val"><span id="mixSMBVal">30</span>%</span></label><input type="range" id="mixSMB" min="0" max="100" step="1" value="30"></div>
+              <div class="control"><label>Win Rate (mean) <span class="val"><span id="wrSMBVal">0.45</span></span></label><input type="range" id="wrSMB" min="0.05" max="0.9" step="0.01" value="0.45"></div>
+              <div class="control"><label>Avg Deal Size (median, $k) <span class="val"><span id="aspSMBVal">20</span>k</span></label><input type="range" id="aspSMB" min="5" max="60" step="1" value="20"></div>
+              <div class="control"><label>Cycle Δ vs Baseline (mo) <span class="val"><span id="cycSMBVal">-0.5</span></span></label><input type="range" id="cycSMB" min="-2" max="2" step="0.1" value="-0.5"></div>
+            </div>
+            <div class="seg-box">
+              <h4>Mid-Market</h4>
+              <div class="control"><label>Mix % of Pipeline <span class="val"><span id="mixMMVal">45</span>%</span></label><input type="range" id="mixMM" min="0" max="100" step="1" value="45"></div>
+              <div class="control"><label>Win Rate (mean) <span class="val"><span id="wrMMVal">0.35</span></span></label><input type="range" id="wrMM" min="0.05" max="0.9" step="0.01" value="0.35"></div>
+              <div class="control"><label>Avg Deal Size (median, $k) <span class="val"><span id="aspMMVal">50</span>k</span></label><input type="range" id="aspMM" min="10" max="150" step="1" value="50"></div>
+              <div class="control"><label>Cycle Δ vs Baseline (mo) <span class="val"><span id="cycMMVal">0.0</span></span></label><input type="range" id="cycMM" min="-2" max="2" step="0.1" value="0.0"></div>
+            </div>
+            <div class="seg-box">
+              <h4>Enterprise</h4>
+              <div class="control"><label>Mix % of Pipeline <span class="val"><span id="mixENTVal">25</span>%</span></label><input type="range" id="mixENT" min="0" max="100" step="1" value="25"></div>
+              <div class="control"><label>Win Rate (mean) <span class="val"><span id="wrENTVal">0.25</span></span></label><input type="range" id="wrENT" min="0.02" max="0.8" step="0.01" value="0.25"></div>
+              <div class="control"><label>Avg Deal Size (median, $k) <span class="val"><span id="aspENTVal">120</span>k</span></label><input type="range" id="aspENT" min="20" max="500" step="5" value="120"></div>
+              <div class="control"><label>Cycle Δ vs Baseline (mo) <span class="val"><span id="cycENTVal">+1.0</span></span></label><input type="range" id="cycENT" min="-2" max="4" step="0.1" value="1.0"></div>
+            </div>
+          </div>
+          <div class="chips"><span class="chip">Mix auto-normalizes to 100%</span><span class="chip">Win rate ~ Beta(mean, strength=50)</span><span class="chip">ASP ~ Lognormal (σ≈0.30)</span></div>
+        </details>
+
+        <div class="chips" style="margin-top:12px">
+          <span class="chip">Iterations: <strong id="itersLab">10,000</strong></span>
+          <span class="chip">Quarterly churn/expansion from annual</span>
+          <span class="chip">Monthly capacity from AE ramp × attainment</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Summary -->
+      <div class="card">
+        <h3>Topline Summary</h3>
+        <div class="grid-3">
+          <div class="stat"><div class="k">Probability of Hitting Target</div><div class="v" id="pHit">—</div><div id="badgePHit" class="badge">—</div></div>
+          <div class="stat"><div class="k">Exit ARR (P50)</div><div class="v" id="p50">—</div><div class="k">P10–P90 band</div><div id="band">—</div></div>
+          <div class="stat"><div class="k">Bookings vs Capacity (Avg)</div><div class="v" id="capUtil">—</div><div class="k">Avg Bookings / Capacity</div><div id="capDetail">—</div></div>
+        </div>
+        <div class="chips" style="margin-top:12px"><span class="chip">ARR_Q = Retained_Q + Cum New ARR</span><span class="chip">Closes placed by segment sales-cycle lag; monthly capacity cap</span></div>
+      </div>
+    </div>
+
+    <!-- Charts 1 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Revenue Forecast — Exit ARR (Q4) Distribution</h3><canvas id="arrChart"></canvas></div>
+      <div class="card"><h3>Pipeline Analysis — Bookings vs Capacity (CDF)</h3><canvas id="cdfChart"></canvas></div>
+    </div>
+
+    <!-- Charts 2 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Quarterly Exit ARR — P10 / P50 / P90</h3><canvas id="quarterARR"></canvas></div>
+      <div class="card"><h3>Quarterly New ARR — Mean</h3><canvas id="quarterNewARR"></canvas></div>
+    </div>
+
+    <!-- Charts 3 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Quarterly ARR Bridge — Mean Components</h3><canvas id="bridgeChart"></canvas></div>
+      <div class="card"><h3>Quota Attainment — Team % of Quota</h3><canvas id="quotaChart"></canvas></div>
+    </div>
+
+    <!-- Charts 4: Per-seg -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Per-Segment New ARR — Totals (Mean)</h3><canvas id="segTotalsChart"></canvas></div>
+      <div class="card"><h3>Per-Segment New ARR — By Quarter (Mean)</h3><canvas id="segQuarterChart"></canvas></div>
+    </div>
+
+    <!-- Charts 5: Sensitivity -->
+    <div class="row-1" style="margin-top:16px;">
+      <div class="card">
+        <h3>Win-Rate Sensitivity — “Tornado” (Δ vs Base P50 Exit ARR)</h3>
+        <div class="inline-controls">
+          <label>Shock size:
+            <select id="shockPct">
+              <option value="0.05">±5%</option>
+              <option value="0.10" selected>±10%</option>
+              <option value="0.20">±20%</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="sortImpact"> Sort by absolute impact</label>
+        </div>
+        <canvas id="tornadoChart"></canvas>
+      </div>
+      <div class="card">
+        <h3>Per-Segment Win-Rate Sensitivity (± shock) — Δ vs Base P50</h3>
+        <canvas id="segTornadoChart"></canvas>
+      </div>
+      <div class="chips"><span class="chip">Bars show change in P50 Exit ARR (in $m) when only that driver shifts by the selected ±%</span></div>
+    </div>
+
+    <div class="footer">Single HTML file • Segments + Seasonality + AE Ramp • CSV/PDF • Per-segment charts • Tornado (+shock & sorting)</div>
+  </div>
+
+  <script>
+    // ---------- Utils ----------
+    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+    function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+    const normal=(m,s)=>m+s*randn();
+    function lognormal(median, sigma){const mu=Math.log(Math.max(1e-9,median));return Math.exp(mu+sigma*randn());}
+    function betaFromMeanStrength(mean,strength){const m=clamp(mean,1e-6,1-1e-6),s=Math.max(2,strength);return{a:m*s,b:(1-m)*s};}
+    function sampleGamma(k,theta){ if(k<1){const u=Math.random();return sampleGamma(k+1,theta)*Math.pow(u,1/k);} const d=k-1/3,c=1/Math.sqrt(9*d); while(true){const x=randn();const v=Math.pow(1+c*x,3);if(v<=0)continue;const u=Math.random(); if(u<1-0.0331*Math.pow(x,4))return d*v*theta; if(Math.log(u)<0.5*x*x+d*(1-v+Math.log(v)))return d*v*theta;}}
+    function sampleBeta(a,b){const x=sampleGamma(a,1),y=sampleGamma(b,1);return x/(x+y);}
+    const percentile=(arr,p)=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const i=(s.length-1)*p;const lo=Math.floor(i),hi=Math.ceil(i);return lo===hi?s[lo]:s[lo]+(i-lo)*(s[hi]-s[lo]);}
+    const mean=arr=>arr.reduce((a,b)=>a+b,0)/(arr.length||1);
+    function formatMoney(n){const sign=n<0?"-":"";const v=Math.abs(n);let out,u="";if(v>=1e9){out=(v/1e9).toFixed(2);u="bn"}else if(v>=1e6){out=(v/1e6).toFixed(2);u="m"}else if(v>=1e3){out=(v/1e3).toFixed(0);u="k"}else out=v.toFixed(0);return `${sign}$${out}${u?(" "+u):""}`;}
+
+    // ---------- DOM ----------
+    const el=id=>document.getElementById(id);
+    const pipe=el("pipe"), pipeVal=el("pipeVal");
+    const att=el("att"), attVal=el("attVal");
+    const cycle=el("cycle"), cycleVal=el("cycleVal");
+    const startArr=el("startArr"), targetArr=el("targetArr"), startPipe=el("startPipe");
+    const aeStart=el("aeStart"), aeMid=el("aeMid"), aeEnd=el("aeEnd"), aeMidMonth=el("aeMidMonth");
+    const quota=el("quota"), churn=el("churn"), expansion=el("expansion");
+    const runBtn=el("runBtn"), resetBtn=el("resetBtn"), themeToggle=el("themeToggle"), exportBtn=el("exportBtn"), pdfBtn=el("pdfBtn");
+    const pHit=el("pHit"), badgePHit=el("badgePHit"), p50=el("p50"), band=el("band");
+    const capUtil=el("capUtil"), capDetail=el("capDetail");
+    const shockPctEl=el("shockPct"), sortImpactEl=el("sortImpact");
+
+    // Seasonality
+    const seasonGrid=el("seasonGrid");
+    const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const seasonInputs=[];
+    for(let i=0;i<12;i++){
+      const cell=document.createElement("div"); cell.className="season-cell";
+      cell.innerHTML = `<label>${monthNames[i]} <span class="val"><span id="sval${i}">1.00</span>x</span></label><input type="range" min="0.5" max="1.5" step="0.01" value="1.00" id="s${i}">`;
+      seasonGrid.appendChild(cell);
+      const r=el(`s${i}`); const v=el(`sval${i}`);
+      r.addEventListener("input", ()=>{ v.textContent=parseFloat(r.value).toFixed(2); });
+      seasonInputs.push(r);
+    }
+
+    // Segments
+    const mixSMB=el("mixSMB"), mixMM=el("mixMM"), mixENT=el("mixENT");
+    const mixSMBVal=el("mixSMBVal"), mixMMVal=el("mixMMVal"), mixENTVal=el("mixENTVal");
+    const wrSMB=el("wrSMB"), wrMM=el("wrMM"), wrENT=el("wrENT");
+    const wrSMBVal=el("wrSMBVal"), wrMMVal=el("wrMMVal"), wrENTVal=el("wrENTVal");
+    const aspSMB=el("aspSMB"), aspMM=el("aspMM"), aspENT=el("aspENT");
+    const aspSMBVal=el("aspSMBVal"), aspMMVal=el("aspMMVal"), aspENTVal=el("aspENTVal");
+    const cycSMB=el("cycSMB"), cycMM=el("cycMM"), cycENT=el("cycENT");
+    const cycSMBVal=el("cycSMBVal"), cycMMVal=el("cycMMVal"), cycENTVal=el("cycENTVal");
+
+    // Chart helpers
+    function ensureBar(ctx,label,x,y,yTickFmt=v=>v, stacked=false, datasetsOverride=null){
+      if(!ctx._chart){
+        ctx._chart=new Chart(ctx.getContext("2d"),{
+          type:"bar",
+          data: datasetsOverride ? {labels:x,datasets:datasetsOverride} : {labels:x,datasets:[{label,data:y}]},
+          options:{responsive:true,plugins:{legend:{display:!!datasetsOverride}},scales:{x:{grid:{display:false}, stacked},y:{grid:{color:'rgba(127,127,127,0.15)'},ticks:{callback:yTickFmt}, stacked}}}
+        });
+      }else{
+        ctx._chart.data.labels=x; ctx._chart.data.datasets = datasetsOverride ? datasetsOverride : [{label,data:y}];
+        ctx._chart.options.plugins.legend.display = !!datasetsOverride;
+        ctx._chart.options.scales.x.stacked=stacked; ctx._chart.options.scales.y.stacked=stacked;
+        ctx._chart.update();
+      }
+      return ctx._chart;
+    }
+    function ensureStacked(ctx, labels, datasets, yFmt=v=>v){
+      return ensureBar(ctx, "", labels, [], yFmt, true, datasets.map(d=>({label:d.name,data:d.y})));
+    }
+    function ensureLine(ctx,labels,series,yFmt=v=>v){
+      if(!ctx._chart){
+        ctx._chart=new Chart(ctx.getContext("2d"),{
+          type:"line",
+          data:{labels,datasets:series.map(s=>({label:s.name,data:s.y,tension:0.2,pointRadius:0}))},
+          options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(127,127,127,0.15)'},ticks:{callback:yFmt}}}}
+        });
+      }else{
+        ctx._chart.data.labels=labels; ctx._chart.data.datasets=series.map(s=>({label:s.name,data:s.y,tension:0.2,pointRadius:0})); ctx._chart.update();
+      }
+      return ctx._chart;
+    }
+
+    // ---------- Simulation (robust) ----------
+    function getInputs(){
+      return {
+        pipeMean: parseFloat(pipe.value)*1e6,
+        attMean: parseFloat(att.value),
+        cycleBase: parseFloat(cycle.value),
+        startARR: parseFloat(startArr.value)*1e6,
+        targetARR: parseFloat(targetArr.value)*1e6,
+        startPipeM: parseFloat(startPipe.value)*1e6,
+        aeStartV: parseInt(aeStart.value,10),
+        aeMidV: parseInt(aeMid.value,10),
+        aeEndV: parseInt(aeEnd.value,10),
+        aeMidMonthV: clamp(parseInt(aeMidMonth.value,10),1,12),
+        quotaK: parseFloat(quota.value)*1000,
+        churnPct: parseFloat(churn.value)/100,
+        expansionPct: parseFloat(expansion.value)/100,
+        mixRaw: [parseFloat(mixSMB.value), parseFloat(mixMM.value), parseFloat(mixENT.value)],
+        wrMeans: [parseFloat(wrSMB.value), parseFloat(wrMM.value), parseFloat(wrENT.value)],
+        aspMedsK: [parseFloat(aspSMB.value)*1000, parseFloat(aspMM.value)*1000, parseFloat(aspENT.value)*1000],
+        cycDeltas: [parseFloat(cycSMB.value), parseFloat(cycMM.value), parseFloat(cycENT.value)],
+        seasonRaw: seasonInputs.map(r=>parseFloat(r.value)),
+      };
+    }
+
+    function simulate(iterations=10000, overrides={}){
+      const P = { ...getInputs(), ...overrides };
+      const mixSum = (P.mixRaw.reduce((a,b)=>a+b,0)||1);
+      const mix = P.mixRaw.map(x=>x/mixSum);
+      const avgSeason = (P.seasonRaw.reduce((a,b)=>a+b,0)/(P.seasonRaw.length||1))||1;
+      const season = P.seasonRaw.map(x=>x/avgSeason);
+
+      const wrStrength=50, dealSigma=0.30, pipeSd=P.pipeMean*0.25, attSd=Math.max(0.05, P.attMean*0.12), cycleSd=0.8;
+      const betaParams = P.wrMeans.map(m => betaFromMeanStrength(m, wrStrength));
+      const qChurn = 1 - Math.pow(1 - P.churnPct, 1/4);
+      const qExpansion = Math.pow(1 + P.expansionPct, 1/4) - 1;
+
+      // AE ramp monthly
+      const mMid = P.aeMidMonthV - 1;
+      const aeMonthly = new Array(12).fill(0);
+      for(let m=0;m<12;m++){
+        if(m<=mMid){ const t=mMid===0?1:m/mMid; aeMonthly[m]=Math.round(P.aeStartV + t*(P.aeMidV - P.aeStartV)); }
+        else{ const t=(m-mMid)/(11-mMid); aeMonthly[m]=Math.round(P.aeMidV + t*(P.aeEndV - P.aeMidV)); }
+        aeMonthly[m]=Math.max(0,aeMonthly[m]);
+      }
+
+      // collectors
+      const exitQ=[[],[],[],[]];
+      const qNewMeans=[0,0,0,0];
+      const qChurnLossMeans=[0,0,0,0];
+      const qExpansionGainMeans=[0,0,0,0];
+      const exitArrsQ4=[]; const bookingsArr=[]; const capacityArr=[]; const teamQuotaPct=[];
+      const segTotals=[0,0,0];                      // mean new ARR by segment
+      const segQuarter=[ [0,0,0,0], [0,0,0,0], [0,0,0,0] ];
+
+      for(let i=0;i<iterations;i++){
+        const teamAtt=clamp(normal(P.attMean,attSd),0.2,1.5);
+        const monthlyCap=aeMonthly.map(ae => (ae * P.quotaK * teamAtt)/12);
+        const monthlyPipeBase=new Array(12).fill(0).map((_,m)=>Math.max(0, normal(P.pipeMean*season[m], pipeSd)));
+        monthlyPipeBase[0]+=Math.max(0,P.startPipeM);
+
+        const monthlyBookings=new Array(12).fill(0);
+        const monthlyBookingsBySeg=[new Array(12).fill(0), new Array(12).fill(0), new Array(12).fill(0)];
+
+        for(let s=0;s<3;s++){
+          const {a,b} = betaParams[s];
+          const wr = clamp(sampleBeta(a,b),0.01,0.99);
+          const asp = Math.max(5e3, lognormal(P.aspMedsK[s], dealSigma));
+          const cycMean = Math.max(0.1, P.cycleBase + P.cycDeltas[s]);
+
+          for(let m=0;m<12;m++){
+            const pipeSeg = monthlyPipeBase[m] * mix[s];
+            if(pipeSeg<=0) continue;
+            const expectedWon$ = pipeSeg * wr;
+            const lag = Math.max(0, Math.round(normal(cycMean, cycleSd)));
+            const closeMonth = Math.min(11, m + lag);
+            monthlyBookings[closeMonth]+=expectedWon$;
+            monthlyBookingsBySeg[s][closeMonth]+=expectedWon$;
+          }
+        }
+
+        const cappedMonthly = monthlyBookings.map((v,m)=>Math.min(v,monthlyCap[m]));
+        const cappedBySeg = [0,1,2].map(s=> monthlyBookingsBySeg[s].map((v,m)=> {
+          if(monthlyBookings[m]===0) return 0;
+          const share = v / monthlyBookings[m];
+          return Math.min(cappedMonthly[m]*share, v); // proportional cap
+        }));
+
+        const totalBookings = cappedMonthly.reduce((a,b)=>a+b,0);
+        const annualCapacity = monthlyCap.reduce((a,b)=>a+b,0);
+
+        const qNew = [
+          cappedMonthly.slice(0,3).reduce((a,b)=>a+b,0),
+          cappedMonthly.slice(3,6).reduce((a,b)=>a+b,0),
+          cappedMonthly.slice(6,9).reduce((a,b)=>a+b,0),
+          cappedMonthly.slice(9,12).reduce((a,b)=>a+b,0)
+        ];
+
+        // per-seg quarters
+        for(let s=0;s<3;s++){
+          const qSeg = [
+            cappedBySeg[s].slice(0,3).reduce((a,b)=>a+b,0),
+            cappedBySeg[s].slice(3,6).reduce((a,b)=>a+b,0),
+            cappedBySeg[s].slice(6,9).reduce((a,b)=>a+b,0),
+            cappedBySeg[s].slice(9,12).reduce((a,b)=>a+b,0),
+          ];
+          segTotals[s]+= qSeg[0]+qSeg[1]+qSeg[2]+qSeg[3];
+          for(let q=0;q<4;q++) segQuarter[s][q]+=qSeg[q];
+        }
+
+        // retention + exit
+        let retained=P.startARR;
+        const retainedQ=[0,0,0,0], churnLossQ=[0,0,0,0], expansionGainQ=[0,0,0,0];
+        for(let q=0;q<4;q++){
+          const before=retained, afterChurn=before*(1-qChurn), churnLoss=before-afterChurn, afterExpansion=afterChurn*(1+qExpansion), expansionGain=afterExpansion-afterChurn;
+          churnLossQ[q]=churnLoss; expansionGainQ[q]=expansionGain; retained=afterExpansion; retainedQ[q]=retained;
+        }
+        const cumNew=[qNew[0],qNew[0]+qNew[1],qNew[0]+qNew[1]+qNew[2],qNew[0]+qNew[1]+qNew[2]+qNew[3]];
+        const exits=[retainedQ[0]+cumNew[0],retainedQ[1]+cumNew[1],retainedQ[2]+cumNew[2],retainedQ[3]+cumNew[3]];
+
+        for(let q=0;q<4;q++){ exitQ[q].push(exits[q]); qNewMeans[q]+=qNew[q]; qChurnLossMeans[q]+=churnLossQ[q]; qExpansionGainMeans[q]+=expansionGainQ[q]; }
+        exitArrsQ4.push(exits[3]);
+        bookingsArr.push(totalBookings); capacityArr.push(annualCapacity); teamQuotaPct.push(annualCapacity===0?0:(totalBookings/annualCapacity));
+      }
+
+      // stats
+      const qP10=[0,1,2,3].map(i=>percentile(exitQ[i],0.10));
+      const qP50=[0,1,2,3].map(i=>percentile(exitQ[i],0.50));
+      const qP90=[0,1,2,3].map(i=>percentile(exitQ[i],0.90));
+      return {
+        exitArrsQ4, bookingsArr, capacityArr, teamQuotaPct,
+        qP10, qP50, qP90,
+        qNewMeans, qChurnLossMeans, qExpansionGainMeans,
+        segTotals, segQuarter,
+        p50ExitQ4: percentile(exitArrsQ4,0.50),
+        p10ExitQ4: percentile(exitArrsQ4,0.10),
+        p90ExitQ4: percentile(exitArrsQ4,0.90),
+        hitPct: exitArrsQ4.filter(v=>v>=P.targetARR).length/(iterations||1),
+        avgBookings: mean(bookingsArr),
+        avgCapacity: mean(capacityArr),
+        capUtilPct: (mean(bookingsArr)/(mean(capacityArr)||1))
+      };
+    }
+
+    // ---------- Main run (UI + charts) ----------
+    let lastResultsForCSV=null;
+    function runMain(iterations=10000){
+      const res = simulate(iterations);
+
+      // Summary
+      pHit.textContent = (res.hitPct*100).toFixed(1) + "%";
+      badgePHit.textContent = res.hitPct>=0.7?"High Confidence":res.hitPct>=0.4?"Moderate":"Low";
+      badgePHit.className = "badge " + (res.hitPct>=0.7?"ok":res.hitPct>=0.4?"warn":"bad");
+      p50.textContent = formatMoney(res.p50ExitQ4);
+      band.textContent = `${formatMoney(res.p10ExitQ4)} – ${formatMoney(res.p90ExitQ4)}`;
+      capUtil.textContent = (res.capUtilPct*100).toFixed(0) + "%";
+      capDetail.textContent = `${formatMoney(res.avgBookings)} / ${formatMoney(res.avgCapacity)}`;
+
+      // Charts
+      const quarters=["Q1","Q2","Q3","Q4"];
+
+      // Exit histogram
+      const hist = makeHistogram(res.exitArrsQ4.map(v=>v/1e6), 50);
+      ensureBar(document.getElementById("arrChart"),"Exit ARR ($m)", hist.x.map(x=>x.toFixed(1)), hist.y);
+
+      // CDF
+      const bookingsCDF = makeCDF(res.bookingsArr);
+      const cdfX = bookingsCDF.x.map(v=>v/1e6), cdfY=bookingsCDF.y;
+      const cdfCanvas = document.getElementById("cdfChart");
+      if(!cdfCanvas._chart){
+        cdfCanvas._chart = new Chart(cdfCanvas.getContext("2d"), {
+          type:"line",
+          data:{labels:cdfX,datasets:[{label:"CDF of Bookings ($m)",data:cdfY,tension:0.2,pointRadius:0}]},
+          options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},title:{display:true,text:"Bookings ($m)"}},y:{grid:{color:'rgba(127,127,127,0.15)'},min:0,max:1,title:{display:true,text:"Cumulative Probability"}}}}
+        });
+      }else{ const chart=cdfCanvas._chart; chart.data.labels=cdfX; chart.data.datasets[0].data=cdfY; chart.update(); }
+
+      // Quarterly Exit ARR P10/P50/P90
+      ensureLine(document.getElementById("quarterARR"), quarters, [
+        {name:"P10", y: res.qP10.map(v=>v/1e6)},
+        {name:"P50", y: res.qP50.map(v=>v/1e6)},
+        {name:"P90", y: res.qP90.map(v=>v/1e6)}
+      ], v=>formatMoney(v*1e6));
+
+      // Quarterly New ARR mean
+      const qNewMeansM = res.qNewMeans.map(v=> (v/iterations)/1e6 );
+      ensureBar(document.getElementById("quarterNewARR"), "Mean New ARR ($m)", quarters, qNewMeansM, v=>formatMoney(v*1e6));
+
+      // ARR Bridge — mean components
+      const churnMean = res.qChurnLossMeans.map(v=> (v/iterations)/1e6 );
+      const expansMean = res.qExpansionGainMeans.map(v=> (v/iterations)/1e6 );
+      ensureStacked(document.getElementById("bridgeChart"), quarters, [
+        {name:"Churn Loss", y: churnMean.map(x=> -x)},
+        {name:"Expansion Gain", y: expansMean},
+        {name:"New ARR", y: qNewMeansM},
+      ], v=>formatMoney(v*1e6));
+
+      // Quota % histogram
+      const quotaPct = res.teamQuotaPct.map(v=>v*100);
+      const histQ = makeHistogram(quotaPct, 40);
+      ensureBar(document.getElementById("quotaChart"), "Team % of Quota", histQ.x.map(x=>x.toFixed(0)+"%"), histQ.y);
+
+      // Per-segment totals
+      const segNames = ["SMB","Mid-Market","Enterprise"];
+      const segTotalsM = res.segTotals.map(v=> (v/iterations)/1e6 );
+      ensureBar(document.getElementById("segTotalsChart"), "Mean New ARR ($m) by Segment", segNames, segTotalsM, v=>formatMoney(v*1e6));
+
+      // Per-segment per-quarter stacked
+      const segQuarterM = res.segQuarter.map(seg=> seg.map(v=> (v/iterations)/1e6 ));
+      const datasets = [
+        {label:"SMB", data: segQuarterM[0]},
+        {label:"Mid-Market", data: segQuarterM[1]},
+        {label:"Enterprise", data: segQuarterM[2]},
+      ];
+      ensureBar(document.getElementById("segQuarterChart"), "", quarters, [], v=>formatMoney(v*1e6), true, datasets);
+
+      // Save + sensitivity
+      lastResultsForCSV = res;
+      buildTornado(res.p50ExitQ4);
+      buildSegWinrateTornado(res.p50ExitQ4);
+    }
+
+    // ---------- Sensitivity / Tornado ----------
+    function buildTornado(baseP50){
+      const iterations = 3000;
+      const base = getInputs();
+      const f = parseFloat(shockPctEl.value); // 0.05 / 0.10 / 0.20
+      const shocks = [
+        { key:`Pipeline (+${(f*100).toFixed(0)}%)`,  ov:{ pipeMean: base.pipeMean*(1+f) } },
+        { key:`Pipeline (−${(f*100).toFixed(0)}%)`,  ov:{ pipeMean: base.pipeMean*(1-f) } },
+        { key:`Attainment (+${(f*100).toFixed(0)}%)`,ov:{ attMean: base.attMean*(1+f) } },
+        { key:`Attainment (−${(f*100).toFixed(0)}%)`,ov:{ attMean: base.attMean*(1-f) } },
+        { key:`Sales Cycle (−${(f*100).toFixed(0)}%) faster`, ov:{ cycleBase: base.cycleBase*(1-f) } },
+        { key:`Sales Cycle (+${(f*100).toFixed(0)}%) slower`, ov:{ cycleBase: base.cycleBase*(1+f) } },
+        { key:`ASP (+${(f*100).toFixed(0)}%)`, ov:{ aspMedsK: base.aspMedsK.map(x=>x*(1+f)) } },
+        { key:`ASP (−${(f*100).toFixed(0)}%)`, ov:{ aspMedsK: base.aspMedsK.map(x=>x*(1-f)) } },
+        { key:`Win Rate SMB (+${(f*100).toFixed(0)}%)`, ov:{ wrMeans: [base.wrMeans[0]*(1+f), base.wrMeans[1], base.wrMeans[2]] } },
+        { key:`Win Rate SMB (−${(f*100).toFixed(0)}%)`, ov:{ wrMeans: [base.wrMeans[0]*(1-f), base.wrMeans[1], base.wrMeans[2]] } },
+        { key:`Win Rate MM (+${(f*100).toFixed(0)}%)`,  ov:{ wrMeans: [base.wrMeans[0], base.wrMeans[1]*(1+f), base.wrMeans[2]] } },
+        { key:`Win Rate MM (−${(f*100).toFixed(0)}%)`,  ov:{ wrMeans: [base.wrMeans[0], base.wrMeans[1]*(1-f), base.wrMeans[2]] } },
+        { key:`Win Rate ENT (+${(f*100).toFixed(0)}%)`, ov:{ wrMeans: [base.wrMeans[0], base.wrMeans[1], base.wrMeans[2]*(1+f)] } },
+        { key:`Win Rate ENT (−${(f*100).toFixed(0)}%)`, ov:{ wrMeans: [base.wrMeans[0], base.wrMeans[1], base.wrMeans[2]*(1-f)] } },
+      ];
+
+      let results = shocks.map(s=>{
+        const r = simulate(iterations, s.ov);
+        return { label: s.key, delta: (percentile(r.p50ExitQ4? [r.p50ExitQ4] : r.exitArrsQ4, r.p50ExitQ4? 0 : 0.50) - baseP50)/1e6 };
+      });
+      // The above trick keeps compatibility if simulate returns stats only; but we do have exitArrsQ4, so:
+      results = shocks.map(s=>{
+        const r = simulate(iterations, s.ov);
+        return { label: s.key, delta: (percentile(r.exitArrsQ4,0.50) - baseP50)/1e6 };
+      });
+
+      if(sortImpactEl.checked){
+        results.sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+      }
+
+      const labels = results.map(r=>r.label);
+      const values = results.map(r=>r.delta);
+      const canvas = document.getElementById("tornadoChart");
+      if(!canvas._chart){
+        canvas._chart = new Chart(canvas.getContext("2d"), {
+          type: "bar",
+          data: { labels, datasets: [{ label:"Δ to Base P50 (in $m)", data: values }]},
+          options: {
+            indexAxis: "y",
+            responsive: true,
+            plugins: { legend: { display:false }, tooltip: { callbacks: { label: (c)=> `${c.raw>=0?'+':''}${c.raw.toFixed(2)} m` } } },
+            scales: { x: { ticks: { callback: v => `${v>=0?'+':''}${v.toFixed(1)} m` }, grid:{ color:'rgba(127,127,127,0.15)'} }, y: { grid:{ display:false } } }
+          }
+        });
+      }else{
+        const chart = canvas._chart;
+        chart.data.labels = labels; chart.data.datasets[0].data = values; chart.update();
+      }
+    }
+
+    // Per-segment win-rate sensitivity (± shock) side-by-side bars
+    function buildSegWinrateTornado(baseP50){
+      const iterations = 3000;
+      const base = getInputs();
+      const f = parseFloat(shockPctEl.value);
+
+      function runDelta(segIndex, factor){
+        const wr = [...base.wrMeans];
+        wr[segIndex] = wr[segIndex] * factor;
+        const r = simulate(iterations, { wrMeans: wr });
+        return (percentile(r.exitArrsQ4,0.50) - baseP50)/1e6; // in $m
+      }
+
+      let rows = [
+        { seg:"SMB", plus: runDelta(0,1+f), minus: runDelta(0,1-f) },
+        { seg:"Mid-Market", plus: runDelta(1,1+f), minus: runDelta(1,1-f) },
+        { seg:"Enterprise", plus: runDelta(2,1+f), minus: runDelta(2,1-f) },
+      ];
+
+      if(sortImpactEl.checked){
+        rows.sort((a,b)=>Math.max(Math.abs(b.plus),Math.abs(b.minus)) - Math.max(Math.abs(a.plus),Math.abs(a.minus)));
+      }
+
+      const labels = rows.map(r=>r.seg);
+      const plus = rows.map(r=>r.plus);
+      const minus = rows.map(r=>r.minus);
+
+      const ctx = document.getElementById("segTornadoChart");
+      const datasets = [
+        { label:`+${(f*100).toFixed(0)}% Win Rate`, data: plus },
+        { label:`-${(f*100).toFixed(0)}% Win Rate`, data: minus }
+      ];
+      if(!ctx._chart){
+        ctx._chart = new Chart(ctx.getContext("2d"), {
+          type:"bar",
+          data:{ labels, datasets },
+          options:{
+            indexAxis:"y",
+            responsive:true,
+            plugins:{ legend:{ display:true }, tooltip:{ callbacks:{ label:(c)=> `${c.dataset.label}: ${c.raw>=0?'+':''}${c.raw.toFixed(2)} m` } } },
+            scales:{ x:{ ticks:{ callback:v=>`${v>=0?'+':''}${v.toFixed(1)} m` }, grid:{ color:'rgba(127,127,127,0.15)'} }, y:{ grid:{ display:false } } }
+          }
+        });
+      }else{
+        ctx._chart.data.labels = labels;
+        ctx._chart.data.datasets = datasets;
+        ctx._chart.update();
+      }
+    }
+
+    // ---------- Misc helpers ----------
+    function makeHistogram(data,bins=40){
+      const lo=Math.min(...data), hi=Math.max(...data);
+      const width=(hi-lo)/bins || 1;
+      const edges=Array.from({length:bins},(_,i)=>lo+i*width);
+      const counts=new Array(bins).fill(0);
+      data.forEach(v=>{ const idx=Math.min(bins-1, Math.max(0, Math.floor((v-lo)/width))); counts[idx]++ });
+      const centers=edges.map((e,i)=>e+width/2);
+      return {x:centers,y:counts,lo,hi};
+    }
+    function makeCDF(data){
+      const sorted=[...data].sort((a,b)=>a-b);
+      const y=sorted.map((_,i)=>(i+1)/sorted.length);
+      return {x:sorted,y};
+    }
+
+    // CSV (summary quick export)
+    function exportCSV(){
+      if(!lastResultsForCSV){ alert("Run the simulation first."); return; }
+      const iter = 10000;
+      const res = lastResultsForCSV;
+      const cols = ["metric","Q1","Q2","Q3","Q4","Total_or_P50"];
+      let csv = cols.join(",") + "\n";
+      const qNew = res.qNewMeans.map(v=> Math.round(v/iter));
+      csv += `Mean New ARR,$${qNew[0]},$${qNew[1]},$${qNew[2]},$${qNew[3]},$${qNew.reduce((a,b)=>a+b,0)}\n`;
+      const qP50 = res.qP50.map(v=> Math.round(v));
+      csv += `Exit ARR P50,$${qP50[0]},$${qP50[1]},$${qP50[2]},$${qP50[3]},$${Math.round(res.p50ExitQ4)}\n`;
+      const segNames=["SMB","Mid-Market","Enterprise"];
+      for(let s=0;s<3;s++){
+        const segQ = res.segQuarter[s].map(v=>Math.round(v/iter));
+        csv += `Seg ${segNames[s]} New,$${segQ[0]},$${segQ[1]},$${segQ[2]},$${segQ[3]},$${Math.round(res.segTotals[s]/iter)}\n`;
+      }
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = "mc_saas_summary.csv"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    // PDF export (adds both sensitivity charts)
+    async function exportPDF(){
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+      async function addCanvas(title, id){
+        pdf.addPage();
+        pdf.setFontSize(16); pdf.text(title, 40, 40);
+        const c = document.getElementById(id);
+        const img = c.toDataURL("image/png", 1.0);
+        const pw = pdf.internal.pageSize.getWidth()-80, ph = pdf.internal.pageSize.getHeight()-100;
+        const aspect = c.width/c.height;
+        let w=pw, h=w/aspect; if(h>ph){ h=ph; w=h*aspect; }
+        pdf.addImage(img,"PNG",40,60,w,h);
+      }
+      pdf.setFontSize(18); pdf.text("SaaS Monte Carlo — Board Pack", 40, 50);
+      pdf.setFontSize(11); pdf.text("Segments • Quarterly • Seasonality • AE Ramp • Sensitivity", 40, 70);
+      await addCanvas("Exit ARR Distribution","arrChart");
+      await addCanvas("Bookings vs Capacity (CDF)","cdfChart");
+      await addCanvas("Quarterly Exit ARR (P10/P50/P90)","quarterARR");
+      await addCanvas("Quarterly New ARR — Mean","quarterNewARR");
+      await addCanvas("ARR Bridge — Mean","bridgeChart");
+      await addCanvas("Team % of Quota","quotaChart");
+      await addCanvas("Per-Segment Totals","segTotalsChart");
+      await addCanvas("Per-Segment by Quarter","segQuarterChart");
+      await addCanvas("Tornado — All Drivers","tornadoChart");
+      await addCanvas("Per-Segment Win-Rate Sensitivity","segTornadoChart");
+      pdf.save("saas_mc_board_pack.pdf");
+    }
+
+    // UI wiring
+    function syncLabels(){
+      pipeVal.textContent=parseFloat(pipe.value).toFixed(1);
+      attVal.textContent=parseFloat(att.value).toFixed(2);
+      cycleVal.textContent=parseFloat(cycle.value).toFixed(1);
+      mixSMBVal.textContent=parseInt(mixSMB.value,10); mixMMVal.textContent=parseInt(mixMM.value,10); mixENTVal.textContent=parseInt(mixENT.value,10);
+      wrSMBVal.textContent=parseFloat(wrSMB.value).toFixed(2); wrMMVal.textContent=parseFloat(wrMM.value).toFixed(2); wrENTVal.textContent=parseFloat(wrENT.value).toFixed(2);
+      aspSMBVal.textContent=parseInt(aspSMB.value,10); aspMMVal.textContent=parseInt(aspMM.value,10); aspENTVal.textContent=parseInt(aspENT.value,10);
+      cycSMBVal.textContent=(parseFloat(cycSMB.value)>=0?"+":"")+parseFloat(cycSMB.value).toFixed(1);
+      cycMMVal.textContent=(parseFloat(cycMM.value)>=0?"+":"")+parseFloat(cycMM.value).toFixed(1);
+      cycENTVal.textContent=(parseFloat(cycENT.value)>=0?"+":"")+parseFloat(cycENT.value).toFixed(1);
+    }
+    [pipe,att,cycle,mixSMB,mixMM,mixENT,wrSMB,wrMM,wrENT,aspSMB,aspMM,aspENT,cycSMB,cycMM,cycENT].forEach(inp=>inp.addEventListener("input", syncLabels));
+    seasonInputs.forEach(inp=>inp.addEventListener("input", syncLabels));
+    syncLabels();
+
+    runBtn.addEventListener("click", ()=>runMain(10000));
+    exportBtn.addEventListener("click", exportCSV);
+    pdfBtn.addEventListener("click", exportPDF);
+    resetBtn.addEventListener("click", ()=>{
+      pipe.value=2.1; att.value=0.85; cycle.value=3.0;
+      startArr.value=12; targetArr.value=20.5; startPipe.value=5;
+      aeStart.value=12; aeMid.value=18; aeEnd.value=24; aeMidMonth.value=6;
+      churn.value=6; expansion.value=22; quota.value=600;
+      mixSMB.value=30; mixMM.value=45; mixENT.value=25;
+      wrSMB.value=0.45; wrMM.value=0.35; wrENT.value=0.25;
+      aspSMB.value=20; aspMM.value=50; aspENT.value=120;
+      cycSMB.value=-0.5; cycMM.value=0.0; cycENT.value=1.0;
+      seasonInputs.forEach((r,i)=>{ r.value=1.00; document.getElementById(`sval${i}`).textContent="1.00"; });
+      syncLabels(); runMain(10000);
+    });
+    themeToggle.addEventListener("change", ()=>{ document.documentElement.setAttribute("data-theme", themeToggle.checked ? "dark" : "light"); runMain(3000); });
+
+    // Recompute tornadoes on shock/sort changes
+    shockPctEl.addEventListener("change", ()=>{ const p50 = lastResultsForCSV?.p50ExitQ4 || simulate(4000).p50ExitQ4; buildTornado(p50); buildSegWinrateTornado(p50); });
+    sortImpactEl.addEventListener("change", ()=>{ const p50 = lastResultsForCSV?.p50ExitQ4 || simulate(4000).p50ExitQ4; buildTornado(p50); buildSegWinrateTornado(p50); });
+
+    // First run
+    window.addEventListener("DOMContentLoaded", ()=>{ themeToggle.checked=false; runMain(5000); });
+  </script>
+</body>
+</html>

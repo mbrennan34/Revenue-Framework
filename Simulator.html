@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EMEA SaaS Monte Carlo — 2026 (Mid-Market & Enterprise)</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <style>
+    :root { --bg:#0f172a; --card:#111827; --text:#e5e7eb; --muted:#9ca3af; --accent:#60a5fa; --ok:#34d399; --warn:#f59e0b; --bad:#f87171; --border:#1f2937; --chip:#334155; --chipText:#cbd5e1; --inputBg:#0b1220; }
+    [data-theme="light"]{ --bg:#f8fafc; --card:#ffffff; --text:#0f172a; --muted:#475569; --accent:#2563eb; --ok:#059669; --warn:#b45309; --bad:#b91c1c; --border:#e5e7eb; --chip:#e2e8f0; --chipText:#334155; --inputBg:#ffffff; }
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,Helvetica Neue,Arial}
+    .container{max-width:1280px;margin:0 auto}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .title{font-size:clamp(20px,3vw,28px);font-weight:800}
+    .subtitle{color:var(--muted);font-size:14px}
+    .row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+    .row-1{display:grid;grid-template-columns:1fr;gap:16px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+    .card h3{margin:0 0 12px;font-size:16px}
+    .controls-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .twocol{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .control{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .control label{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:8px;color:var(--muted);gap:8px}
+    .control .val{color:var(--text);font-weight:700}
+    .control input[type="range"]{width:100%}
+    .control input[type="number"], .control select{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--text)}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .chip{background:var(--chip);color:var(--chipText);border:1px solid var(--border);border-radius:999px;padding:6px 10px;font-size:12px}
+    .btnbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    button{cursor:pointer;border:1px solid var(--border);background:var(--accent);color:#fff;font-weight:700;padding:10px 14px;border-radius:10px}
+    button.secondary{background:transparent;color:var(--text)}
+    .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .stat{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    .stat .k{font-size:12px;color:var(--muted)}
+    .stat .v{font-size:20px;font-weight:800}
+    .badge{padding:4px 8px;border-radius:999px;font-weight:700;font-size:12px;display:inline-block;border:1px solid transparent}
+    /* Color-mix fallback → explicit rgba shades */
+    .ok{background:rgba(52,211,153,0.18);color:var(--ok);border-color:rgba(52,211,153,0.4)}
+    .warn{background:rgba(245,158,11,0.18);color:var(--warn);border-color:rgba(245,158,11,0.4)}
+    .bad{background:rgba(248,113,113,0.18);color:var(--bad);border-color:rgba(248,113,113,0.4)}
+    canvas{width:100%;height:320px !important}
+    .switch{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);border:1px solid var(--border);padding:8px 10px;border-radius:999px;background:var(--card)}
+    details{background:var(--inputBg);border:1px solid var(--border);border-radius:12px;padding:12px}
+    details summary{cursor:pointer;color:var(--muted);font-weight:700;margin:-12px -12px 8px -12px;padding:12px}
+    .season-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .season-cell{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px}
+    .season-cell label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .inline-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px}
+    .inline-controls select,.inline-controls label{font-size:13px;color:var(--muted)}
+    .diag-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .diag{background:var(--inputBg);border:1px solid var(--border);border-radius:10px;padding:10px}
+    .diag .name{font-size:12px;color:var(--muted);margin-bottom:6px}
+    .diag .val{font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <div class="title">EMEA SaaS Monte Carlo — 2026</div>
+        <div class="subtitle">Two teams: Mid-Market & Enterprise • Monthly flows • Capacity • Seasonality • Churn/Expansion • Sensitivity</div>
+      </div>
+      <div class="btnbar">
+        <span class="switch"><input id="themeToggle" type="checkbox"/><span>Light / Dark</span></span>
+        <button id="runBtn">Run</button>
+        <button id="csvBtn" class="secondary">CSV</button>
+        <button id="jsonCopyBtn" class="secondary">Copy JSON</button>
+        <button id="jsonLoadBtn" class="secondary">Load JSON</button>
+        <button id="pdfBtn" class="secondary">PDF</button>
+        <button id="resetBtn" class="secondary">Reset</button>
+      </div>
+    </div>
+
+    <!-- Diagnostics Panel -->
+    <div class="card" id="diagCard">
+      <h3>Diagnostics</h3>
+      <div class="diag-grid">
+        <div class="diag"><div class="name">Protocol</div><div class="val" id="dProt">—</div><span id="dProtBadge" class="badge">—</span></div>
+        <div class="diag"><div class="name">Chart.js</div><div class="val" id="dChart">—</div><span id="dChartBadge" class="badge">—</span></div>
+        <div class="diag"><div class="name">Canvas → PNG</div><div class="val" id="dCanvas">—</div><span id="dCanvasBadge" class="badge">—</span></div>
+        <div class="diag"><div class="name">Clipboard / Downloads</div><div class="val" id="dApis">—</div><span id="dApisBadge" class="badge">—</span></div>
+      </div>
+      <div class="chips" style="margin-top:10px">
+        <span class="chip" id="serveHint">Tip: If PDF export fails under <code>file://</code>, run a tiny local server: <code>python3 -m http.server 8000</code> and open <code>http://localhost:8000/</code></span>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- LEFT: Inputs -->
+      <div class="card">
+        <h3>Global Assumptions</h3>
+        <div class="controls-grid" style="margin-top:8px;">
+          <div class="control"><label>Starting ARR ($m)</label><input type="number" id="startArr" value="12" step="0.1" min="0"></div>
+          <div class="control"><label>Target Exit ARR ($m)</label><input type="number" id="targetArr" value="21" step="0.1" min="0"></div>
+          <div class="control"><label>Annual Churn % (GRR loss)</label><input type="number" id="churn" value="7" step="0.5" min="0" max="50"></div>
+          <div class="control"><label>Annual Expansion %</label><input type="number" id="expansion" value="18" step="0.5" min="0" max="200"></div>
+          <div class="control"><label>Iterations</label><input type="number" id="iters" value="8000" step="1000" min="1000" max="50000"></div>
+        </div>
+
+        <details style="margin-top:12px" open>
+          <summary>Monthly Seasonality (multiplier; mean auto-normalized to 1.00)</summary>
+          <div class="season-grid" id="seasonGrid"></div>
+          <div class="chips"><span class="chip">Example: Q4 push 1.20×; summer dip 0.9×</span></div>
+        </details>
+
+        <h3 style="margin-top:14px">Mid-Market Team (EMEA)</h3>
+        <div class="twocol">
+          <div class="control"><label>Monthly Pipeline Mean ($m) <span class="val">$<span id="mmPipeLab">1.5</span>m</span></label><input type="range" id="mmPipe" min="0.2" max="5" step="0.1" value="1.5"></div>
+          <div class="control"><label>Start Qualified Pipeline ($m)</label><input type="number" id="mmStartPipe" value="2" step="0.1" min="0"></div>
+          <div class="control"><label>Win Rate (mean) <span class="val"><span id="mmWrLab">0.38</span></span></label><input type="range" id="mmWr" min="0.05" max="0.9" step="0.01" value="0.38"></div>
+          <div class="control"><label>Median Deal Size ($k) <span class="val"><span id="mmAspLab">45</span>k</span></label><input type="range" id="mmAsp" min="10" max="150" step="1" value="45"></div>
+          <div class="control"><label>Sales Cycle Δ vs base (mo) <span class="val"><span id="mmCycLab">-0.3</span></span></label><input type="range" id="mmCyc" min="-2" max="2" step="0.1" value="-0.3"></div>
+          <div class="control"><label>Baseline Sales Cycle (mo)</label><input type="number" id="baseCycle" value="3.0" step="0.1" min="0.5" max="12"></div>
+          <div class="control"><label>Quota per AE ($k ARR/yr)</label><input type="number" id="mmQuota" value="550" step="10" min="100"></div>
+          <div class="control"><label>AE Attainment (mean)</label><input type="number" id="mmAtt" value="0.85" step="0.01" min="0.4" max="1.5"></div>
+        </div>
+        <div class="twocol" style="margin-top:8px">
+          <div class="control"><label>AE Headcount Start</label><input type="number" id="mmAeStart" value="10" min="0" step="1"></div>
+          <div class="control"><label>AE Headcount Mid</label><input type="number" id="mmAeMid" value="14" min="0" step="1"></div>
+          <div class="control"><label>AE Headcount End</label><input type="number" id="mmAeEnd" value="18" min="0" step="1"></div>
+          <div class="control"><label>Mid Month (1–12)</label><input type="number" id="mmMidMonth" value="6" min="1" max="12" step="1"></div>
+        </div>
+
+        <h3 style="margin-top:14px">Enterprise Team (EMEA)</h3>
+        <div class="twocol">
+          <div class="control"><label>Monthly Pipeline Mean ($m) <span class="val">$<span id="entPipeLab">1.2</span>m</span></label><input type="range" id="entPipe" min="0.2" max="5" step="0.1" value="1.2"></div>
+          <div class="control"><label>Start Qualified Pipeline ($m)</label><input type="number" id="entStartPipe" value="3" step="0.1" min="0"></div>
+          <div class="control"><label>Win Rate (mean) <span class="val"><span id="entWrLab">0.28</span></span></label><input type="range" id="entWr" min="0.02" max="0.8" step="0.01" value="0.28"></div>
+          <div class="control"><label>Median Deal Size ($k) <span class="val"><span id="entAspLab">180</span>k</span></label><input type="range" id="entAsp" min="30" max="800" step="5" value="180"></div>
+          <div class="control"><label>Sales Cycle Δ vs base (mo) <span class="val"><span id="entCycLab">+1.2</span></span></label><input type="range" id="entCyc" min="-1" max="6" step="0.1" value="1.2"></div>
+          <div class="control"><label>Quota per AE ($k ARR/yr)</label><input type="number" id="entQuota" value="900" step="10" min="200"></div>
+          <div class="control"><label>AE Attainment (mean)</label><input type="number" id="entAtt" value="0.80" step="0.01" min="0.4" max="1.5"></div>
+        </div>
+        <div class="twocol" style="margin-top:8px">
+          <div class="control"><label>AE Headcount Start</label><input type="number" id="entAeStart" value="6" min="0" step="1"></div>
+          <div class="control"><label>AE Headcount Mid</label><input type="number" id="entAeMid" value="8" min="0" step="1"></div>
+          <div class="control"><label>AE Headcount End</label><input type="number" id="entAeEnd" value="10" min="0" step="1"></div>
+          <div class="control"><label>Mid Month (1–12)</label><input type="number" id="entMidMonth" value="7" min="1" max="12" step="1"></div>
+        </div>
+
+        <div class="chips" style="margin-top:10px">
+          <span class="chip">Win Rate ~ Beta(mean, strength=50)</span>
+          <span class="chip">ASP ~ Lognormal (σ≈0.30)</span>
+          <span class="chip">Pipeline ~ Normal (±25% sd)</span>
+          <span class="chip">Cycle lag adds close delay</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Summary -->
+      <div class="card">
+        <h3>Topline Summary</h3>
+        <div class="grid-3">
+          <div class="stat"><div class="k">Probability of Hitting Target</div><div class="v" id="pHit">—</div><div id="badgePHit" class="badge">—</div></div>
+          <div class="stat"><div class="k">Exit ARR (P50)</div><div class="v" id="p50">—</div><div class="k">P10–P90</div><div id="band">—</div></div>
+          <div class="stat"><div class="k">Bookings vs Capacity (Avg)</div><div class="v" id="capUtil">—</div><div class="k">Avg Bookings / Capacity</div><div id="capDetail">—</div></div>
+        </div>
+        <div class="chips" style="margin-top:12px"><span class="chip">ARR_Q = Retained_Q + Cum New ARR</span><span class="chip">Capacity = AEs × quota × attainment /12</span></div>
+
+        <h3 style="margin-top:16px">Sensitivity Controls</h3>
+        <div class="inline-controls">
+          <label>Shock size:
+            <select id="shockPct">
+              <option value="0.05">±5%</option>
+              <option value="0.10" selected>±10%</option>
+              <option value="0.20">±20%</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="sortImpact"> Sort by |impact|</label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts 1 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Exit ARR (Q4) Distribution</h3><canvas id="arrChart"></canvas></div>
+      <div class="card"><h3>Bookings vs Capacity — CDF</h3><canvas id="cdfChart"></canvas></div>
+    </div>
+
+    <!-- Charts 2 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Quarterly Exit ARR — P10 / P50 / P90</h3><canvas id="quarterARR"></canvas></div>
+      <div class="card"><h3>Quarterly New ARR (Mean)</h3><canvas id="quarterNewARR"></canvas></div>
+    </div>
+
+    <!-- Charts 3 -->
+    <div class="row" style="margin-top:16px;">
+      <div class="card"><h3>Per-Team New ARR — Totals (Mean)</h3><canvas id="teamTotals"></canvas></div>
+      <div class="card"><h3>Per-Team New ARR — By Quarter (Mean)</h3><canvas id="teamQuarter"></canvas></div>
+    </div>
+
+    <!-- Charts 4: Sensitivity -->
+    <div class="row-1" style="margin-top:16px;">
+      <div class="card"><h3>Tornado — All Drivers (Δ vs Base P50, $m)</h3><canvas id="tornadoChart"></canvas></div>
+      <div class="card"><h3>Win-Rate Sensitivity by Team (±shock, Δ vs Base P50, $m)</h3><canvas id="teamWrTornado"></canvas></div>
+      <div class="chips"><span class="chip">Shocks apply to: pipeline, attainment, ASP, cycle, win rates (team-specific).</span></div>
+    </div>
+
+    <div class="chips" style="margin-top:12px">
+      <span class="chip">Single-file app</span>
+      <span class="chip">EMEA Mid-Market & Enterprise</span>
+      <span class="chip">Monthly → Quarterly flows</span>
+      <span class="chip">CSV/PDF/JSON</span>
+    </div>
+  </div>
+
+  <script>
+    // ---------- Utils ----------
+    const el=id=>document.getElementById(id);
+    const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
+    function randn(){let u=0,v=0;while(u===0)u=Math.random();while(v===0)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+    const normal=(m,s)=>m+s*randn();
+    function lognormal(median, sigma){const mu=Math.log(Math.max(1e-9,median));return Math.exp(mu+sigma*randn());}
+    function sampleGamma(k,theta){if(k<1){const u=Math.random();return sampleGamma(k+1,theta)*Math.pow(u,1/k);}const d=k-1/3,c=1/Math.sqrt(9*d);for(;;){const x=randn();const v=Math.pow(1+c*x,3);if(v<=0)continue;const u=Math.random();if(u<1-0.0331*Math.pow(x,4))return d*v*theta;if(Math.log(u)<0.5*x*x+d*(1-v+Math.log(v)))return d*v*theta;}}
+    function sampleBeta(a,b){const x=sampleGamma(a,1),y=sampleGamma(b,1);return x/(x+y);}
+    const percentile=(arr,p)=>{if(!arr.length)return 0;const s=[...arr].sort((a,b)=>a-b);const i=(s.length-1)*p;const lo=Math.floor(i),hi=Math.ceil(i);return lo===hi?s[lo]:s[lo]+(i-lo)*(s[hi]-s[lo]);}
+    const mean=arr=>arr.reduce((a,b)=>a+b,0)/(arr.length||1);
+    const formatMoney=n=>{const sign=n<0?"-":"";const v=Math.abs(n);let out,u="";if(v>=1e9){out=(v/1e9).toFixed(2);u="bn"}else if(v>=1e6){out=(v/1e6).toFixed(2);u="m"}else if(v>=1e3){out=(v/1e3).toFixed(0);u="k"}else out=v.toFixed(0);return `${sign}$${out}${u?(" "+u):""}`;}
+
+    // ---------- Diagnostics ----------
+    function diag(){
+      const prot = location.protocol.replace(':','');
+      el("dProt").textContent = prot.toUpperCase();
+      const protBadge = el("dProtBadge");
+      if(prot==="file"){ protBadge.textContent="Local file mode"; protBadge.className="badge warn"; }
+      else { protBadge.textContent="OK"; protBadge.className="badge ok"; }
+
+      const chartOk = !!window.Chart;
+      el("dChart").textContent = chartOk ? ("v"+Chart.version) : "Not found";
+      el("dChartBadge").className = "badge " + (chartOk ? "ok":"bad");
+      el("dChartBadge").textContent = chartOk ? "Loaded" : "Missing";
+
+      // Canvas export test
+      let can = document.createElement("canvas"); can.width=50; can.height=20;
+      let ctx = can.getContext("2d"); ctx.fillStyle="#000"; ctx.fillRect(0,0,50,20); let pngOk=true;
+      try{ can.toDataURL("image/png"); }catch(e){ pngOk=false; }
+      el("dCanvas").textContent = pngOk ? "Supported" : "Blocked";
+      el("dCanvasBadge").className = "badge " + (pngOk ? "ok":"warn");
+      el("dCanvasBadge").textContent = pngOk ? "OK" : "Might block PDF";
+
+      const clipOk = !!navigator.clipboard;
+      const dlOk = !!window.Blob && !!URL.createObjectURL;
+      el("dApis").textContent = `Clipboard: ${clipOk?"yes":"no"} • Download: ${dlOk?"yes":"no"}`;
+      el("dApisBadge").className = "badge " + (dlOk ? "ok" : "bad");
+      el("dApisBadge").textContent = dlOk ? "OK" : "Downloads blocked";
+
+      // Hint visibility
+      el("serveHint").style.display = (prot==="file") ? "inline-flex" : "none";
+    }
+
+    // ---------- DOM refs ----------
+    const themeToggle=el("themeToggle"), runBtn=el("runBtn"), csvBtn=el("csvBtn"), pdfBtn=el("pdfBtn"), resetBtn=el("resetBtn");
+    const jsonCopyBtn=el("jsonCopyBtn"), jsonLoadBtn=el("jsonLoadBtn");
+    const startArr=el("startArr"), targetArr=el("targetArr"), churn=el("churn"), expansion=el("expansion"), itersEl=el("iters");
+    const mmPipe=el("mmPipe"), mmPipeLab=el("mmPipeLab"), mmStartPipe=el("mmStartPipe"), mmWr=el("mmWr"), mmWrLab=el("mmWrLab"), mmAsp=el("mmAsp"), mmAspLab=el("mmAspLab"), mmCyc=el("mmCyc"), mmCycLab=el("mmCycLab"), baseCycle=el("baseCycle");
+    const mmQuota=el("mmQuota"), mmAtt=el("mmAtt"), mmAeStart=el("mmAeStart"), mmAeMid=el("mmAeMid"), mmAeEnd=el("mmAeEnd"), mmMidMonth=el("mmMidMonth");
+    const entPipe=el("entPipe"), entPipeLab=el("entPipeLab"), entStartPipe=el("entStartPipe"), entWr=el("entWr"), entWrLab=el("entWrLab"), entAsp=el("entAsp"), entAspLab=el("entAspLab"), entCyc=el("entCyc"), entCycLab=el("entCycLab");
+    const entQuota=el("entQuota"), entAtt=el("entAtt"), entAeStart=el("entAeStart"), entAeMid=el("entAeMid"), entAeEnd=el("entAeEnd"), entMidMonth=el("entMidMonth");
+    const pHit=el("pHit"), badgePHit=el("badgePHit"), p50=el("p50"), band=el("band"), capUtil=el("capUtil"), capDetail=el("capDetail");
+    const shockPct=el("shockPct"), sortImpact=el("sortImpact");
+
+    // ---------- Seasonality controls ----------
+    const seasonGrid=el("seasonGrid"); const monthNames=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; const seasonInputs=[];
+    for(let i=0;i<12;i++){
+      const cell=document.createElement("div"); cell.className="season-cell";
+      cell.innerHTML=`<label>${monthNames[i]} <span class="val"><span id="sval${i}">1.00</span>x</span></label>
+      <input type="range" min="0.5" max="1.5" step="0.01" value="1.00" id="s${i}">`;
+      seasonGrid.appendChild(cell);
+      const r=el(`s${i}`), v=el(`sval${i}`); r.addEventListener("input",()=>{v.textContent=parseFloat(r.value).toFixed(2)}); seasonInputs.push(r);
+    }
+
+    // ---------- Label sync ----------
+    function syncLabels(){
+      mmPipeLab.textContent=parseFloat(mmPipe.value).toFixed(1);
+      entPipeLab.textContent=parseFloat(entPipe.value).toFixed(1);
+      mmWrLab.textContent=parseFloat(mmWr.value).toFixed(2);
+      entWrLab.textContent=parseFloat(entWr.value).toFixed(2);
+      mmAspLab.textContent=parseInt(mmAsp.value,10);
+      entAspLab.textContent=parseInt(entAsp.value,10);
+      mmCycLab.textContent=(parseFloat(mmCyc.value)>=0?"+":"")+parseFloat(mmCyc.value).toFixed(1);
+      entCycLab.textContent=(parseFloat(entCyc.value)>=0?"+":"")+parseFloat(entCyc.value).toFixed(1);
+    }
+    [mmPipe,entPipe,mmWr,entWr,mmAsp,entAsp,mmCyc,entCyc].forEach(inp=>inp.addEventListener("input",syncLabels));
+    syncLabels();
+
+    // ---------- Charts helpers ----------
+    function ensureBar(canvas, labels, datasets, horizontal=false, yFmt=null){
+      const ctx=canvas.getContext("2d");
+      if(!canvas._chart){
+        canvas._chart=new Chart(ctx,{
+          type:"bar",
+          data:{labels,datasets},
+          options:{responsive:true,indexAxis: horizontal ? "y":"x",
+            plugins:{legend:{display:datasets.length>1}},
+            scales:{x:{grid:{color:'rgba(127,127,127,0.15)'}},y:{grid:{color:'rgba(127,127,127,0.15)'},ticks:{callback:yFmt||((v)=>v)}}}
+          }
+        });
+      }else{
+        canvas._chart.data.labels=labels; canvas._chart.data.datasets=datasets; canvas._chart.update();
+      }
+    }
+    function ensureLine(canvas, labels, series){
+      const ctx=canvas.getContext("2d");
+      if(!canvas._chart){
+        canvas._chart=new Chart(ctx,{
+          type:"line",
+          data:{labels,datasets:series.map(s=>({label:s.name,data:s.y,tension:0.2,pointRadius:0}))},
+          options:{responsive:true,plugins:{legend:{display:true}},scales:{x:{grid:{color:'rgba(127,127,127,0.15)'}},y:{grid:{color:'rgba(127,127,127,0.15)'}}}}
+        });
+      }else{
+        canvas._chart.data.labels=labels; canvas._chart.data.datasets=series.map(s=>({label:s.name,data:s.y,tension:0.2,pointRadius:0})); canvas._chart.update();
+      }
+    }
+
+    // ---------- Inputs snapshot ----------
+    function getInputs(){
+      return {
+        startARR: parseFloat(startArr.value)*1e6,
+        targetARR: parseFloat(targetArr.value)*1e6,
+        churnPct: parseFloat(churn.value)/100,
+        expansionPct: parseFloat(expansion.value)/100,
+        iters: parseInt(itersEl.value,10),
+
+        season: seasonInputs.map(r=>parseFloat(r.value)),
+
+        baseCycle: parseFloat(baseCycle.value),
+
+        team: {
+          MM: {
+            pipeMean: parseFloat(mmPipe.value)*1e6,
+            startPipe: parseFloat(mmStartPipe.value)*1e6,
+            wrMean: parseFloat(mmWr.value),
+            aspMedianK: parseFloat(mmAsp.value)*1000,
+            cycDelta: parseFloat(mmCyc.value),
+            quotaK: parseFloat(mmQuota.value)*1000,
+            attMean: parseFloat(mmAtt.value),
+            aeStart: parseInt(mmAeStart.value,10),
+            aeMid: parseInt(mmAeMid.value,10),
+            aeEnd: parseInt(mmAeEnd.value,10),
+            midMonth: clamp(parseInt(mmMidMonth.value,10),1,12)
+          },
+          ENT: {
+            pipeMean: parseFloat(entPipe.value)*1e6,
+            startPipe: parseFloat(entStartPipe.value)*1e6,
+            wrMean: parseFloat(entWr.value),
+            aspMedianK: parseFloat(entAsp.value)*1000,
+            cycDelta: parseFloat(entCyc.value),
+            quotaK: parseFloat(entQuota.value)*1000,
+            attMean: parseFloat(entAtt.value),
+            aeStart: parseInt(entAeStart.value,10),
+            aeMid: parseInt(entAeMid.value,10),
+            aeEnd: parseInt(entAeEnd.value,10),
+            midMonth: clamp(parseInt(entMidMonth.value,10),1,12)
+          }
+        },
+        ui:{shockPct: parseFloat(shockPct.value), sortImpact: !!sortImpact.checked, theme: document.documentElement.getAttribute("data-theme")||"light", savedAt: new Date().toISOString()}
+      };
+    }
+
+    // ---------- Simulation ----------
+    function simulate(iter=8000, overrides={}){
+      const P = { ...getInputs(), ...overrides };
+      // normalize seasonality
+      const avgSeason = P.season.reduce((a,b)=>a+b,0)/P.season.length;
+      const season = P.season.map(x=>x/avgSeason);
+
+      const wrStrength=50, dealSigma=0.30;
+      const pipeSdFactor=0.25, attSdFactor=0.12, cycleSd=0.8;
+
+      function aeRamp(aeStart, aeMid, aeEnd, midMonth){
+        const mMid = midMonth-1; const arr=new Array(12).fill(0);
+        for(let m=0;m<12;m++){
+          if(m<=mMid){ const t=(mMid===0?1:m/mMid); arr[m]=Math.round(aeStart + t*(aeMid-aeStart)); }
+          else{ const t=(m-mMid)/(11-mMid); arr[m]=Math.round(aeMid + t*(aeEnd-aeMid)); }
+        }
+        return arr;
+      }
+      const rampMM = aeRamp(P.team.MM.aeStart,P.team.MM.aeMid,P.team.MM.aeEnd,P.team.MM.midMonth);
+      const rampENT = aeRamp(P.team.ENT.aeStart,P.team.ENT.aeMid,P.team.ENT.aeEnd,P.team.ENT.midMonth);
+
+      const exitQ=[[],[],[],[]];
+      const exitArrsQ4=[]; const bookingsArr=[]; const capacityArr=[];
+      const qNewSum=[0,0,0,0];
+      const teamTotals={MM:0, ENT:0};
+      const teamQuarter={MM:[0,0,0,0], ENT:[0,0,0,0]};
+
+      const qChurn = 1 - Math.pow(1 - P.churnPct, 1/4);
+      const qExpansion = Math.pow(1 + P.expansionPct, 1/4) - 1;
+
+      for(let i=0;i<iter;i++){
+        const mmAtt=clamp(normal(P.team.MM.attMean, Math.max(0.05,P.team.MM.attMean*attSdFactor)),0.2,1.5);
+        const entAtt=clamp(normal(P.team.ENT.attMean, Math.max(0.05,P.team.ENT.attMean*attSdFactor)),0.2,1.5);
+
+        const capMM = rampMM.map(ae => (ae * P.team.MM.quotaK * mmAtt)/12);
+        const capENT = rampENT.map(ae => (ae * P.team.ENT.quotaK * entAtt)/12);
+
+        const mmPipeM = new Array(12).fill(0).map((_,m)=>Math.max(0, normal(P.team.MM.pipeMean*season[m], P.team.MM.pipeMean*pipeSdFactor)));
+        const entPipeM = new Array(12).fill(0).map((_,m)=>Math.max(0, normal(P.team.ENT.pipeMean*season[m], P.team.ENT.pipeMean*pipeSdFactor)));
+        mmPipeM[0]+=Math.max(0,P.team.MM.startPipe); entPipeM[0]+=Math.max(0,P.team.ENT.startPipe);
+
+        const mmWR = clamp(sampleBeta(P.team.MM.wrMean*wrStrength, (1-P.team.MM.wrMean)*wrStrength),0.01,0.99);
+        const entWR= clamp(sampleBeta(P.team.ENT.wrMean*wrStrength,(1-P.team.ENT.wrMean)*wrStrength),0.01,0.99);
+        const mmASP = Math.max(5e3, lognormal(P.team.MM.aspMedianK, dealSigma));
+        const entASP= Math.max(5e3, lognormal(P.team.ENT.aspMedianK, dealSigma));
+        const mmCycle = Math.max(0.1, P.baseCycle + P.team.MM.cycDelta);
+        const entCycle= Math.max(0.1, P.baseCycle + P.team.ENT.cycDelta);
+
+        const bookMM=new Array(12).fill(0), bookENT=new Array(12).fill(0);
+        for(let m=0;m<12;m++){
+          const wonMM = mmPipeM[m] * mmWR;
+          const wonENT= entPipeM[m] * entWR;
+          const lagMM = Math.max(0, Math.round(normal(mmCycle, cycleSd)));
+          const lagENT= Math.max(0, Math.round(normal(entCycle, cycleSd)));
+          bookMM[Math.min(11,m+lagMM)]+=wonMM;
+          bookENT[Math.min(11,m+lagENT)]+=wonENT;
+        }
+
+        const totalBookM = bookMM.map((v,m)=>v+bookENT[m]);
+        const capM = capMM.map((v,m)=>v+capENT[m]);
+        const capShareMM = totalBookM.map((t,m)=> t===0 ? 0 : bookMM[m]/t);
+        const capShareENT= totalBookM.map((t,m)=> t===0 ? 0 : bookENT[m]/t);
+        const bookedCappedM = totalBookM.map((t,m)=>Math.min(t, capM[m]));
+        const bookMMCap = bookedCappedM.map((v,m)=>v*capShareMM[m]);
+        const bookENTCap= bookedCappedM.map((v,m)=>v*capShareENT[m]);
+
+        const qMM=[ bookMMCap.slice(0,3).reduce((a,b)=>a+b,0),
+                    bookMMCap.slice(3,6).reduce((a,b)=>a+b,0),
+                    bookMMCap.slice(6,9).reduce((a,b)=>a+b,0),
+                    bookMMCap.slice(9,12).reduce((a,b)=>a+b,0) ];
+        const qENT=[ bookENTCap.slice(0,3).reduce((a,b)=>a+b,0),
+                     bookENTCap.slice(3,6).reduce((a,b)=>a+b,0),
+                     bookENTCap.slice(6,9).reduce((a,b)=>a+b,0),
+                     bookENTCap.slice(9,12).reduce((a,b)=>a+b,0) ];
+        const qNew=[ qMM[0]+qENT[0], qMM[1]+qENT[1], qMM[2]+qENT[2], qMM[3]+qENT[3] ];
+
+        let retained=P.startARR;
+        const retainedQ=[0,0,0,0];
+        for(let q=0;q<4;q++){
+          retained = retained*(1 - qChurn)*(1 + qExpansion);
+          retainedQ[q]=retained;
+        }
+        const cumNew=[qNew[0],qNew[0]+qNew[1],qNew[0]+qNew[1]+qNew[2],qNew[0]+qNew[1]+qNew[2]+qNew[3]];
+        const exits=[retainedQ[0]+cumNew[0],retainedQ[1]+cumNew[1],retainedQ[2]+cumNew[2],retainedQ[3]+cumNew[3]];
+
+        for(let q=0;q<4;q++){ exitQ[q].push(exits[q]); qNewSum[q]+=qNew[q]; }
+        exitArrsQ4.push(exits[3]);
+
+        const totalBookings = bookedCappedM.reduce((a,b)=>a+b,0);
+        const totalCapacity = capM.reduce((a,b)=>a+b,0);
+        bookingsArr.push(totalBookings); capacityArr.push(totalCapacity);
+
+        teamTotals.MM += (qMM[0]+qMM[1]+qMM[2]+qMM[3]);
+        teamTotals.ENT+= (qENT[0]+qENT[1]+qENT[2]+qENT[3]);
+        for(let q=0;q<4;q++){ teamQuarter.MM[q]+=qMM[q]; teamQuarter.ENT[q]+=qENT[q]; }
+      }
+
+      const stats={
+        qP10:[0,1,2,3].map(i=>percentile(exitQ[i],0.10)),
+        qP50:[0,1,2,3].map(i=>percentile(exitQ[i],0.50)),
+        qP90:[0,1,2,3].map(i=>percentile(exitQ[i],0.90)),
+        p50ExitQ4: percentile(exitArrsQ4,0.50),
+        p10ExitQ4: percentile(exitArrsQ4,0.10),
+        p90ExitQ4: percentile(exitArrsQ4,0.90),
+        hitPct: exitArrsQ4.filter(v=>v>=P.targetARR).length/(iter||1),
+        avgBookings: mean(bookingsArr),
+        avgCapacity: mean(capacityArr),
+        capUtilPct: (mean(bookingsArr)/(mean(capacityArr)||1)),
+        qNewMean: qNewSum.map(v=>v/iter),
+        teamTotalsMean:{ MM: teamTotals.MM/iter, ENT: teamTotals.ENT/iter },
+        teamQuarterMean:{ MM: teamQuarter.MM.map(v=>v/iter), ENT: teamQuarter.ENT.map(v=>v/iter) },
+        exitArrsQ4, bookingsArr
+      };
+      return stats;
+    }
+
+    // ---------- Sensitivity ----------
+    function tornado(baseP50){
+      const base=getInputs(); const it=3000; const f=parseFloat(shockPct.value);
+      const shocks=[
+        {k:`MM Pipeline ±${(f*100).toFixed(0)}%`,   up:{team:{MM:{pipeMean:base.team.MM.pipeMean*(1+f)}}}, dn:{team:{MM:{pipeMean:base.team.MM.pipeMean*(1-f)}}}},
+        {k:`ENT Pipeline ±${(f*100).toFixed(0)}%`,  up:{team:{ENT:{pipeMean:base.team.ENT.pipeMean*(1+f)}}}, dn:{team:{ENT:{pipeMean:base.team.ENT.pipeMean*(1-f)}}}},
+        {k:`MM Attainment ±${(f*100).toFixed(0)}%`, up:{team:{MM:{attMean:base.team.MM.attMean*(1+f)}}}, dn:{team:{MM:{attMean:base.team.MM.attMean*(1-f)}}}},
+        {k:`ENT Attainment ±${(f*100).toFixed(0)}%`,up:{team:{ENT:{attMean:base.team.ENT.attMean*(1+f)}}}, dn:{team:{ENT:{attMean:base.team.ENT.attMean*(1-f)}}}},
+        {k:`MM ASP ±${(f*100).toFixed(0)}%`,        up:{team:{MM:{aspMedianK:base.team.MM.aspMedianK*(1+f)}}}, dn:{team:{MM:{aspMedianK:base.team.MM.aspMedianK*(1-f)}}}},
+        {k:`ENT ASP ±${(f*100).toFixed(0)}%`,       up:{team:{ENT:{aspMedianK:base.team.ENT.aspMedianK*(1+f)}}}, dn:{team:{ENT:{aspMedianK:base.team.ENT.aspMedianK*(1-f)}}}},
+        {k:`Base Cycle ±${(f*100).toFixed(0)}%`,    up:{baseCycle: base.baseCycle*(1+f)}, dn:{baseCycle: base.baseCycle*(1-f)}},
+        {k:`MM Win Rate ±${(f*100).toFixed(0)}%`,   up:{team:{MM:{wrMean:base.team.MM.wrMean*(1+f)}}}, dn:{team:{MM:{wrMean:base.team.MM.wrMean*(1-f)}}}},
+        {k:`ENT Win Rate ±${(f*100).toFixed(0)}%`,  up:{team:{ENT:{wrMean:base.team.ENT.wrMean*(1+f)}}}, dn:{team:{ENT:{wrMean:base.team.ENT.wrMean*(1-f)}}}},
+      ];
+      function deepMerge(a,b){const r=JSON.parse(JSON.stringify(a));function rec(t,s){for(const k in s){if(s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])){t[k]=t[k]||{};rec(t[k],s[k])}else{t[k]=s[k]}}}rec(r,b);return r;}
+      let rows=shocks.map(s=>{
+        const up=simulate(it, deepMerge({}, s.up)).p50ExitQ4;
+        const dn=simulate(it, deepMerge({}, s.dn)).p50ExitQ4;
+        return {label:s.k, plus:(up-baseP50)/1e6, minus:(dn-baseP50)/1e6};
+      });
+      if(sortImpact.checked){
+        rows.sort((a,b)=>Math.max(Math.abs(b.plus),Math.abs(b.minus))-Math.max(Math.abs(a.plus),Math.abs(a.minus)));
+      }
+      const labels=rows.map(r=>r.label);
+      const datasets=[{label:"+Δ ($m)",data:rows.map(r=>r.plus)},{label:"−Δ ($m)",data:rows.map(r=>r.minus)}];
+      ensureBar(document.getElementById("tornadoChart"), labels, datasets, true, v=>`${v>=0?'+':''}${v.toFixed(1)} m`);
+
+      const teamRows=[
+        {label:"Mid-Market", plus: rows.find(r=>r.label.startsWith("MM Win Rate")).plus, minus: rows.find(r=>r.label.startsWith("MM Win Rate")).minus},
+        {label:"Enterprise", plus: rows.find(r=>r.label.startsWith("ENT Win Rate")).plus, minus: rows.find(r=>r.label.startsWith("ENT Win Rate")).minus}
+      ];
+      if(sortImpact.checked){
+        teamRows.sort((a,b)=>Math.max(Math.abs(b.plus),Math.abs(b.minus))-Math.max(Math.abs(a.plus),Math.abs(a.minus)));
+      }
+      ensureBar(document.getElementById("teamWrTornado"),
+        teamRows.map(r=>r.label),
+        [{label:"+Δ ($m)",data:teamRows.map(r=>r.plus)},{label:"−Δ ($m)",data:teamRows.map(r=>r.minus)}],
+        true, v=>`${v>=0?'+':''}${v.toFixed(1)} m`);
+    }
+
+    // ---------- Run & Render ----------
+    let lastStats=null;
+    function runMain(){
+      const it = parseInt(itersEl.value,10);
+      const res = simulate(it);
+      lastStats=res;
+
+      pHit.textContent=(res.hitPct*100).toFixed(1)+"%";
+      badgePHit.textContent = res.hitPct>=0.7?"High Confidence":res.hitPct>=0.4?"Moderate":"Low";
+      badgePHit.className="badge "+(res.hitPct>=0.7?"ok":res.hitPct>=0.4?"warn":"bad");
+      p50.textContent=formatMoney(res.p50ExitQ4);
+      band.textContent=`${formatMoney(res.p10ExitQ4)} – ${formatMoney(res.p90ExitQ4)}`;
+      capUtil.textContent=(res.capUtilPct*100).toFixed(0)+"%";
+      capDetail.textContent=`${formatMoney(res.avgBookings)} / ${formatMoney(res.avgCapacity)}`;
+
+      const hist = (data,bins=50)=>{const lo=Math.min(...data), hi=Math.max(...data); const w=(hi-lo)/bins||1; const edges=Array.from({length:bins},(_,i)=>lo+i*w); const counts=new Array(bins).fill(0); data.forEach(v=>{const idx=Math.min(bins-1,Math.max(0,Math.floor((v-lo)/w)));counts[idx]++}); const centers=edges.map((e,i)=>e+w/2); return {x:centers,y:counts};};
+      const histArr = hist(res.exitArrsQ4.map(v=>v/1e6), 50);
+      ensureBar(document.getElementById("arrChart"), histArr.x.map(x=>x.toFixed(1)), [{label:"Count",data:histArr.y}], false);
+
+      const sorted=[...res.bookingsArr].sort((a,b)=>a-b); const cdfY=sorted.map((_,i)=>(i+1)/sorted.length); const cdfX=sorted.map(v=>v/1e6);
+      ensureLine(document.getElementById("cdfChart"), cdfX, [{name:"CDF of Bookings ($m)", y:cdfY}]);
+
+      const qLabels=["Q1","Q2","Q3","Q4"];
+      ensureLine(document.getElementById("quarterARR"), qLabels, [
+        {name:"P10", y: res.qP10.map(v=>v/1e6)},
+        {name:"P50", y: res.qP50.map(v=>v/1e6)},
+        {name:"P90", y: res.qP90.map(v=>v/1e6)}
+      ]);
+
+      ensureBar(document.getElementById("quarterNewARR"), qLabels, [{label:"Mean New ARR ($m)", data: res.qNewMean.map(v=>v/1e6)}], false, v=>formatMoney(v*1e6));
+
+      ensureBar(document.getElementById("teamTotals"), ["Mid-Market","Enterprise"], [{label:"Mean New ARR ($m)", data:[res.teamTotalsMean.MM/1e6, res.teamTotalsMean.ENT/1e6]}], false, v=>formatMoney(v*1e6));
+      ensureBar(document.getElementById("teamQuarter"), qLabels, [
+        {label:"Mid-Market", data: res.teamQuarterMean.MM.map(v=>v/1e6)},
+        {label:"Enterprise", data: res.teamQuarterMean.ENT.map(v=>v/1e6)}
+      ], false, v=>formatMoney(v*1e6));
+
+      tornado(res.p50ExitQ4);
+    }
+
+    // ---------- CSV / JSON / PDF ----------
+    function exportCSV(){
+      if(!lastStats){ alert("Run the simulation first."); return; }
+      const s=lastStats;
+      const rows=[];
+      rows.push(["Metric","Q1","Q2","Q3","Q4","Total/P50"]);
+      rows.push(["Exit ARR P50",
+        Math.round(s.qP50[0]),Math.round(s.qP50[1]),Math.round(s.qP50[2]),Math.round(s.qP50[3]),Math.round(s.p50ExitQ4)]);
+      rows.push(["Mean New ARR",
+        Math.round(s.qNewMean[0]),Math.round(s.qNewMean[1]),Math.round(s.qNewMean[2]),Math.round(s.qNewMean[3]),
+        Math.round(s.qNewMean.reduce((a,b)=>a+b,0))]);
+      rows.push(["Team Mid-Market New",
+        Math.round(s.teamQuarterMean.MM[0]),Math.round(s.teamQuarterMean.MM[1]),Math.round(s.teamQuarterMean.MM[2]),Math.round(s.teamQuarterMean.MM[3]),
+        Math.round(s.teamTotalsMean.MM)]);
+      rows.push(["Team Enterprise New",
+        Math.round(s.teamQuarterMean.ENT[0]),Math.round(s.teamQuarterMean.ENT[1]),Math.round(s.teamQuarterMean.ENT[2]),Math.round(s.teamQuarterMean.ENT[3]),
+        Math.round(s.teamTotalsMean.ENT)]);
+      const csv = rows.map(r=>r.join(",")).join("\n");
+      const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob);
+      const a=document.createElement("a"); a.href=url; a.download="emea_mc_2026_summary.csv"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    }
+
+    async function exportPDF(){
+      try{
+        const { jsPDF } = window.jspdf;
+        if(!jsPDF) throw new Error("jsPDF not loaded");
+        const pdf=new jsPDF({orientation:"landscape",unit:"pt",format:"a4"});
+
+        async function addCanvas(title,id){
+          pdf.addPage(); pdf.setFontSize(16); pdf.text(title,40,40);
+          const c=document.getElementById(id);
+          // toDataURL can be blocked under some file:// policies
+          const img=c.toDataURL("image/png");
+          const pw=pdf.internal.pageSize.getWidth()-80, ph=pdf.internal.pageSize.getHeight()-100;
+          const aspect=c.width/c.height; let w=pw, h=w/aspect; if(h>ph){h=ph; w=h*aspect;} 
+          pdf.addImage(img,"PNG",40,60,w,h);
+        }
+        pdf.setFontSize(18); pdf.text("EMEA SaaS Monte Carlo — 2026", 40, 50);
+        pdf.setFontSize(11); pdf.text("Mid-Market & Enterprise • Monthly flows • Capacity • Sensitivity", 40, 70);
+        await addCanvas("Exit ARR Distribution","arrChart");
+        await addCanvas("Bookings vs Capacity (CDF)","cdfChart");
+        await addCanvas("Quarterly Exit ARR — P10/P50/P90","quarterARR");
+        await addCanvas("Quarterly New ARR — Mean","quarterNewARR");
+        await addCanvas("Per-Team New ARR — Totals","teamTotals");
+        await addCanvas("Per-Team New ARR — By Quarter","teamQuarter");
+        await addCanvas("Tornado — All Drivers","tornadoChart");
+        await addCanvas("Team Win-Rate Sensitivity","teamWrTornado");
+        pdf.save("emea_saas_mc_2026_boardpack.pdf");
+      }catch(e){
+        const prot = location.protocol.replace(':','');
+        const tip = prot==="file" ? "\nHint: Some browsers block canvas export for local files.\nRun a tiny local server:\n  python3 -m http.server 8000\nthen open http://localhost:8000/" : "";
+        alert("PDF export failed: "+(e && e.message ? e.message : e)+tip);
+      }
+    }
+
+    async function copyJSON(){
+      const data=getInputs(); const json=JSON.stringify(data,null,2);
+      try{ await navigator.clipboard.writeText(json); alert("Assumptions copied to clipboard."); }
+      catch(e){ const blob=new Blob([json],{type:"application/json"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download="emea_mc_2026_assumptions.json"; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    }
+    function loadJSON(){
+      const txt=prompt("Paste assumptions JSON:"); if(!txt) return;
+      try{
+        const obj=JSON.parse(txt);
+        if(obj.startARR!=null) startArr.value=(obj.startARR/1e6);
+        if(obj.targetARR!=null) targetArr.value=(obj.targetARR/1e6);
+        if(obj.churnPct!=null) churn.value=(obj.churnPct*100);
+        if(obj.expansionPct!=null) expansion.value=(obj.expansionPct*100);
+        if(obj.iters!=null) itersEl.value=obj.iters;
+        if(obj.baseCycle!=null) baseCycle.value=obj.baseCycle;
+        if(Array.isArray(obj.season)&&obj.season.length===12){ obj.season.forEach((v,i)=>{seasonInputs[i].value=v; const lab=document.getElementById(`sval${i}`); if(lab) lab.textContent=parseFloat(v).toFixed(2);}); }
+
+        const t=obj.team||{};
+        const M=t.MM||{}, E=t.ENT||{};
+        if(M.pipeMean!=null) mmPipe.value=(M.pipeMean/1e6);
+        if(M.startPipe!=null) mmStartPipe.value=(M.startPipe/1e6);
+        if(M.wrMean!=null) mmWr.value=M.wrMean;
+        if(M.aspMedianK!=null) mmAsp.value=Math.round(M.aspMedianK/1000);
+        if(M.cycDelta!=null) mmCyc.value=M.cycDelta;
+        if(M.quotaK!=null) mmQuota.value=Math.round(M.quotaK/1000);
+        if(M.attMean!=null) mmAtt.value=M.attMean;
+        if(M.aeStart!=null) mmAeStart.value=M.aeStart;
+        if(M.aeMid!=null) mmAeMid.value=M.aeMid;
+        if(M.aeEnd!=null) mmAeEnd.value=M.aeEnd;
+        if(M.midMonth!=null) mmMidMonth.value=M.midMonth;
+
+        if(E.pipeMean!=null) entPipe.value=(E.pipeMean/1e6);
+        if(E.startPipe!=null) entStartPipe.value=(E.startPipe/1e6);
+        if(E.wrMean!=null) entWr.value=E.wrMean;
+        if(E.aspMedianK!=null) entAsp.value=Math.round(E.aspMedianK/1000);
+        if(E.cycDelta!=null) entCyc.value=E.cycDelta;
+        if(E.quotaK!=null) entQuota.value=Math.round(E.quotaK/1000);
+        if(E.attMean!=null) entAtt.value=E.attMean;
+        if(E.aeStart!=null) entAeStart.value=E.aeStart;
+        if(E.aeMid!=null) entAeMid.value=E.aeMid;
+        if(E.aeEnd!=null) entAeEnd.value=E.aeEnd;
+        if(E.midMonth!=null) entMidMonth.value=E.midMonth;
+
+        if(obj.ui){ if(obj.ui.shockPct!=null) shockPct.value=obj.ui.shockPct; if(obj.ui.sortImpact!=null) sortImpact.checked=!!obj.ui.sortImpact; if(obj.ui.theme){ document.documentElement.setAttribute("data-theme",obj.ui.theme); themeToggle.checked=(obj.ui.theme==="dark"); } }
+        syncLabels(); runMain();
+      }catch(e){ alert("Invalid JSON: "+e.message); }
+    }
+
+    // ---------- Wire up ----------
+    runBtn.addEventListener("click",runMain);
+    csvBtn.addEventListener("click",exportCSV);
+    pdfBtn.addEventListener("click",exportPDF);
+    jsonCopyBtn.addEventListener("click",copyJSON);
+    jsonLoadBtn.addEventListener("click",loadJSON);
+    resetBtn.addEventListener("click",()=>{ document.location.reload(); });
+    themeToggle.addEventListener("change",()=>{ document.documentElement.setAttribute("data-theme", themeToggle.checked?"dark":"light"); });
+
+    shockPct.addEventListener("change", ()=>{ if(lastStats) tornado(lastStats.p50ExitQ4); });
+    sortImpact.addEventListener("change", ()=>{ if(lastStats) tornado(lastStats.p50ExitQ4); });
+
+    window.addEventListener("DOMContentLoaded", ()=>{ diag(); themeToggle.checked=false; runMain(); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competitive Intelligence Battle Cards</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* Navigation buttons */
+        .controls {
+            max-width: 1400px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Controls Bar */
+        .controls-bar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .competitor-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .competitor-selector label {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+
+        .competitor-selector select {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            cursor: pointer;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .control-btn.new {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .control-btn.delete {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+        }
+
+        .control-btn.export {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .save-indicator {
+            text-align: right;
+            color: #718096;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            background: white;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #f7fafc;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-btn:hover {
+            background: #edf2f7;
+        }
+
+        .tab-btn.active:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+
+        /* Content Card */
+        .content-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            display: none;
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 1.8em;
+            color: #2d3748;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Overview Section */
+        .overview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .info-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .info-input {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .info-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea.info-input {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* SWOT Grid */
+        .swot-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .swot-box {
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid;
+        }
+
+        .swot-box.strengths {
+            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
+            border-left-color: #48bb78;
+        }
+
+        .swot-box.weaknesses {
+            background: linear-gradient(135deg, #fed7d7 0%, #fc8181 100%);
+            border-left-color: #e53e3e;
+        }
+
+        .swot-box.opportunities {
+            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+            border-left-color: #4299e1;
+        }
+
+        .swot-box.threats {
+            background: linear-gradient(135deg, #feebc8 0%, #fbd38d 100%);
+            border-left-color: #ed8936;
+        }
+
+        .swot-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .swot-textarea {
+            width: 100%;
+            min-height: 150px;
+            border: 2px solid rgba(255,255,255,0.8);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            background: rgba(255,255,255,0.5);
+            resize: vertical;
+        }
+
+        .swot-textarea:focus {
+            outline: none;
+            background: white;
+        }
+
+        /* Positioning Grid */
+        .positioning-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .positioning-card {
+            background: linear-gradient(135deg, #f0f4ff 0%, #e8edff 100%);
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 5px solid #667eea;
+        }
+
+        .positioning-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        /* Objection Handling */
+        .objection-item {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .objection-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .objection-content {
+            flex: 1;
+            margin-right: 15px;
+        }
+
+        .objection-text {
+            font-weight: 600;
+            color: #e53e3e;
+            margin-bottom: 10px;
+        }
+
+        .objection-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .objection-textarea:focus {
+            outline: none;
+            border-color: #e53e3e;
+        }
+
+        .objection-response {
+            font-weight: 600;
+            color: #48bb78;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .response-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .response-textarea:focus {
+            outline: none;
+            border-color: #48bb78;
+        }
+
+        .delete-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background: #c53030;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+            transform: translateY(-2px);
+        }
+
+        /* Win Loss Tracker */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            border-top: 4px solid #667eea;
+        }
+
+        .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #4a5568;
+            margin-top: 5px;
+        }
+
+        .win-loss-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .win-loss-item {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            border-left: 4px solid;
+            width: 100%;
+        }
+
+        .win-loss-item.win {
+            border-left-color: #48bb78;
+        }
+
+        .win-loss-item.loss {
+            border-left-color: #e53e3e;
+        }
+
+        .win-loss-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .win-loss-content {
+            width: 100%;
+        }
+
+        .win-loss-badge {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .win-loss-badge.win {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .win-loss-badge.loss {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+
+        .deal-name-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .deal-name-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .deal-reason-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+
+        .deal-reason-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .deal-date-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .deal-date-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* Quick Reference */
+        .quick-ref-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .quick-ref-card {
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+            border-radius: 12px;
+            padding: 25px;
+            border-left: 5px solid #f39c12;
+            width: 100%;
+        }
+
+        .quick-ref-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #d68910;
+            margin-bottom: 15px;
+        }
+
+        .quick-ref-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid rgba(243, 156, 18, 0.3);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            background: white;
+            resize: vertical;
+            line-height: 1.6;
+            box-sizing: border-box;
+        }
+
+        .quick-ref-textarea:focus {
+            outline: none;
+            border-color: #f39c12;
+            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.1);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .controls, .controls-bar, .tab-nav, .delete-btn, .add-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+  <button class="btn" onclick="window.location.href='Territory-Plan.html'">Territory Plan</button>
+        <button class="btn" onclick="window.location.href='sales-triggers-messaging.html'">Messaging Library</button>
+        <button class="btn" onclick="window.location.href='Command-Message.html'">Command of Message</button>
+        <button class="btn" onclick="window.location.href='Miller-Heiman.html'">Miller Heiman</button>
+        <button class="btn" onclick="window.location.href='one2one3.html'">1:1 Tracker</button>
+<button class="top-nav-btn" onclick="window.location.href='moscow-sales-coaching.html'">Coaching</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>⚔️ Competitive Intelligence Battle Cards</h1>
+            <p class="subtitle">Know your competitors inside and out - Win more deals</p>
+        </header>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="controls-grid">
+                <div class="competitor-selector">
+                    <label for="competitor-select">Select Competitor:</label>
+                    <select id="competitor-select" onchange="switchCompetitor(this.value)"></select>
+                </div>
+                <div class="action-buttons">
+                    <button class="control-btn new" onclick="createNewCompetitor()">+ New Competitor</button>
+                    <button class="control-btn delete" onclick="deleteCompetitor()">🗑️ Delete</button>
+                    <button class="control-btn export" onclick="exportToPDF()">📄 Export PDF</button>
+                    <button class="control-btn" style="background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);" onclick="loadSampleData()">📥 Load Samples</button>
+                </div>
+            </div>
+            <div class="save-indicator">
+                <span id="save-indicator">🟢 Auto-save enabled</span>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('overview')">📋 Overview</button>
+            <button class="tab-btn" onclick="showTab('swot')">🎯 SWOT Analysis</button>
+            <button class="tab-btn" onclick="showTab('positioning')">💡 Positioning</button>
+            <button class="tab-btn" onclick="showTab('objections')">🛡️ Objection Handling</button>
+            <button class="tab-btn" onclick="showTab('winloss')">📊 Win/Loss Analysis</button>
+            <button class="tab-btn" onclick="showTab('quickref')">⚡ Quick Reference</button>
+        </div>
+
+        <!-- Overview Tab -->
+        <div id="overview" class="content-card active">
+            <div class="section-header">
+                <div class="section-title">📋 Competitor Overview</div>
+            </div>
+            <div class="overview-grid">
+                <div class="info-group">
+                    <label class="info-label">Competitor Name</label>
+                    <input type="text" class="info-input" id="comp-name" placeholder="Enter competitor name">
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Website</label>
+                    <input type="text" class="info-input" id="comp-website" placeholder="https://competitor.com">
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Company Size</label>
+                    <input type="text" class="info-input" id="comp-size" placeholder="e.g., 500-1000 employees">
+                </div>
+                <div class="info-group">
+                    <label class="info-label">Market Position</label>
+                    <select class="info-input" id="comp-position">
+                        <option value="">Select...</option>
+                        <option value="leader">Market Leader</option>
+                        <option value="challenger">Challenger</option>
+                        <option value="niche">Niche Player</option>
+                        <option value="emerging">Emerging</option>
+                    </select>
+                </div>
+            </div>
+            <div class="info-group">
+                <label class="info-label">Company Description</label>
+                <textarea class="info-input" id="comp-description" placeholder="Brief overview of the company and their main offerings..."></textarea>
+            </div>
+            <div class="info-group">
+                <label class="info-label">Target Customer Profile</label>
+                <textarea class="info-input" id="comp-target" placeholder="Who do they typically sell to? Industry, company size, etc..."></textarea>
+            </div>
+            <div class="info-group">
+                <label class="info-label">Pricing Model</label>
+                <textarea class="info-input" id="comp-pricing" placeholder="How do they price? What's their typical range?"></textarea>
+            </div>
+        </div>
+
+        <!-- SWOT Tab -->
+        <div id="swot" class="content-card">
+            <div class="section-header">
+                <div class="section-title">🎯 SWOT Analysis</div>
+            </div>
+            <div class="swot-grid">
+                <div class="swot-box strengths">
+                    <div class="swot-title">💪 Their Strengths</div>
+                    <textarea class="swot-textarea" id="swot-strengths" placeholder="What are they good at? Brand recognition? Technology? Market share?"></textarea>
+                </div>
+                <div class="swot-box weaknesses">
+                    <div class="swot-title">🎯 Their Weaknesses</div>
+                    <textarea class="swot-textarea" id="swot-weaknesses" placeholder="Where do they fall short? Customer service? Pricing? Features?"></textarea>
+                </div>
+                <div class="swot-box opportunities">
+                    <div class="swot-title">🌟 Our Opportunities</div>
+                    <textarea class="swot-textarea" id="swot-opportunities" placeholder="How can we capitalize on their weaknesses? What markets can we win?"></textarea>
+                </div>
+                <div class="swot-box threats">
+                    <div class="swot-title">⚠️ Threats to Watch</div>
+                    <textarea class="swot-textarea" id="swot-threats" placeholder="What could they do that would hurt us? New products? Price cuts?"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- Positioning Tab -->
+        <div id="positioning" class="content-card">
+            <div class="section-header">
+                <div class="section-title">💡 Competitive Positioning</div>
+            </div>
+            <div class="positioning-grid">
+                <div class="positioning-card">
+                    <div class="positioning-title">🎯 When You're Ahead</div>
+                    <textarea class="info-input" id="pos-ahead" placeholder="What to say when we're the incumbent or have momentum..."></textarea>
+                </div>
+                <div class="positioning-card">
+                    <div class="positioning-title">⚡ When You're Behind</div>
+                    <textarea class="info-input" id="pos-behind" placeholder="How to reframe the conversation when they're ahead..."></textarea>
+                </div>
+                <div class="positioning-card">
+                    <div class="positioning-title">💎 Our Unique Differentiation</div>
+                    <textarea class="info-input" id="pos-differentiation" placeholder="What makes us fundamentally different and better?"></textarea>
+                </div>
+                <div class="positioning-card">
+                    <div class="positioning-title">🔄 Trap Setting Questions</div>
+                    <textarea class="info-input" id="pos-trap" placeholder="Questions that expose their weaknesses without mentioning them..."></textarea>
+                </div>
+            </div>
+            <div class="info-group">
+                <label class="info-label">🎤 Elevator Pitch (Why Us vs Them)</label>
+                <textarea class="info-input" id="pos-elevator" placeholder="30-second pitch on why to choose us over this competitor..."></textarea>
+            </div>
+        </div>
+
+        <!-- Objections Tab -->
+        <div id="objections" class="content-card">
+            <div class="section-header">
+                <div class="section-title">🛡️ Objection Handling</div>
+            </div>
+            <div id="objections-list"></div>
+            <button class="add-btn" onclick="addObjection()">+ Add Objection/Response</button>
+        </div>
+
+        <!-- Win/Loss Tab -->
+        <div id="winloss" class="content-card">
+            <div class="section-header">
+                <div class="section-title">📊 Win/Loss Analysis</div>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-deals">0</div>
+                    <div class="stat-label">Total Deals vs Competitor</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="wins-count">0</div>
+                    <div class="stat-label">Wins</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="losses-count">0</div>
+                    <div class="stat-label">Losses</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="win-rate">0%</div>
+                    <div class="stat-label">Win Rate</div>
+                </div>
+            </div>
+            <div class="info-group" style="margin-bottom: 20px;">
+                <label class="info-label">Common Reasons We Win</label>
+                <textarea class="info-input" id="win-reasons" placeholder="What are the patterns in deals we win against them?"></textarea>
+            </div>
+            <div class="info-group" style="margin-bottom: 20px;">
+                <label class="info-label">Common Reasons We Lose</label>
+                <textarea class="info-input" id="loss-reasons" placeholder="What are the patterns in deals we lose to them?"></textarea>
+            </div>
+            <h3 style="margin-bottom: 15px; color: #2d3748;">Recent Deals</h3>
+            <div id="winloss-list" class="win-loss-list"></div>
+            <button class="add-btn" onclick="addWinLoss()">+ Add Deal Result</button>
+        </div>
+
+        <!-- Quick Reference Tab -->
+        <div id="quickref" class="content-card">
+            <div class="section-header">
+                <div class="section-title">⚡ Quick Reference Card</div>
+            </div>
+            <div class="quick-ref-grid">
+                <div class="quick-ref-card">
+                    <div class="quick-ref-title">🎯 Top 3 Strengths (Theirs)</div>
+                    <textarea class="quick-ref-textarea" id="ref-strengths" placeholder="1.&#10;2.&#10;3."></textarea>
+                </div>
+                <div class="quick-ref-card">
+                    <div class="quick-ref-title">⚡ Top 3 Weaknesses (Theirs)</div>
+                    <textarea class="quick-ref-textarea" id="ref-weaknesses" placeholder="1.&#10;2.&#10;3."></textarea>
+                </div>
+                <div class="quick-ref-card">
+                    <div class="quick-ref-title">💎 Our Top 3 Differentiators</div>
+                    <textarea class="quick-ref-textarea" id="ref-differentiators" placeholder="1.&#10;2.&#10;3."></textarea>
+                </div>
+                <div class="quick-ref-card">
+                    <div class="quick-ref-title">🔑 Key Message to Remember</div>
+                    <textarea class="quick-ref-textarea" id="ref-message" placeholder="The one thing to remember when competing against them..."></textarea>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let competitors = {};
+        let currentCompetitorId = null;
+        let currentTab = 'overview';
+
+        function initializeApp() {
+            loadFromStorage();
+            
+            if (Object.keys(competitors).length === 0) {
+                const vmwareCard = createVMwareSample();
+                const parallelsCard = createParallelsSample();
+                competitors[vmwareCard.id] = vmwareCard;
+                competitors[parallelsCard.id] = parallelsCard;
+                currentCompetitorId = vmwareCard.id;
+                saveToStorage();
+            }
+            
+            renderCompetitorSelector();
+            loadCompetitor(currentCompetitorId);
+            startAutoSave();
+        }
+
+        function createParallelsSample() {
+            return {
+                id: 'comp-parallels-sample',
+                name: 'Parallels RAS (Remote Application Server)',
+                dateCreated: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                data: {
+                    name: 'Parallels RAS (Remote Application Server)',
+                    website: 'https://www.parallels.com/products/ras/',
+                    size: '600-800 employees (Corel/Alludo owned)',
+                    position: 'niche',
+                    description: 'Cost-conscious VDI and application delivery solution owned by Corel (now Alludo). Positioned as a simplified, budget-friendly alternative to Citrix and VMware. Strong in SMB and mid-market segments. Known for ease of deployment and lower complexity. Mac virtualization heritage from Parallels Desktop, but RAS is separate product line focused on Windows application delivery and remote desktop.',
+                    target: 'Small to mid-market companies (100-2,500 employees), price-sensitive organizations, companies with limited IT resources, education sector, MSPs (Managed Service Providers), organizations wanting "good enough" VDI without enterprise complexity. Strongest in EMEA and emerging markets.',
+                    pricing: 'Aggressive low-cost pricing - typically 40-60% cheaper than Citrix upfront. Perpetual licenses with annual maintenance or subscription available. Named user licensing model. Pricing starts around $99-149 per concurrent user. Competitive on initial acquisition cost but limited scalability pricing. No complex bundles - straightforward pricing appeals to SMB buyers.',
+                    swot: {
+                        strengths: '• LOW COST: 40-60% cheaper than Citrix/VMware on initial purchase\n• SIMPLE DEPLOYMENT: Quick setup, minimal infrastructure requirements, "works out of box"\n• EASE OF USE: Simplified admin console, less complex than enterprise solutions\n• ALL-IN-ONE: Includes RDP, application delivery, load balancing in base product\n• NO VENDOR LOCK-IN: Standard protocols, easy to migrate away if needed\n• GOOD FOR SMB: Right-sized for small IT teams without dedicated VDI specialists\n• MSP FRIENDLY: Good multi-tenancy for service providers\n• MARKETING AGILITY: Aggressive competitive marketing against Citrix/VMware price increases',
+                        weaknesses: '• LIMITED ENTERPRISE SCALE: Struggles beyond 2,500-5,000 users, performance degrades\n• BASIC FEATURES: Lacks advanced capabilities (HDX-level performance, advanced analytics, AI)\n• SMALL COMPANY RISK: Corel/Alludo ownership raises continuity questions, limited R&D investment\n• MINIMAL INNOVATION: Slow feature development, years behind in modern capabilities\n• SUPPORT QUALITY: Small support team, longer resolution times for complex issues\n• LIMITED INTEGRATIONS: Weak ecosystem, poor third-party integration\n• NO HYBRID CLOUD SOPHISTICATION: Basic cloud support, not cloud-native\n• BRAND PERCEPTION: "Cheap alternative" stigma, not seen as strategic choice\n• SECURITY LIMITATIONS: Lacks advanced zero-trust, SASE integration\n• PROTOCOL PERFORMANCE: Uses RDP/ICA, not optimized like HDX',
+                        opportunities: '• PARALLELS WINS ON PRICE ONLY: If customer evaluates total value, we win\n• LIMITED TO SMB: Enterprise accounts will outgrow Parallels quickly\n• POST-VMWARE MIGRATION: Companies fleeing Broadcom pricing might consider Parallels as cheap option\n• COMPLEXITY SELLING POINT: Enterprises need sophistication Parallels can\'t deliver\n• SCALABILITY CONCERNS: Growth-focused companies need enterprise-grade solution\n• CLOUD TRANSFORMATION: Modern cloud strategies require more than Parallels offers\n• SECURITY REQUIREMENTS: Regulated industries need capabilities Parallels lacks\n• USER EXPERIENCE: Knowledge workers demand better performance than RDP provides',
+                        threats: '• PRICE PRESSURE: Forces us to justify premium pricing, especially in deals where budget is primary concern\n• GOOD ENOUGH: For basic use cases, Parallels may be adequate, eroding low-end market\n• VMware/CITRIX REFUGEES: Price-shocked customers might choose "cheap" over "right"\n• POC SUCCESS: Parallels deploys quickly, wins on "easy button" in short evaluations\n• SMB MARKET: Could lose small deals we don\'t want to compete for anyway\n• EXPANSION RISK: Companies start with Parallels, get locked in before recognizing limitations'
+                    },
+                    positioning: {
+                        ahead: 'When we\'re ahead:\n\n"I understand Parallels RAS looks attractive from a price standpoint - and for a 200-user company with basic needs, it might be adequate. But you\'re evaluating enterprise workspace solutions for a reason: you need scale, security, performance, and innovation.\n\nParallels is a small company (Corel/Alludo) selling a budget product. When you have 5,000 users, complex security requirements, hybrid cloud needs, and demanding end users - you need a strategic vendor who\'s invested billions in R&D, not a low-cost alternative that cuts corners.\n\nThe question isn\'t whether Parallels is cheaper today - it\'s whether you want to re-platform in 2 years when you outgrow it, experience performance issues, or need capabilities they simply don\'t have. Citrix is the enterprise choice that scales with your business, delivers superior user experience through HDX, and provides the security and compliance frameworks you\'ll need."',
+                        behind: 'When competing from behind:\n\n"I completely understand the appeal of Parallels\' pricing - in today\'s environment, every dollar matters. So let\'s be direct about what you\'re really comparing:\n\nParallels is a budget product that works for basic remote desktop scenarios. If you\'re just replacing VPN access for light users, it might suffice. But you mentioned [business driver: digital transformation / security / user experience / scale] - and that\'s where Parallels fundamentally cannot compete.\n\nThree critical questions:\n1. What happens when you scale beyond 2,000 users and Parallels performance degrades?\n2. How will Parallels\' basic RDP protocol handle your [graphics/multimedia/bandwidth-constrained] use case?\n3. When you need [zero trust security / advanced analytics / cloud integration / AI-powered support], where does Parallels\' roadmap take you?\n\nThe true cost isn\'t the license price - it\'s the TCO over 3-5 years including poor user productivity, IT firefighting, and inevitable migration costs. Companies like [Customer Example] started with Parallels to save money and switched to Citrix within 18 months when reality hit. Let\'s do this right the first time."',
+                        differentiation: '🔷 ENTERPRISE SCALE: Proven at 100,000+ users. Parallels struggles beyond 5,000.\n\n🔷 HDX PROTOCOL: 50% better performance than Parallels\' RDP. Superior multimedia, graphics, mobile experience.\n\n🔷 INNOVATION INVESTMENT: $500M+ annual R&D, AI capabilities, continuous innovation. Parallels: minimal development.\n\n🔷 CLOUD SOPHISTICATION: True hybrid/multi-cloud architecture. Parallels: basic cloud support.\n\n🔷 SECURITY & COMPLIANCE: Zero Trust, SASE integration, advanced analytics. Parallels: basic security.\n\n🔷 USER EXPERIENCE: Consistently ranks #1 in user satisfaction. Parallels: "good enough" for basic needs.\n\n🔷 STRATEGIC PARTNER: Fortune 500 trust Citrix for mission-critical workloads. Parallels: SMB budget solution.\n\n🔷 ECOSYSTEM: Deep integrations with Microsoft, Google, AWS. Parallels: limited partnerships.\n\n🔷 SUPPORT: 24/7 enterprise support, dedicated teams. Parallels: small support organization.',
+                        trap: 'Questions that expose Parallels without naming them:\n\n1. "What\'s your 5-year growth projection for users? Will your solution scale with you or require a painful migration?"\n\n2. "How important is protocol performance for your use cases - especially multimedia, graphics, or mobile users?"\n\n3. "Do you need advanced security capabilities like zero trust, contextual access, or behavioral analytics?"\n\n4. "How critical is vendor stability and long-term R&D investment to your infrastructure strategy?"\n\n5. "If you could see independent user satisfaction ratings, how important is that to your evaluation?"\n\n6. "What happens when you need capabilities beyond basic remote desktop - advanced analytics, AI, cloud optimization?"\n\n7. "Have you validated performance at your target scale, or just in a small proof-of-concept?"\n\n8. "What\'s your integration strategy with Microsoft 365, Azure, AWS, Google Workspace?"\n\n9. "How much IT time do you want to spend managing infrastructure versus delivering business value?"',
+                        elevator: '"While Parallels RAS offers an attractive entry price, it\'s fundamentally a budget SMB solution with significant limitations in scale, performance, security, and innovation. Citrix delivers enterprise-grade capabilities that Parallels simply cannot match: HDX protocol performance that\'s 50% faster than their RDP, proven scalability to 100,000+ users, $500M+ annual R&D investment in AI and cloud innovation, and enterprise-grade security for compliance and zero-trust architectures. Companies like [Customer] chose Parallels to save money, then migrated to Citrix within 18 months when they hit performance and scalability walls. The question is: do you want to do this twice, or get it right the first time?"'
+                    },
+                    objections: [
+                        {
+                            objection: '"Parallels is 50% cheaper than Citrix. We need to cut costs, not increase them."',
+                            response: '"I understand budget pressure - it\'s real. But let\'s talk about true cost, not just license price. Parallels looks cheaper until you factor in: 1) Poor performance leading to 20-30% productivity loss for knowledge workers ($50K employee losing 10 hours/month = $3,600/year in lost productivity), 2) IT overhead managing a less robust platform (2x the tickets), 3) Migration costs in 18-24 months when you hit scaling limits. Forrester TEI studies show Citrix delivers 40-60% lower TCO than alternatives over 3 years despite higher initial cost. Plus, our flexible licensing means you\'re not buying features you don\'t use. Would you rather save money upfront and pay more over time, or invest wisely for sustainable value?"'
+                        },
+                        {
+                            objection: '"Parallels deployed in 2 days in our POC. Your deployment looks more complex."',
+                            response: '"That\'s actually proving my point. Parallels deploys quickly because it\'s simple - which means limited capabilities. It\'s like saying a bicycle is easier to set up than a car. True, but can it get you where you need to go? Our deployment takes slightly longer because we\'re implementing enterprise-grade security, integration with your identity systems, optimization for your specific use cases, and scalable architecture. The POC showed Parallels works for basic scenarios - but did you test: performance at full user load? Integration with your enterprise applications? Security compliance requirements? Failover and redundancy? The \'easy button\' in POC often becomes the \'hard problem\' in production. We\'d rather invest 2 weeks getting it right than deploy fast and spend 6 months firefighting."'
+                        },
+                        {
+                            objection: '"We\'re only 500 users. We don\'t need enterprise-scale capabilities."',
+                            response: '"Fair point - today you\'re 500 users. Three questions: 1) What\'s your growth plan? Even modest 15% annual growth puts you at 1,000 users in 5 years. 2) Are all use cases equally simple, or do some users need high-performance access to graphics-intensive apps, ERP systems, or mobile access? 3) What are your security and compliance requirements? Even at 500 users, if you\'re handling HIPAA, PCI-DSS, or GDPR data, you need enterprise-grade security controls Parallels lacks. We have plenty of 500-user customers who chose Citrix not for scale, but for performance, security, or user experience requirements. The question isn\'t how many users - it\'s what do those users need to accomplish? Let\'s map your actual requirements."'
+                        },
+                        {
+                            objection: '"Parallels has all the features we need. Why pay more for capabilities we won\'t use?"',
+                            response: '"That\'s exactly the right way to think about it. Let me ask: Did you evaluate user experience under real-world conditions - bandwidth constraints, mobile devices, multimedia applications? Did you test performance at peak load? Did you validate integration with your critical business applications? Most importantly - did you project 3 years forward on your digital transformation roadmap? Here\'s what we see consistently: companies choose Parallels thinking they need \'basic,\' then hit walls on: scalability (can\'t add users without performance degradation), security (compliance audit failures), user experience (complaints about sluggish performance), cloud strategy (limited Azure/AWS integration). We offer flexible licensing - you only pay for what you use. But you get access to capabilities when your needs evolve, not another platform migration."'
+                        },
+                        {
+                            objection: '"Our IT team evaluated both and said Parallels works fine for our needs."',
+                            response: '"Your IT team is right that Parallels can work - and I respect their technical assessment. But \'works\' and \'optimal\' are different. Can I ask: did the evaluation include input from: end users on their experience and productivity? Finance on total cost over 3-5 years including productivity impacts? Security team on compliance and risk requirements? Business leaders on strategic initiatives and growth plans? IT understandably evaluates \'does it function?\' but the business question is \'does it enable our strategy?\' We\'ve found the most successful implementations involve stakeholders beyond IT. Would it be valuable to run a broader evaluation including user experience testing, TCO analysis, and business requirements alignment? We\'re confident that when the full picture emerges, the investment in Citrix becomes clear."'
+                        },
+                        {
+                            objection: '"We\'re an MSP and need to keep costs low for our clients. Parallels\' pricing model works better for us."',
+                            response: '"As an MSP, your business model depends on customer retention and margin - not just acquisition cost. Consider: 1) CHURN RISK: What happens when your clients outgrow Parallels\' capabilities and you have to migrate them to another platform? You lose the customer or eat migration costs. 2) SUPPORT BURDEN: Parallels\' limitations mean more support tickets, eating your margin. Citrix\'s robust platform reduces your operational overhead. 3) UPSELL OPPORTUNITY: Enterprise-grade capabilities let you sell higher-value services - security, analytics, advanced integrations. 4) DIFFERENTIATION: Every MSP can resell cheap solutions. Citrix partnership positions you as enterprise-grade, premium provider. 5) CUSTOMER SUCCESS: Happy customers with great user experience renew and expand. Would you rather compete on being cheapest, or being best? We have MSP-specific programs and pricing that make the economics work while positioning you for premium market."'
+                        }
+                    ],
+                    winLoss: {
+                        deals: [
+                            {
+                                result: 'win',
+                                dealName: 'Mid-Market Healthcare - 1,200 users',
+                                reason: 'Initial Parallels evaluation failed security audit. HIPAA compliance requirements demanded advanced security controls, session recording, and detailed audit logs that Parallels couldn\'t provide. Citrix analytics and security features met regulatory requirements. Even with higher cost, non-negotiable for compliance.',
+                                date: '2024-09-28'
+                            },
+                            {
+                                result: 'win',
+                                dealName: 'Professional Services Firm - 800 users',
+                                reason: 'User experience was deciding factor. Engineering team working with CAD and graphics-intensive applications had terrible performance with Parallels RDP. HDX protocol demonstration showed 3x better frame rates and responsiveness. Partners demanded better experience - cost became secondary to productivity.',
+                                date: '2024-08-15'
+                            },
+                            {
+                                result: 'loss',
+                                dealName: 'Small Manufacturer - 350 users',
+                                reason: 'Pure price decision. CFO mandate to minimize costs. Basic use case (office apps, web browser) where Parallels was "good enough." Limited IT budget and no growth plans. We were 2.5x the price. Should have qualified budget authority earlier. Not our ideal customer profile anyway.',
+                                date: '2024-07-22'
+                            },
+                            {
+                                result: 'win',
+                                dealName: 'Financial Services - 2,000 users',
+                                reason: 'Started with Parallels, outgrew it in 14 months. Performance degradation beyond 1,500 users, couldn\'t handle spike loads, poor mobile experience. CEO frustrated with user complaints. Migration project to Citrix. Lesson: initial price savings were lost in migration costs and 12 months of productivity loss. Used this as case study.',
+                                date: '2024-10-12'
+                            }
+                        ],
+                        winReasons: '✅ ENTERPRISE REQUIREMENTS: Scale, security, compliance needs that Parallels fundamentally cannot meet.\n\n✅ USER EXPERIENCE: Knowledge worker productivity demands better performance than RDP provides.\n\n✅ GROWTH TRAJECTORY: Forward-looking companies recognize they\'ll outgrow Parallels quickly.\n\n✅ TOTAL COST OF OWNERSHIP: Sophisticated buyers calculate true 3-5 year TCO including productivity.\n\n✅ STAKEHOLDER ALIGNMENT: When end users, security, and business leaders weigh in, not just IT.\n\n✅ STRATEGIC INITIATIVE: Cloud transformation, digital workplace, zero trust projects require enterprise capabilities.\n\n✅ VENDOR CONFIDENCE: Risk-averse buyers choose established, well-funded strategic partner.\n\n✅ PARALLELS FAILURES: Customers who tried Parallels and hit walls migrate to us.\n\n✅ COMPLIANCE MANDATES: Regulated industries need security/audit capabilities Parallels lacks.',
+                        lossReasons: '❌ PRICE SENSITIVITY: Pure cost-driven decisions where budget trumps all other factors.\n\n❌ BASIC USE CASE: Simple scenarios (browser, Office, email) where Parallels is adequate.\n\n❌ SMALL SCALE: Sub-500 user deployments with no growth plans, limited requirements.\n\n❌ POOR QUALIFICATION: Didn\'t identify budget constraints or decision criteria early enough.\n\n❌ LIMITED EVALUATION: POC focused on "does it work" not "is it optimal" - Parallels passed bar.\n\n❌ IT-ONLY DECISION: Technical evaluation without business stakeholder input or TCO analysis.\n\n❌ WRONG CUSTOMER PROFILE: Small businesses outside our sweet spot, not strategic accounts.\n\n❌ FAST TIMELINE: Parallels\' quick deployment won when speed trumped thoroughness.\n\n❌ ECONOMIC PRESSURE: Recession concerns, budget cuts prioritize immediate savings over long-term value.'
+                    },
+                    quickRef: {
+                        strengths: '1. LOW PRICE: 40-60% cheaper upfront, very aggressive competitive pricing\n\n2. SIMPLE DEPLOYMENT: Fast setup, minimal complexity, "works out of box" for basic scenarios\n\n3. SMB FOCUSED: Right-sized for small companies with limited IT resources and simple needs',
+                        weaknesses: '1. NOT ENTERPRISE-GRADE: Poor scalability (2,500+ user limit), basic features, limited innovation\n\n2. RDP PERFORMANCE: Standard protocol, can\'t match HDX optimization for multimedia/graphics/mobile\n\n3. SMALL VENDOR RISK: Corel/Alludo ownership, minimal R&D, weak ecosystem, limited support resources',
+                        differentiators: '1. ENTERPRISE PROVEN: Scale to 100,000+ users with consistent performance vs Parallels\' 2,500 user ceiling\n\n2. HDX SUPERIORITY: 50% better protocol performance, user satisfaction scores consistently higher\n\n3. INNOVATION & STABILITY: $500M+ R&D, Fortune 500 trusted partner vs small budget vendor',
+                        message: '🎯 KEY MESSAGE: "Parallels is a budget SMB product that saves money upfront but costs more over time through poor performance, scaling limitations, and inevitable migration. Citrix is the enterprise choice that gets it right the first time - proven scale, superior user experience, and strategic partnership that grows with you."'
+                    }
+                }
+            };
+        }
+
+        function createVMwareSample() {
+            return {
+                id: 'comp-vmware-sample',
+                name: 'VMware (Broadcom)',
+                dateCreated: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                data: {
+                    name: 'VMware (Broadcom)',
+                    website: 'https://www.vmware.com',
+                    size: '38,000+ employees (pre-acquisition)',
+                    position: 'leader',
+                    description: 'Enterprise virtualization and cloud infrastructure leader, recently acquired by Broadcom in 2023. Known for their comprehensive desktop and application virtualization solutions, workspace management, and hybrid cloud offerings. Strong presence in large enterprise accounts with deep VMware infrastructure investments.',
+                    target: 'Large enterprises (5,000+ employees), Fortune 500 companies, organizations with significant on-premises infrastructure, IT-centric buyers, companies heavily invested in VMware virtualization stack. Strong in financial services, healthcare, manufacturing, and government sectors.',
+                    pricing: 'Premium pricing model, typically 20-30% higher than Citrix. Perpetual licenses being phased out post-Broadcom acquisition in favor of subscription model. Known for aggressive Enterprise License Agreements (ELAs). Recent price increases of 300-500% reported post-acquisition causing customer concern.',
+                    swot: {
+                        strengths: '• Market leader in virtualization with 80%+ market share\n• Strong brand recognition and "safe choice" perception\n• Deep integration with existing VMware infrastructure (vSphere, ESXi)\n• Comprehensive product portfolio (Horizon, Workspace ONE, App Volumes)\n• Large partner ecosystem and extensive support network\n• Strong in VDI (Virtual Desktop Infrastructure) deployments\n• Blast protocol performs well in high-latency environments\n• Unified Endpoint Management (UEM) capabilities',
+                        weaknesses: '• Recent Broadcom acquisition causing significant customer uncertainty\n• Massive price increases (300-500%) alienating customer base\n• Forced bundling - customers must buy entire suite, can\'t pick à la carte\n• Complex licensing structure, difficult to understand costs\n• Slower innovation cycle compared to cloud-native competitors\n• Heavy infrastructure requirements, complex deployment\n• Poor cloud economics - doesn\'t optimize for cloud consumption\n• Limited modern SaaS capabilities\n• Layoffs and talent exodus post-acquisition affecting support quality\n• Customer support quality declining significantly',
+                        opportunities: '• Broadcom price increases creating massive migration opportunity\n• VMware customers actively seeking alternatives (RFPs up 400%)\n• Dissatisfaction with forced bundling = opportunity for flexible licensing\n• Cloud-first organizations looking for modern architecture\n• Cost optimization initiatives favor our lower TCO\n• Partner ecosystem frustrated with Broadcom, open to alternatives\n• End User Computing (EUC) modernization projects\n• Hybrid work driving need for simpler, more flexible solutions\n• Customer desire to reduce vendor lock-in',
+                        threats: '• VMware has deep hooks in enterprise infrastructure\n• Migration concerns - "switching costs" perception\n• IT teams trained on VMware, comfortable with known solution\n• VMware may offer "win-back" discounts to prevent churn\n• Some customers locked into multi-year ELAs\n• Integration with existing VMware stack creates stickiness\n• Horizon has feature parity in many areas\n• Strong presence in security-conscious verticals (government, healthcare)'
+                    },
+                    positioning: {
+                        ahead: 'When we\'re the incumbent or ahead:\n\n"While VMware is dealing with the Broadcom acquisition uncertainty - massive price increases, forced bundling, and declining support - Citrix continues to innovate with customer-first flexibility. Our customers aren\'t facing 300% price hikes or being forced to buy products they don\'t need. We offer predictable, transparent pricing with the flexibility to choose what you actually use.\n\nUnder Broadcom, VMware is optimizing for short-term revenue extraction, not long-term customer success. We\'re investing in cloud innovation, AI-powered experiences, and the future of work while VMware customers are dealing with support ticket backlogs and talent exodus."',
+                        behind: 'When competing from behind:\n\n"I understand you have significant VMware infrastructure investment. The real question isn\'t whether VMware Horizon works - it does. The question is: at what cost and complexity?\n\nPost-Broadcom, you\'re likely facing significant price increases and being forced into bundles you don\'t need. Meanwhile, your IT team is managing complex on-premises infrastructure when they could be focused on strategic initiatives.\n\nCitrix offers modern cloud architecture that reduces your infrastructure burden by 60%, delivers superior user experience through HDX protocol, and provides flexible licensing so you only pay for what you use. Many organizations like [Customer Example] were 100% VMware and made the switch - not because VMware stopped working, but because the TCO, flexibility, and user experience made it a strategic imperative."',
+                        differentiation: '🔷 CLOUD-NATIVE ARCHITECTURE: Built for cloud-first, not retrofitted. 70% lower infrastructure costs.\n\n🔷 FLEXIBLE LICENSING: Pay for what you use, not forced bundles. Cancel anytime, no ELA lock-in.\n\n🔷 HDX PROTOCOL SUPERIORITY: 30% better performance, 50% less bandwidth than VMware Blast.\n\n🔷 PREDICTABLE PRICING: No surprise 300% increases. Transparent, customer-friendly model.\n\n🔷 INNOVATION VELOCITY: Monthly updates vs VMware\'s slowing release cycle. AI-powered analytics.\n\n🔷 UNIFIED WORKSPACE: True single-pane-of-glass experience. Not duct-taped acquisitions.\n\n🔷 LOWER TCO: 40-60% total cost savings over 3 years (Forrester TEI study).',
+                        trap: 'Questions that expose VMware weaknesses without naming them:\n\n1. "How are you feeling about your current vendor\'s pricing stability and roadmap certainty?"\n\n2. "If you could only pay for the specific capabilities you actually use, rather than buying everything in a bundle, would that be valuable?"\n\n3. "What percentage of your IT team\'s time is spent managing infrastructure versus delivering strategic business value?"\n\n4. "How important is it that your vendor is investing in innovation versus optimizing for short-term revenue extraction?"\n\n5. "If you could reduce your on-premises infrastructure footprint by 70% while improving user experience, what would that enable?"\n\n6. "Have you experienced any changes in support quality or response times with your current vendor recently?"\n\n7. "What would it mean to your organization if you could modernize your End User Computing without a complex multi-year migration project?"',
+                        elevator: '"While VMware deals with the Broadcom acquisition fallout - massive price increases, forced bundling, and declining support - Citrix offers what enterprises actually need: cloud-native architecture that reduces infrastructure costs by 60%, flexible licensing where you only pay for what you use, and the industry\'s best protocol (HDX) delivering superior user experience. We\'re helping VMware customers modernize their workspace without the Broadcom tax. Companies like [Customer] reduced their EUC costs by 45% and improved user satisfaction scores by 35% by making the switch."'
+                    },
+                    objections: [
+                        {
+                            objection: '"We\'ve invested heavily in VMware infrastructure - vSphere, ESXi, Horizon. We can\'t just rip and replace."',
+                            response: '"You\'re right - we\'re not suggesting rip and replace. Most Citrix customers keep their VMware infrastructure and run Citrix on top of it. You can use your existing ESXi hosts, vSphere management, and storage. The difference? You get better user experience, flexible licensing, and avoid the Broadcom pricing model while leveraging your infrastructure investment. We have automated migration tools that minimize disruption - typical migration is 60-90 days with zero downtime. Think evolution, not revolution."'
+                        },
+                        {
+                            objection: '"VMware is the industry standard. It\'s the safe choice."',
+                            response: '"That WAS true - before the Broadcom acquisition. Ask your peers who just received 300-500% price increases if VMware still feels \'safe.\' The \'nobody gets fired for buying IBM\' mentality doesn\'t apply when that vendor fundamentally changes their business model overnight. The actual safe choice is a vendor with stable, predictable pricing, continued innovation investment, and a customer-first approach. Gartner and Forrester both recognize Citrix as a leader. You\'re not taking a risk - you\'re making the strategic choice that your CFO will thank you for."'
+                        },
+                        {
+                            objection: '"Our IT team knows VMware inside and out. Learning a new platform is a big lift."',
+                            response: '"Great news - 85% of customers report their IT teams are fully productive on Citrix within 30 days. Why? Because Citrix Cloud handles much of the complexity VMware admins spend time on - updates, patching, scaling. Your team goes from managing infrastructure to delivering value. Plus, we provide comprehensive training, migration assistance, and 24/7 support. Many customers tell us their VMware admins are relieved to stop dealing with the complexity. We have a VMware admin certification fast-track program specifically for this scenario."'
+                        },
+                        {
+                            objection: '"We just signed a 3-year ELA with VMware. Our hands are tied."',
+                            response: '"I understand. Two points: First, many ELAs have early termination clauses, especially given the material business changes post-Broadcom acquisition. Your legal team should review - you might have more flexibility than you think. Second, even if you\'re locked in for now, let\'s plan your exit strategy. Most organizations take 12-18 months to plan and execute a platform change. By starting the conversation now, you\'ll be ready when that ELA expires rather than being forced into another punitive agreement. We can also discuss hybrid approaches - maybe start with a specific use case or business unit outside the ELA scope."'
+                        },
+                        {
+                            objection: '"VMware Horizon has all the features we need. Why switch?"',
+                            response: '"If VMware Horizon is meeting your needs, that\'s great. But this isn\'t really about features - it\'s about total cost of ownership, user experience, and strategic direction. Three questions: 1) Are you getting good ROI on the 70% of VMware bundle features you don\'t use but pay for? 2) Are your users raving about their VDI experience or just tolerating it? 3) Do you trust Broadcom\'s long-term commitment to End User Computing? Citrix delivers 30% better user experience scores, 40-60% lower TCO, and a clear cloud-first roadmap. The question isn\'t can VMware do the job - it\'s whether it\'s the best strategic choice."'
+                        }
+                    ],
+                    winLoss: {
+                        deals: [
+                            {
+                                result: 'win',
+                                dealName: 'Global Financial Services - 25,000 seats',
+                                reason: 'Broadcom price increase of 320% was untenable. CFO mandated cost reduction. Citrix delivered 48% TCO savings over 3 years while improving user experience scores by 31%. VMware tried to win back with 40% discount but damage was done - trust broken.',
+                                date: '2024-09-15'
+                            },
+                            {
+                                result: 'win',
+                                dealName: 'Healthcare System - 12,000 users',
+                                reason: 'Needed better clinical application performance for EMR access. HDX protocol delivered 35% faster screen refresh rates for medical imaging. VMware Blast couldn\'t match performance requirements. Security certifications (HIPAA, HITRUST) equal.',
+                                date: '2024-08-22'
+                            },
+                            {
+                                result: 'loss',
+                                dealName: 'Manufacturing - 8,000 seats',
+                                reason: 'Deep VMware infrastructure investment (10+ years). IT team risk-averse, didn\'t want to learn new platform despite 270% price increase. Signed 3-year ELA under pressure. Should have engaged C-level earlier on strategic cost implications.',
+                                date: '2024-07-10'
+                            },
+                            {
+                                result: 'win',
+                                dealName: 'Technology Company - 5,500 users',
+                                reason: 'Cloud-first mandate, VMware\'s on-prem architecture didn\'t fit strategy. Citrix Cloud simplified operations, reduced infrastructure by 65%. DevOps team championed modern API-driven approach. Price 30% lower even before infrastructure savings.',
+                                date: '2024-10-05'
+                            }
+                        ],
+                        winReasons: '✅ BROADCOM PRICING: #1 reason by far. Customers outraged by 300-500% increases and forced bundling.\n\n✅ TOTAL COST OF OWNERSHIP: Infrastructure reduction (60-70%), operational efficiency, flexible licensing = 40-60% savings.\n\n✅ USER EXPERIENCE: HDX protocol superiority, faster performance, better multimedia, mobile experience.\n\n✅ CLOUD STRATEGY: Citrix Cloud aligns with digital transformation, VMware feels legacy.\n\n✅ FLEXIBILITY: Pay-as-you-go, no forced bundles, can cancel anytime vs ELA lock-in.\n\n✅ SUPPORT QUALITY: Broadcom support declining, longer ticket resolution, talent exodus.\n\n✅ INNOVATION: Monthly updates, AI capabilities, modern features vs VMware slowdown.\n\n✅ C-LEVEL MANDATE: CFOs forcing cost reduction, CIOs seeking modernization.',
+                        lossReasons: '❌ INFRASTRUCTURE LOCK-IN: Deep VMware investment, perceived switching costs, sunk cost fallacy.\n\n❌ RISK AVERSION: "If it ain\'t broke..." mentality, especially in conservative IT cultures.\n\n❌ EXISTING ELAs: Multi-year agreements lock customers in, even when unhappy.\n\n❌ IT TEAM RESISTANCE: Admins comfortable with VMware, fear of learning curve.\n\n❌ TIMING: Engaged too late in evaluation cycle, VMware already in renewal discussions.\n\n❌ INCOMPLETE BUSINESS CASE: Focused on features not total cost or strategic value.\n\n❌ LACK OF EXECUTIVE SPONSORSHIP: IT evaluation only, didn\'t engage CFO or CEO on strategic/cost implications.\n\n❌ COMPETITIVE DISCOUNTING: VMware offers aggressive "win-back" deals when threatened.\n\n❌ INTEGRATION CONCERNS: Fear of breaking existing workflows or integrations.'
+                    },
+                    quickRef: {
+                        strengths: '1. MARKET LEADER: 80%+ virtualization market share, "safe choice" perception (pre-Broadcom)\n\n2. INFRASTRUCTURE INTEGRATION: Deep hooks with vSphere/ESXi, hard to rip out\n\n3. COMPREHENSIVE PORTFOLIO: Full stack from virtualization to UEM to security',
+                        weaknesses: '1. BROADCOM ACQUISITION FALLOUT: 300-500% price increases, forced bundling, customer exodus\n\n2. LEGACY ARCHITECTURE: On-prem focused, poor cloud economics, complex management\n\n3. DECLINING SUPPORT: Layoffs, talent exodus, longer ticket resolution times',
+                        differentiators: '1. 40-60% LOWER TCO: Flexible licensing, cloud-native efficiency, no forced bundles\n\n2. SUPERIOR USER EXPERIENCE: HDX protocol beats Blast by 30%, better multimedia performance\n\n3. STABLE PARTNER: No acquisition drama, predictable pricing, customer-first innovation',
+                        message: '🎯 KEY MESSAGE: "Broadcom turned VMware into a short-term revenue extraction machine. Citrix is the stable, innovative, customer-first alternative that delivers better experience at lower cost. The exodus has begun - be strategic, not a hostage."'
+                    }
+                }
+            };
+        }
+
+        function createEmptyCompetitor(name) {
+            return {
+                id: 'comp-' + Date.now(),
+                name: name,
+                dateCreated: new Date().toISOString(),
+                lastModified: new Date().toISOString(),
+                data: {
+                    name: name,
+                    website: '',
+                    size: '',
+                    position: '',
+                    description: '',
+                    target: '',
+                    pricing: '',
+                    swot: {
+                        strengths: '',
+                        weaknesses: '',
+                        opportunities: '',
+                        threats: ''
+                    },
+                    positioning: {
+                        ahead: '',
+                        behind: '',
+                        differentiation: '',
+                        trap: '',
+                        elevator: ''
+                    },
+                    objections: [],
+                    winLoss: {
+                        deals: [],
+                        winReasons: '',
+                        lossReasons: ''
+                    },
+                    quickRef: {
+                        strengths: '',
+                        weaknesses: '',
+                        differentiators: '',
+                        message: ''
+                    }
+                }
+            };
+        }
+
+        function loadFromStorage() {
+            try {
+                const saved = localStorage.getItem('competitorBattleCards');
+                const savedId = localStorage.getItem('currentCompetitorId');
+                
+                if (saved) {
+                    competitors = JSON.parse(saved);
+                }
+                if (savedId) {
+                    currentCompetitorId = savedId;
+                }
+            } catch (error) {
+                console.error('Error loading data:', error);
+            }
+        }
+
+        function saveToStorage() {
+            try {
+                localStorage.setItem('competitorBattleCards', JSON.stringify(competitors));
+                localStorage.setItem('currentCompetitorId', currentCompetitorId);
+                updateSaveIndicator();
+            } catch (error) {
+                console.error('Error saving data:', error);
+            }
+        }
+
+        function startAutoSave() {
+            setInterval(() => {
+                saveCurrentCompetitor();
+                saveToStorage();
+            }, 15000);
+        }
+
+        function updateSaveIndicator() {
+            const indicator = document.getElementById('save-indicator');
+            const time = new Date().toLocaleTimeString();
+            indicator.innerHTML = `✓ Saved at ${time}`;
+            indicator.style.color = '#48bb78';
+            setTimeout(() => {
+                indicator.innerHTML = '🟢 Auto-save enabled';
+                indicator.style.color = '#718096';
+            }, 3000);
+        }
+
+        function renderCompetitorSelector() {
+            const select = document.getElementById('competitor-select');
+            const sorted = Object.values(competitors).sort((a, b) => 
+                new Date(b.lastModified) - new Date(a.lastModified)
+            );
+            
+            select.innerHTML = sorted.map(comp => 
+                `<option value="${comp.id}" ${comp.id === currentCompetitorId ? 'selected' : ''}>
+                    ${comp.name}
+                </option>`
+            ).join('');
+        }
+
+        function createNewCompetitor() {
+            saveCurrentCompetitor();
+            const name = prompt('Enter competitor name:');
+            if (!name || !name.trim()) return;
+            
+            const newComp = createEmptyCompetitor(name.trim());
+            competitors[newComp.id] = newComp;
+            currentCompetitorId = newComp.id;
+            
+            renderCompetitorSelector();
+            loadCompetitor(currentCompetitorId);
+            saveToStorage();
+        }
+
+        function deleteCompetitor() {
+            if (Object.keys(competitors).length === 1) {
+                alert('Cannot delete the last competitor.');
+                return;
+            }
+            
+            const comp = competitors[currentCompetitorId];
+            if (confirm(`Delete battle card for "${comp.name}"?`)) {
+                delete competitors[currentCompetitorId];
+                currentCompetitorId = Object.keys(competitors)[0];
+                renderCompetitorSelector();
+                loadCompetitor(currentCompetitorId);
+                saveToStorage();
+            }
+        }
+
+        function switchCompetitor(id) {
+            saveCurrentCompetitor();
+            currentCompetitorId = id;
+            loadCompetitor(id);
+        }
+
+        function saveCurrentCompetitor() {
+            if (!currentCompetitorId) return;
+            
+            const comp = competitors[currentCompetitorId];
+            if (!comp) return;
+            
+            comp.lastModified = new Date().toISOString();
+            
+            // Overview
+            comp.data.name = document.getElementById('comp-name').value;
+            comp.data.website = document.getElementById('comp-website').value;
+            comp.data.size = document.getElementById('comp-size').value;
+            comp.data.position = document.getElementById('comp-position').value;
+            comp.data.description = document.getElementById('comp-description').value;
+            comp.data.target = document.getElementById('comp-target').value;
+            comp.data.pricing = document.getElementById('comp-pricing').value;
+            
+            // SWOT
+            comp.data.swot.strengths = document.getElementById('swot-strengths').value;
+            comp.data.swot.weaknesses = document.getElementById('swot-weaknesses').value;
+            comp.data.swot.opportunities = document.getElementById('swot-opportunities').value;
+            comp.data.swot.threats = document.getElementById('swot-threats').value;
+            
+            // Positioning
+            comp.data.positioning.ahead = document.getElementById('pos-ahead').value;
+            comp.data.positioning.behind = document.getElementById('pos-behind').value;
+            comp.data.positioning.differentiation = document.getElementById('pos-differentiation').value;
+            comp.data.positioning.trap = document.getElementById('pos-trap').value;
+            comp.data.positioning.elevator = document.getElementById('pos-elevator').value;
+            
+            // Win/Loss
+            comp.data.winLoss.winReasons = document.getElementById('win-reasons').value;
+            comp.data.winLoss.lossReasons = document.getElementById('loss-reasons').value;
+            
+            // Quick Ref
+            comp.data.quickRef.strengths = document.getElementById('ref-strengths').value;
+            comp.data.quickRef.weaknesses = document.getElementById('ref-weaknesses').value;
+            comp.data.quickRef.differentiators = document.getElementById('ref-differentiators').value;
+            comp.data.quickRef.message = document.getElementById('ref-message').value;
+            
+            // Update name
+            comp.name = comp.data.name || 'Unnamed Competitor';
+        }
+
+        function loadCompetitor(id) {
+            const comp = competitors[id];
+            if (!comp) {
+                console.error('Competitor not found:', id);
+                return;
+            }
+            
+            console.log('Loading competitor:', comp.name);
+            
+            // Make sure DOM is ready
+            setTimeout(() => {
+                // Overview
+                const fields = {
+                    'comp-name': comp.data.name || '',
+                    'comp-website': comp.data.website || '',
+                    'comp-size': comp.data.size || '',
+                    'comp-position': comp.data.position || '',
+                    'comp-description': comp.data.description || '',
+                    'comp-target': comp.data.target || '',
+                    'comp-pricing': comp.data.pricing || '',
+                    
+                    // SWOT
+                    'swot-strengths': comp.data.swot?.strengths || '',
+                    'swot-weaknesses': comp.data.swot?.weaknesses || '',
+                    'swot-opportunities': comp.data.swot?.opportunities || '',
+                    'swot-threats': comp.data.swot?.threats || '',
+                    
+                    // Positioning
+                    'pos-ahead': comp.data.positioning?.ahead || '',
+                    'pos-behind': comp.data.positioning?.behind || '',
+                    'pos-differentiation': comp.data.positioning?.differentiation || '',
+                    'pos-trap': comp.data.positioning?.trap || '',
+                    'pos-elevator': comp.data.positioning?.elevator || '',
+                    
+                    // Win/Loss
+                    'win-reasons': comp.data.winLoss?.winReasons || '',
+                    'loss-reasons': comp.data.winLoss?.lossReasons || '',
+                    
+                    // Quick Ref
+                    'ref-strengths': comp.data.quickRef?.strengths || '',
+                    'ref-weaknesses': comp.data.quickRef?.weaknesses || '',
+                    'ref-differentiators': comp.data.quickRef?.differentiators || '',
+                    'ref-message': comp.data.quickRef?.message || ''
+                };
+                
+                // Set all field values
+                Object.keys(fields).forEach(fieldId => {
+                    const element = document.getElementById(fieldId);
+                    if (element) {
+                        element.value = fields[fieldId];
+                    } else {
+                        console.warn('Element not found:', fieldId);
+                    }
+                });
+                
+                // Render dynamic content
+                renderObjections();
+                renderWinLoss();
+                
+                console.log('Competitor loaded successfully');
+            }, 100);
+        }
+
+        function showTab(tabName) {
+            currentTab = tabName;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update content cards
+            document.querySelectorAll('.content-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Objections
+        function renderObjections() {
+            const comp = competitors[currentCompetitorId];
+            const container = document.getElementById('objections-list');
+            
+            if (!comp.data.objections || comp.data.objections.length === 0) {
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">No objections added yet. Click "+ Add Objection/Response" to get started.</p>';
+                return;
+            }
+            
+            container.innerHTML = comp.data.objections.map((obj, index) => `
+                <div class="objection-item">
+                    <div class="objection-header">
+                        <div class="objection-content">
+                            <div class="objection-text">❌ Objection:</div>
+                            <textarea class="objection-textarea" onchange="updateObjection(${index}, 'objection', this.value)">${obj.objection || ''}</textarea>
+                            
+                            <div class="objection-response">✅ Response:</div>
+                            <textarea class="response-textarea" onchange="updateObjection(${index}, 'response', this.value)">${obj.response || ''}</textarea>
+                        </div>
+                        <button class="delete-btn" onclick="deleteObjection(${index})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addObjection() {
+            const comp = competitors[currentCompetitorId];
+            if (!comp.data.objections) comp.data.objections = [];
+            
+            comp.data.objections.push({
+                objection: '',
+                response: ''
+            });
+            
+            renderObjections();
+            saveToStorage();
+        }
+
+        function updateObjection(index, field, value) {
+            const comp = competitors[currentCompetitorId];
+            comp.data.objections[index][field] = value;
+            setTimeout(() => saveToStorage(), 500);
+        }
+
+        function deleteObjection(index) {
+            const comp = competitors[currentCompetitorId];
+            comp.data.objections.splice(index, 1);
+            renderObjections();
+            saveToStorage();
+        }
+
+        // Win/Loss
+        function renderWinLoss() {
+            const comp = competitors[currentCompetitorId];
+            const deals = comp.data.winLoss.deals || [];
+            
+            // Calculate stats
+            const wins = deals.filter(d => d.result === 'win').length;
+            const losses = deals.filter(d => d.result === 'loss').length;
+            const total = deals.length;
+            const winRate = total > 0 ? Math.round((wins / total) * 100) : 0;
+            
+            document.getElementById('total-deals').textContent = total;
+            document.getElementById('wins-count').textContent = wins;
+            document.getElementById('losses-count').textContent = losses;
+            document.getElementById('win-rate').textContent = winRate + '%';
+            
+            // Render list
+            const container = document.getElementById('winloss-list');
+            
+            if (deals.length === 0) {
+                container.innerHTML = '<p style="color: #a0aec0; text-align: center; padding: 40px;">No deals tracked yet. Click "+ Add Deal Result" to get started.</p>';
+                return;
+            }
+            
+            container.innerHTML = deals.map((deal, index) => `
+                <div class="win-loss-item ${deal.result}">
+                    <div class="win-loss-header">
+                        <div class="win-loss-badge ${deal.result}">${deal.result === 'win' ? '🏆 WIN' : '❌ LOSS'}</div>
+                        <button class="delete-btn" onclick="deleteDeal(${index})">Delete</button>
+                    </div>
+                    <div class="win-loss-content">
+                        <input type="text" class="deal-name-input" value="${deal.dealName || ''}" 
+                               onchange="updateDeal(${index}, 'dealName', this.value)" 
+                               placeholder="Deal name or account">
+                        <textarea class="deal-reason-textarea" 
+                                  onchange="updateDeal(${index}, 'reason', this.value)" 
+                                  placeholder="Why did we ${deal.result}? What were the key factors?">${deal.reason || ''}</textarea>
+                        <input type="date" class="deal-date-input" value="${deal.date || ''}" 
+                               onchange="updateDeal(${index}, 'date', this.value)">
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addWinLoss() {
+            const comp = competitors[currentCompetitorId];
+            if (!comp.data.winLoss.deals) comp.data.winLoss.deals = [];
+            
+            const result = prompt('Enter result (win or loss):')?.toLowerCase();
+            if (result !== 'win' && result !== 'loss') {
+                alert('Please enter either "win" or "loss"');
+                return;
+            }
+            
+            comp.data.winLoss.deals.unshift({
+                result: result,
+                dealName: '',
+                reason: '',
+                date: new Date().toISOString().split('T')[0]
+            });
+            
+            renderWinLoss();
+            saveToStorage();
+        }
+
+        function updateDeal(index, field, value) {
+            const comp = competitors[currentCompetitorId];
+            comp.data.winLoss.deals[index][field] = value;
+            setTimeout(() => {
+                renderWinLoss();
+                saveToStorage();
+            }, 500);
+        }
+
+        function deleteDeal(index) {
+            const comp = competitors[currentCompetitorId];
+            comp.data.winLoss.deals.splice(index, 1);
+            renderWinLoss();
+            saveToStorage();
+        }
+
+        function loadSampleData() {
+            if (confirm('This will load sample battle cards for VMware and Parallels RAS. This will not delete your existing competitors. Continue?')) {
+                const vmwareCard = createVMwareSample();
+                const parallelsCard = createParallelsSample();
+                
+                // Add samples if they don't already exist
+                if (!Object.values(competitors).find(c => c.name.includes('VMware'))) {
+                    competitors[vmwareCard.id] = vmwareCard;
+                }
+                if (!Object.values(competitors).find(c => c.name.includes('Parallels'))) {
+                    competitors[parallelsCard.id] = parallelsCard;
+                }
+                
+                currentCompetitorId = vmwareCard.id;
+                saveToStorage();
+                renderCompetitorSelector();
+                loadCompetitor(currentCompetitorId);
+                
+                alert('Sample battle cards loaded! Use the dropdown to switch between VMware and Parallels RAS.');
+            }
+        }
+
+        function exportToPDF() {
+            saveCurrentCompetitor();
+            window.print();
+        }
+
+        // Auto-save on input
+        document.addEventListener('input', function(e) {
+            if (e.target.classList.contains('info-input') || 
+                e.target.classList.contains('swot-textarea')) {
+                clearTimeout(window.inputTimer);
+                window.inputTimer = setTimeout(() => {
+                    saveCurrentCompetitor();
+                    saveToStorage();
+                }, 2000);
+            }
+        });
+
+        // Save before unload
+        window.addEventListener('beforeunload', function() {
+            saveCurrentCompetitor();
+            saveToStorage();
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>

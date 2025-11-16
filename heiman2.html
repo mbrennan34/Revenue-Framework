@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miller Heiman Strategic Analysis</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        .controls {
+            max-width: 1600px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: white;
+            color: #667eea;
+            border: 2px solid white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .controls-bar {
+            max-width: 1600px;
+            margin: 0 auto 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .client-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .save-indicator {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #718096;
+        }
+
+        .page {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+
+        .top-section {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            border-bottom: 2px solid #000;
+        }
+
+        .left-panel {
+            border-right: 2px solid #000;
+        }
+
+        .section-row {
+            border-bottom: 1px solid #000;
+            display: grid;
+            grid-template-columns: 150px 1fr;
+        }
+
+        .section-label {
+            background: #edf2f7;
+            padding: 12px 15px;
+            font-weight: 600;
+            border-right: 2px solid #cbd5e0;
+            color: #2d3748;
+        }
+
+        .section-content {
+            padding: 12px 15px;
+            background: #ffffff;
+        }
+
+        .section-content input,
+        .section-content textarea {
+            width: 100%;
+            border: none;
+            font-family: inherit;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .section-content textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+        .adequacy-box {
+            padding: 15px;
+            background: #f7fafc;
+        }
+
+        .adequacy-grid {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+
+        .adequacy-item {
+            text-align: center;
+        }
+
+        .adequacy-item input[type="radio"] {
+            display: block;
+            margin: 8px auto;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .ideal-customer {
+            padding: 15px;
+            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
+            border-top: 2px solid #4299e1;
+        }
+
+        .ideal-customer textarea {
+            width: 100%;
+            min-height: 90px;
+            border: 2px solid #4299e1;
+            padding: 10px;
+            margin-top: 8px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .sso-section {
+            display: grid;
+            grid-template-columns: 150px 1fr 200px 200px 200px;
+            border-bottom: 2px solid #000;
+        }
+
+        .sso-content {
+            padding: 10px;
+            border-right: 1px solid #000;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .roles-section {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: 2px solid #cbd5e0;
+            background: linear-gradient(135deg, #fef5e7 0%, #fdebd0 100%);
+        }
+
+        .role-box {
+            padding: 15px;
+            border-right: 2px solid #f5b041;
+            font-size: 13px;
+        }
+
+        .note-box {
+            background: #fef5e7;
+            border: 2px solid #f5b041;
+            border-left: 5px solid #f39c12;
+            padding: 15px;
+            margin: 15px;
+            font-size: 12px;
+        }
+
+        .buying-influences-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .buying-influences-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-size: 12px;
+            border: 1px solid #5a67d8;
+        }
+
+        .buying-influences-table td {
+            padding: 10px;
+            border: 1px solid #cbd5e0;
+            background: #f7fafc;
+        }
+
+        .buying-influences-table input,
+        .buying-influences-table select,
+        .buying-influences-table textarea {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            background: white;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        .buying-influences-table textarea {
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .add-row-btn {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .delete-row-btn {
+            background: #e53e3e;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .bottom-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            border-top: 2px solid #000;
+        }
+
+        .bottom-box {
+            border-right: 1px solid #000;
+            min-height: 200px;
+        }
+
+        .bottom-box:last-child {
+            border-right: none;
+        }
+
+        .bottom-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .bottom-content {
+            padding: 20px;
+            background: #f7fafc;
+        }
+
+        .bottom-content textarea {
+            width: 100%;
+            min-height: 130px;
+            border: 2px solid #cbd5e0;
+            padding: 12px;
+            font-size: 13px;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .action-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .action-table th {
+            background: #edf2f7;
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            font-size: 12px;
+        }
+
+        .action-table td {
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            background: white;
+        }
+
+        .action-table input {
+            width: 100%;
+            border: 1px solid #e2e8f0;
+            font-size: 12px;
+            padding: 6px;
+            border-radius: 4px;
+        }
+
+        @media print {
+            .controls, .controls-bar, .add-row-btn, .delete-row-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+  <button class="btn" onclick="window.location.href='Territory-Plan.html'">Territory Plan</button>
+    <button class="btn" onclick="window.location.href='sales-triggers-messaging.html'">Messaging Library</button>
+    <button class="btn" onclick="window.location.href='one2one3.html'">1:1 Tracker</button>
+</div>
+
+<div class="controls-bar">
+    <div class="controls-grid">
+        <div class="client-selector">
+            <label>Select Client Strategy:</label>
+            <select id="strategy-select" onchange="switchStrategy(this.value)"></select>
+        </div>
+        <div class="action-buttons">
+            <button class="control-btn" style="background: #48bb78;" onclick="createNewStrategy()">+ New</button>
+            <button class="control-btn" style="background: #48bb78;" onclick="loadSampleStrategy()">📝 Sample</button>
+            <button class="control-btn" style="background: #ed8936;" onclick="exportToPDF()">📄 PDF</button>
+            <button class="control-btn" style="background: #805ad5;" onclick="manualSave()">💾 Save</button>
+        </div>
+    </div>
+    <div class="save-indicator">
+        <span id="save-indicator">🟢 Auto-save enabled</span>
+    </div>
+</div>
+
+<div class="page">
+    <div class="header">
+        <div style="font-size: 14px; font-style: italic;">Miller Heiman</div>
+        <h1>STRATEGIC ANALYSIS</h1>
+        <div style="font-size: 10px;">STRATEGIC SELLING®</div>
+    </div>
+    
+    <!-- TOP SECTION: Account Info -->
+    <div class="top-section">
+        <div class="left-panel">
+            <div class="section-row">
+                <div class="section-label">Account:</div>
+                <div class="section-content">
+                    <input type="text" id="account" placeholder="Enter account name">
+                </div>
+            </div>
+            <div class="section-row">
+                <div class="section-label">Opportunity:</div>
+                <div class="section-content">
+                    <input type="text" id="opportunity" placeholder="Enter opportunity">
+                </div>
+            </div>
+            <div class="section-row">
+                <div class="section-label">Date:</div>
+                <div class="section-content">
+                    <input type="date" id="date">
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="adequacy-box">
+                <strong>ADEQUACY OF CURRENT POSITION:</strong>
+                <div class="adequacy-grid">
+                    <div class="adequacy-item">
+                        <div>Euphoria</div>
+                        <input type="radio" name="adequacy" value="euphoria">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>Great</div>
+                        <input type="radio" name="adequacy" value="great">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>Secure</div>
+                        <input type="radio" name="adequacy" value="secure">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>OK</div>
+                        <input type="radio" name="adequacy" value="ok">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>Concern</div>
+                        <input type="radio" name="adequacy" value="concern">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>Worry</div>
+                        <input type="radio" name="adequacy" value="worry">
+                    </div>
+                    <div class="adequacy-item">
+                        <div>Panic</div>
+                        <input type="radio" name="adequacy" value="panic">
+                    </div>
+                </div>
+            </div>
+            <div class="ideal-customer">
+                <strong>IDEAL CUSTOMER CRITERIA:</strong>
+                <textarea id="ideal-customer"></textarea>
+            </div>
+        </div>
+    </div>
+    
+    <!-- COMPETITION SECTION -->
+    <div class="section-row">
+        <div class="section-label">Competition:</div>
+        <div class="section-content">
+            <textarea id="competition"></textarea>
+        </div>
+    </div>
+    
+    <div class="section-row">
+        <div class="section-label">Specify Competitors:</div>
+        <div class="section-content">
+            <input type="text" id="competitors-list">
+        </div>
+    </div>
+    
+    <!-- SSO SECTION -->
+    <div class="sso-section">
+        <div class="section-label" style="background: #e6e6e6; font-weight: bold;">SINGLE SALES OBJECTIVE</div>
+        <div class="sso-content">
+            <textarea id="sso" style="width: 100%; min-height: 60px; border: 1px solid #e2e8f0; padding: 6px;"></textarea>
+        </div>
+        <div class="sso-content">
+            <strong style="font-size: 11px;">My Position vs Competition:</strong>
+            <div class="checkbox-group">
+                <label><input type="radio" name="position" value="only"> Only Alternative</label>
+                <label><input type="radio" name="position" value="front"> Front Runner</label>
+                <label><input type="radio" name="position" value="staged"> Staged</label>
+            </div>
+        </div>
+        <div class="sso-content">
+            <strong style="font-size: 11px;">Place in Sales Funnel:</strong>
+            <div class="checkbox-group">
+                <label><input type="radio" name="funnel" value="universe"> Universe</label>
+                <label><input type="radio" name="funnel" value="above"> Above</label>
+                <label><input type="radio" name="funnel" value="in"> In</label>
+            </div>
+        </div>
+        <div class="sso-content">
+            <strong style="font-size: 11px;">Timing for Priorities:</strong>
+            <div class="checkbox-group">
+                <label><input type="radio" name="timing" value="urgent"> Urgent</label>
+                <label><input type="radio" name="timing" value="active"> Active</label>
+                <label><input type="radio" name="timing" value="later"> Later</label>
+            </div>
+        </div>
+    </div>
+    
+    <!-- ROLES SECTION -->
+    <div class="roles-section">
+        <div class="role-box">
+            <strong>ROLES</strong>
+            <div>E = Economic</div>
+            <div>T = Technical</div>
+            <div>U = User</div>
+            <div>C = Coach</div>
+        </div>
+        <div class="role-box">
+            <strong>DEGREE OF INFLUENCE</strong>
+            <div>H = High</div>
+            <div>M = Medium</div>
+            <div>L = Low</div>
+        </div>
+        <div class="role-box" style="border-right: none;">
+            <strong>MODE</strong>
+            <div>G = Growth</div>
+            <div>T = Trouble</div>
+            <div>EK = Even Keel</div>
+            <div>OC = Overconfident</div>
+        </div>
+    </div>
+    
+    <div class="note-box">
+        <strong>NOTE:</strong> Win-Results Statement: a short statement of the personal Win that a Buying Influence desires when important measurable business Results are delivered.
+    </div>
+    
+    <!-- BUYING INFLUENCES TABLE - MIDDLE OF FORM -->
+    <table class="buying-influences-table">
+        <thead>
+            <tr>
+                <th style="width: 200px;">BUYING INFLUENCES INVOLVED<br><span style="font-weight: normal; font-size: 10px;">(NAME/TITLE, LOCATION)</span></th>
+                <th style="width: 60px;">ROLE</th>
+                <th style="width: 60px;">DEGREE</th>
+                <th style="width: 60px;">MODE</th>
+                <th style="width: 250px;">KEY WIN - RESULTS<br><span style="font-weight: normal; font-size: 10px;">(WIN RESULTS STATEMENT)</span></th>
+                <th style="width: 60px;">RATING</th>
+                <th style="width: 250px;">BASE COVERED?<br><span style="font-weight: normal; font-size: 10px;">(EVIDENCE)</span></th>
+                <th style="width: 50px;"></th>
+            </tr>
+        </thead>
+        <tbody id="buyersTableBody">
+        </tbody>
+    </table>
+    
+    <button class="add-row-btn" onclick="addBuyerRow()">+ Add Buying Influence</button>
+    
+    <!-- BOTTOM SECTION: Three Columns -->
+    <div class="bottom-section">
+        <div class="bottom-box">
+            <div class="bottom-header">SUMMARY OF MY POSITION TODAY</div>
+            <div class="bottom-content">
+                <div style="margin-bottom: 15px;">
+                    <strong>💪 STRENGTHS:</strong>
+                    <textarea id="strengths"></textarea>
+                </div>
+                <div>
+                    <strong>🚩 RED FLAGS:</strong>
+                    <textarea id="red-flags"></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bottom-box">
+            <div class="bottom-header">POSSIBLE ACTIONS</div>
+            <div class="bottom-content">
+                <textarea id="possible-actions"></textarea>
+            </div>
+        </div>
+        
+        <div class="bottom-box">
+            <div class="bottom-header">BEST ACTION PLAN</div>
+            <div class="bottom-content">
+                <table class="action-table">
+                    <thead>
+                        <tr>
+                            <th>WHAT:</th>
+                            <th>WHO:</th>
+                            <th>WHEN:</th>
+                            <th style="width: 50px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="actionTableBody">
+                    </tbody>
+                </table>
+                <button class="add-row-btn" onclick="addActionRow()">+ Add Action</button>
+                
+                <div style="margin-top: 20px;">
+                    <strong style="font-size: 11px;">INFORMATION NEEDED:</strong>
+                    <table class="action-table" style="margin-top: 5px;">
+                        <thead>
+                            <tr>
+                                <th>FROM WHOM:</th>
+                                <th>WHEN:</th>
+                                <th style="width: 50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="infoTableBody">
+                        </tbody>
+                    </table>
+                    <button class="add-row-btn" onclick="addInfoRow()">+ Add Info Need</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let strategies = {};
+    let currentStrategyId = null;
+
+    function loadFromStorage() {
+        const saved = localStorage.getItem('millerHeimanStrategies');
+        if (saved) strategies = JSON.parse(saved);
+    }
+
+    function saveToStorage() {
+        localStorage.setItem('millerHeimanStrategies', JSON.stringify(strategies));
+        document.getElementById('save-indicator').innerHTML = '✓ Saved';
+    }
+
+    function createEmptyStrategy(name) {
+        return {
+            id: 'strategy-' + Date.now(),
+            clientName: name,
+            data: {
+                account: '', opportunity: '', date: '', adequacy: '',
+                idealCustomer: '', competition: '', competitorsList: '', sso: '',
+                position: '', funnel: '', timing: '',
+                buyingInfluences: [], strengths: '', redFlags: '',
+                possibleActions: '', actions: [], infoNeeds: []
+            }
+        };
+    }
+
+    function createSampleStrategy() {
+        const sample = createEmptyStrategy('Global Financial Corp');
+        sample.data.account = 'Global Financial Corp';
+        sample.data.opportunity = 'Enterprise VDI Replacement - 8,500 users';
+        sample.data.date = '2024-11-15';
+        sample.data.adequacy = 'concern';
+        sample.data.position = 'staged';
+        sample.data.funnel = 'in';
+        sample.data.timing = 'urgent';
+        sample.data.buyingInfluences = [
+            { name: 'Sarah Chen, CIO', role: 'E', influence: 'H', mode: 'T', 
+              winResults: 'WIN: Avoid career risk\nRESULTS: Migrate 8,500 users', 
+              rating: '6', evidence: '3 meetings completed' },
+            { name: 'Michael Rodriguez, CFO', role: 'E', influence: 'H', mode: 'G',
+              winResults: 'WIN: Cost savings\nRESULTS: 40% TCO reduction', 
+              rating: '8', evidence: 'Strong champion' }
+        ];
+        sample.data.strengths = '💪 CFO champion\n💪 40% cost savings\n💪 VMware price increase';
+        sample.data.redFlags = '🚩 CIO risk aversion\n🚩 Security VP skeptical';
+        return sample;
+    }
+
+    function loadSampleStrategy() {
+        const sample = createSampleStrategy();
+        strategies[sample.id] = sample;
+        currentStrategyId = sample.id;
+        saveToStorage();
+        renderStrategySelector();
+        loadStrategy(sample.id);
+        alert('Sample loaded!');
+    }
+
+    function initializeStrategies() {
+        loadFromStorage();
+        if (Object.keys(strategies).length === 0) {
+            const first = createEmptyStrategy('New Client');
+            strategies[first.id] = first;
+            currentStrategyId = first.id;
+            saveToStorage();
+        } else {
+            currentStrategyId = Object.keys(strategies)[0];
+        }
+        renderStrategySelector();
+        loadStrategy(currentStrategyId);
+    }
+
+    function renderStrategySelector() {
+        const select = document.getElementById('strategy-select');
+        select.innerHTML = Object.entries(strategies).map(([id, s]) => 
+            `<option value="${id}" ${id === currentStrategyId ? 'selected' : ''}>
+                ${s.clientName} - ${s.data.account || 'Untitled'}
+            </option>`
+        ).join('');
+    }
+
+    function createNewStrategy() {
+        const name = prompt('Enter client name:');
+        if (!name) return;
+        const newS = createEmptyStrategy(name);
+        strategies[newS.id] = newS;
+        currentStrategyId = newS.id;
+        renderStrategySelector();
+        loadStrategy(newS.id);
+        saveToStorage();
+    }
+
+    function switchStrategy(id) {
+        saveCurrentStrategy();
+        currentStrategyId = id;
+        loadStrategy(id);
+    }
+
+    function saveCurrentStrategy() {
+        if (!currentStrategyId) return;
+        const s = strategies[currentStrategyId];
+        s.data.account = document.getElementById('account').value;
+        s.data.opportunity = document.getElementById('opportunity').value;
+        s.data.date = document.getElementById('date').value;
+        s.data.idealCustomer = document.getElementById('ideal-customer').value;
+        s.data.competition = document.getElementById('competition').value;
+        s.data.competitorsList = document.getElementById('competitors-list').value;
+        s.data.sso = document.getElementById('sso').value;
+        s.data.strengths = document.getElementById('strengths').value;
+        s.data.redFlags = document.getElementById('red-flags').value;
+        s.data.possibleActions = document.getElementById('possible-actions').value;
+        
+        const adequacy = document.querySelector('input[name="adequacy"]:checked');
+        s.data.adequacy = adequacy ? adequacy.value : '';
+        const position = document.querySelector('input[name="position"]:checked');
+        s.data.position = position ? position.value : '';
+        const funnel = document.querySelector('input[name="funnel"]:checked');
+        s.data.funnel = funnel ? funnel.value : '';
+        const timing = document.querySelector('input[name="timing"]:checked');
+        s.data.timing = timing ? timing.value : '';
+        
+        s.data.buyingInfluences = [];
+        document.querySelectorAll('#buyersTableBody tr').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells.length >= 7) {
+                s.data.buyingInfluences.push({
+                    name: cells[0].querySelector('input').value,
+                    role: cells[1].querySelector('select').value,
+                    influence: cells[2].querySelector('select').value,
+                    mode: cells[3].querySelector('select').value,
+                    winResults: cells[4].querySelector('textarea').value,
+                    rating: cells[5].querySelector('input').value,
+                    evidence: cells[6].querySelector('textarea').value
+                });
+            }
+        });
+    }
+
+    function loadStrategy(id) {
+        const s = strategies[id];
+        document.getElementById('account').value = s.data.account || '';
+        document.getElementById('opportunity').value = s.data.opportunity || '';
+        document.getElementById('date').value = s.data.date || '';
+        document.getElementById('ideal-customer').value = s.data.idealCustomer || '';
+        document.getElementById('competition').value = s.data.competition || '';
+        document.getElementById('competitors-list').value = s.data.competitorsList || '';
+        document.getElementById('sso').value = s.data.sso || '';
+        document.getElementById('strengths').value = s.data.strengths || '';
+        document.getElementById('red-flags').value = s.data.redFlags || '';
+        document.getElementById('possible-actions').value = s.data.possibleActions || '';
+        
+        if (s.data.adequacy) {
+            const r = document.querySelector(`input[name="adequacy"][value="${s.data.adequacy}"]`);
+            if (r) r.checked = true;
+        }
+        if (s.data.position) {
+            const r = document.querySelector(`input[name="position"][value="${s.data.position}"]`);
+            if (r) r.checked = true;
+        }
+        if (s.data.funnel) {
+            const r = document.querySelector(`input[name="funnel"][value="${s.data.funnel}"]`);
+            if (r) r.checked = true;
+        }
+        if (s.data.timing) {
+            const r = document.querySelector(`input[name="timing"][value="${s.data.timing}"]`);
+            if (r) r.checked = true;
+        }
+        
+        const tbody = document.getElementById('buyersTableBody');
+        tbody.innerHTML = '';
+        if (s.data.buyingInfluences && s.data.buyingInfluences.length > 0) {
+            s.data.buyingInfluences.forEach(b => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><input type="text" value="${b.name || ''}"></td>
+                    <td><select>
+                        <option value="">-</option>
+                        <option value="E" ${b.role === 'E' ? 'selected' : ''}>E</option>
+                        <option value="T" ${b.role === 'T' ? 'selected' : ''}>T</option>
+                        <option value="U" ${b.role === 'U' ? 'selected' : ''}>U</option>
+                        <option value="C" ${b.role === 'C' ? 'selected' : ''}>C</option>
+                    </select></td>
+                    <td><select>
+                        <option value="">-</option>
+                        <option value="H" ${b.influence === 'H' ? 'selected' : ''}>H</option>
+                        <option value="M" ${b.influence === 'M' ? 'selected' : ''}>M</option>
+                        <option value="L" ${b.influence === 'L' ? 'selected' : ''}>L</option>
+                    </select></td>
+                    <td><select>
+                        <option value="">-</option>
+                        <option value="G" ${b.mode === 'G' ? 'selected' : ''}>G</option>
+                        <option value="T" ${b.mode === 'T' ? 'selected' : ''}>T</option>
+                        <option value="EK" ${b.mode === 'EK' ? 'selected' : ''}>EK</option>
+                        <option value="OC" ${b.mode === 'OC' ? 'selected' : ''}>OC</option>
+                    </select></td>
+                    <td><textarea>${b.winResults || ''}</textarea></td>
+                    <td><input type="number" value="${b.rating || ''}" min="-5" max="10"></td>
+                    <td><textarea>${b.evidence || ''}</textarea></td>
+                    <td><button class="delete-row-btn" onclick="deleteBuyerRow(this)">×</button></td>
+                `;
+            });
+        } else {
+            addBuyerRow();
+        }
+    }
+
+    function addBuyerRow() {
+        const tbody = document.getElementById('buyersTableBody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="text" placeholder="Name, Title"></td>
+            <td><select>
+                <option value="">-</option>
+                <option value="E">E</option>
+                <option value="T">T</option>
+                <option value="U">U</option>
+                <option value="C">C</option>
+            </select></td>
+            <td><select>
+                <option value="">-</option>
+                <option value="H">H</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+            </select></td>
+            <td><select>
+                <option value="">-</option>
+                <option value="G">G</option>
+                <option value="T">T</option>
+                <option value="EK">EK</option>
+                <option value="OC">OC</option>
+            </select></td>
+            <td><textarea placeholder="Win-Results"></textarea></td>
+            <td><input type="number" min="-5" max="10" placeholder="0"></td>
+            <td><textarea placeholder="Evidence"></textarea></td>
+            <td><button class="delete-row-btn" onclick="deleteBuyerRow(this)">×</button></td>
+        `;
+    }
+
+    function deleteBuyerRow(btn) {
+        btn.closest('tr').remove();
+        saveCurrentStrategy();
+        saveToStorage();
+    }
+
+    function addActionRow() {
+        const tbody = document.getElementById('actionTableBody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="text" placeholder="Action"></td>
+            <td><input type="text" placeholder="Owner"></td>
+            <td><input type="date"></td>
+            <td><button class="delete-row-btn" onclick="btn.closest('tr').remove()">×</button></td>
+        `;
+    }
+
+    function addInfoRow() {
+        const tbody = document.getElementById('infoTableBody');
+        const row = tbody.insertRow();
+        row.innerHTML = `
+            <td><input type="text" placeholder="Info needed from whom?"></td>
+            <td><input type="date"></td>
+            <td><button class="delete-row-btn" onclick="btn.closest('tr').remove()">×</button></td>
+        `;
+    }
+
+    function manualSave() {
+        saveCurrentStrategy();
+        saveToStorage();
+        alert('Saved!');
+    }
+
+    function exportToPDF() {
+        saveCurrentStrategy();
+        window.print();
+    }
+
+    document.addEventListener('input', function() {
+        clearTimeout(window.saveTimer);
+        window.saveTimer = setTimeout(() => {
+            saveCurrentStrategy();
+            saveToStorage();
+        }, 2000);
+    });
+
+    window.addEventListener('beforeunload', function() {
+        saveCurrentStrategy();
+        saveToStorage();
+    });
+
+    document.addEventListener('DOMContentLoaded', initializeStrategies);
+</script>
+</body>
+</html>

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trigger-Based Persona Mapping</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .nav-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            background: #764ba2;
+            color: white;
+        }
+
+        .back-btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            background: #764ba2;
+            color: white;
+        }
+
+        .trigger-page {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .trigger-title {
+            font-size: 2.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 6px;
+        }
+
+        .trigger-title:focus {
+            outline: 2px solid #667eea;
+            background: #f0f0f0;
+        }
+
+        .trigger-description {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.6;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            min-height: 60px;
+        }
+
+        .trigger-description:focus {
+            outline: 2px solid #667eea;
+            background: white;
+        }
+
+        .persona-section {
+            margin-bottom: 40px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #764ba2;
+        }
+
+        .persona-header {
+            font-size: 1.8em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .persona-header:focus {
+            outline: 2px solid #764ba2;
+            background: white;
+        }
+
+        .persona-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+        }
+
+        .persona-table td {
+            border: 2px solid #e0e0e0;
+            padding: 20px;
+            vertical-align: top;
+            width: 50%;
+        }
+
+        .persona-table .label {
+            font-weight: bold;
+            color: #764ba2;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+            display: block;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .persona-table .label:focus {
+            outline: 2px solid #764ba2;
+            background: #f0f0f0;
+        }
+
+        .editable-content {
+            min-height: 100px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 6px;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .editable-content:focus {
+            outline: 2px solid #667eea;
+            background: white;
+        }
+
+        .add-trigger-btn {
+            display: block;
+            margin: 30px auto;
+            padding: 15px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .add-trigger-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .save-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 15px 30px;
+            background: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(72, 187, 120, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 25px rgba(72, 187, 120, 0.6);
+            background: #38a169;
+        }
+
+        .save-btn:active {
+            transform: scale(0.98);
+        }
+
+        .add-persona-btn {
+            background: #48bb78;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 20px 0;
+            transition: background 0.3s ease;
+        }
+
+        .add-persona-btn:hover {
+            background: #38a169;
+        }
+
+        .delete-persona-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            float: right;
+            transition: background 0.3s ease;
+        }
+
+        .delete-persona-btn:hover {
+            background: #c0392b;
+        }
+
+        .delete-trigger-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95em;
+            transition: background 0.3s ease;
+            float: right;
+        }
+
+        .delete-trigger-btn:hover {
+            background: #c0392b;
+        }
+
+        @media (max-width: 768px) {
+            .persona-table td {
+                display: block;
+                width: 100%;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+
+            .nav-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls">
+    <button class="btn" onclick="window.location.href='Sales-Triggers2.HTML'">← Back to Tracker</button>
+<button class="btn" onclick="window.location.href='sales-triggers-messaging.html'">Messaging Library</button>
+   </div>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="homePage">
+            <h1>BearOps Trigger-Based Persona Mapping</h1>
+            
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showTriggerPage('trigger-1')">Funding Rounds</button>
+                <button class="nav-btn" onclick="showTriggerPage('trigger-2')">Team Expansion / Headcount Growth</button>
+                <button class="nav-btn" onclick="showTriggerPage('trigger-3')">New GTM or Revenue Leadership Hires</button>
+                <button class="nav-btn" onclick="showTriggerPage('trigger-4')">International Expansion / Market Entry</button>
+            </div>
+
+            <button class="add-trigger-btn" onclick="addNewTrigger()">+ Add New Trigger</button>
+        </div>
+        
+        <!-- Trigger Pages Container -->
+        <div id="triggersContainer">
+            <!-- Funding Rounds Trigger -->
+            <div class="trigger-page hidden" id="trigger-1">
+                <button class="back-btn" onclick="showHomePage()">← Back to All Triggers</button>
+                <button class="delete-trigger-btn" onclick="deleteTrigger('trigger-1')">Delete This Trigger</button>
+                
+                <div class="page-header">
+                    <h2 class="trigger-title" contenteditable="true">Funding Rounds (Seed / Series A / Series B)</h2>
+                    <div class="trigger-description" contenteditable="true">
+                        Fresh capital means pressure from investors to show repeatable, efficient growth. Common pain: founder-led sales, no ICP clarity, high burn multiples. Trigger: announcement of new funding or Enterprise Ireland HPSU support.
+                    </div>
+                </div>
+                
+                <!-- CEO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">CEO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the CEO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the CEO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the CEO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the CEO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Founder Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">Founder</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the Founder's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the Founder faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the Founder's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the Founder...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- COO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">COO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the COO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the COO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the COO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the COO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- GTM Leader Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">GTM Leader</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the GTM Leader's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the GTM Leader faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the GTM Leader's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the GTM Leader...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <button class="add-persona-btn" onclick="addPersona(this)">+ Add Another Persona</button>
+            </div>
+
+            <!-- Team Expansion Trigger -->
+            <div class="trigger-page hidden" id="trigger-2">
+                <button class="back-btn" onclick="showHomePage()">← Back to All Triggers</button>
+                <button class="delete-trigger-btn" onclick="deleteTrigger('trigger-2')">Delete This Trigger</button>
+                
+                <div class="page-header">
+                    <h2 class="trigger-title" contenteditable="true">Team Expansion / Headcount Growth</h2>
+                    <div class="trigger-description" contenteditable="true">
+                        Jump from 5 → 15+ people creates accountability and alignment challenges. Common pain: no hiring framework, wrong people in the wrong seats, lack of performance metrics. Trigger: LinkedIn job postings, new SDR/AE/Marketing hires.
+                    </div>
+                </div>
+                
+                <!-- CEO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">CEO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the CEO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the CEO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the CEO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the CEO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Founder Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">Founder</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the Founder's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the Founder faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the Founder's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the Founder...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- COO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">COO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the COO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the COO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the COO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the COO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- GTM Leader Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">GTM Leader</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the GTM Leader's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the GTM Leader faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the GTM Leader's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the GTM Leader...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <button class="add-persona-btn" onclick="addPersona(this)">+ Add Another Persona</button>
+            </div>
+
+            <!-- GTM Leadership Hires Trigger -->
+            <div class="trigger-page hidden" id="trigger-3">
+                <button class="back-btn" onclick="showHomePage()">← Back to All Triggers</button>
+                <button class="delete-trigger-btn" onclick="deleteTrigger('trigger-3')">Delete This Trigger</button>
+                
+                <div class="page-header">
+                    <h2 class="trigger-title" contenteditable="true">New GTM or Revenue Leadership Hires</h2>
+                    <div class="trigger-description" contenteditable="true">
+                        A first CRO, VP Sales, or Head of GTM joining indicates scaling ambitions. Common pain: leadership wants playbooks, dashboards, and structure in place fast. Trigger: LinkedIn role announcements, job postings for revenue leaders.
+                    </div>
+                </div>
+                
+                <!-- CEO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">CEO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the CEO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the CEO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the CEO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the CEO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Founder Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">Founder</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the Founder's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the Founder faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the Founder's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the Founder...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- COO Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">COO</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the COO's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the COO faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the COO's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the COO...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- GTM Leader Persona -->
+                <div class="persona-section">
+                    <button class="delete-persona-btn" onclick="deletePersona(this)">Delete</button>
+                    <h3 class="persona-header" contenteditable="true">GTM Leader</h3>
+                    <table class="persona-table">
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Current State</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the GTM Leader's current state when this trigger occurs...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Business Problems</span>
+                                <div class="editable-content" contenteditable="true">
+                                    List the key business problems the GTM Leader faces...
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <span class="label" contenteditable="true">Business Impact</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Describe the impact on the GTM Leader's priorities...
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                                <div class="editable-content" contenteditable="true">
+                                    Define desired outcomes for the GTM Leader...
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <button class="add-persona-btn" onclick="addPersona(this)">+ Add Another Persona</button>
+            </div>...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Business Problems</span>
+                            <div class="editable-content" contenteditable="true">
+                                List the key business problems associated with this trigger...
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="label" contenteditable="true">Business Impact</span>
+                            <div class="editable-content" contenteditable="true">
+                                Describe the impact of these problems on the business...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                            <div class="editable-content" contenteditable="true">
+                                Define the desired positive outcomes and success metrics...
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- International Expansion Trigger -->
+            <div class="trigger-page hidden" id="trigger-4">
+                <button class="back-btn" onclick="showHomePage()">← Back to All Triggers</button>
+                <button class="delete-trigger-btn" onclick="deleteTrigger('trigger-4')">Delete This Trigger</button>
+                
+                <div class="page-header">
+                    <h2 class="trigger-title" contenteditable="true">International Expansion / Market Entry</h2>
+                    <div class="trigger-description" contenteditable="true">
+                        Expanding outside Ireland/UK into US or EU markets increases complexity. Common pain: ICP drift, GTM misalignment, inconsistent pricing or messaging. Trigger: press releases on new market launches, hiring for US/EU roles.
+                    </div>
+                </div>
+                
+                <table class="persona-table">
+                    <tr>
+                        <td>
+                            <span class="label" contenteditable="true">Current State</span>
+                            <div class="editable-content" contenteditable="true">
+                                Describe the current state when this trigger occurs...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Business Problems</span>
+                            <div class="editable-content" contenteditable="true">
+                                List the key business problems associated with this trigger...
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="label" contenteditable="true">Business Impact</span>
+                            <div class="editable-content" contenteditable="true">
+                                Describe the impact of these problems on the business...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                            <div class="editable-content" contenteditable="true">
+                                Define the desired positive outcomes and success metrics...
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Save Button -->
+    <button class="save-btn" onclick="saveToFile()">💾 Save Progress</button>
+
+    <script>
+        let triggerCounter = 4;
+
+        // Auto-save functionality - saves content to browser storage
+        function autoSave() {
+            const allContent = {};
+            
+            // Save all editable content
+            document.querySelectorAll('[contenteditable="true"]').forEach((element, index) => {
+                allContent[`content_${index}`] = element.innerHTML;
+            });
+            
+            // Store in browser's local storage
+            try {
+                localStorage.setItem('personaMappingData', JSON.stringify(allContent));
+                console.log('Auto-saved successfully');
+            } catch (e) {
+                console.error('Auto-save failed:', e);
+            }
+        }
+
+        // Load saved content when page loads
+        function loadSavedContent() {
+            try {
+                const savedData = localStorage.getItem('personaMappingData');
+                if (savedData) {
+                    const allContent = JSON.parse(savedData);
+                    document.querySelectorAll('[contenteditable="true"]').forEach((element, index) => {
+                        if (allContent[`content_${index}`]) {
+                            element.innerHTML = allContent[`content_${index}`];
+                        }
+                    });
+                    console.log('Loaded saved content');
+                }
+            } catch (e) {
+                console.error('Load failed:', e);
+            }
+        }
+
+        // Set up auto-save on content change
+        function setupAutoSave() {
+            document.querySelectorAll('[contenteditable="true"]').forEach(element => {
+                element.addEventListener('blur', autoSave);
+                element.addEventListener('input', debounce(autoSave, 1000));
+            });
+        }
+
+        // Debounce function to prevent too frequent saves
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Load saved content when page loads
+        window.addEventListener('load', () => {
+            loadSavedContent();
+            setupAutoSave();
+        });
+
+        function saveToFile() {
+            // Get the entire HTML content
+            const htmlContent = document.documentElement.outerHTML;
+            
+            // Create a Blob with the HTML content
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            
+            // Create a temporary download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            
+            // Generate filename with timestamp
+            const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+            link.download = `persona-mapping-${timestamp}.html`;
+            
+            // Trigger download
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Clean up the URL object
+            URL.revokeObjectURL(link.href);
+            
+            // Show confirmation
+            alert('Your progress has been saved! Open the downloaded file to continue editing.');
+        }
+
+        function showHomePage() {
+            autoSave(); // Save before switching pages
+            document.querySelectorAll('.trigger-page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            document.getElementById('homePage').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showTriggerPage(triggerId) {
+            autoSave(); // Save before switching pages
+            document.getElementById('homePage').classList.add('hidden');
+            document.querySelectorAll('.trigger-page').forEach(page => {
+                page.classList.add('hidden');
+            });
+            const selectedTrigger = document.getElementById(triggerId);
+            if (selectedTrigger) {
+                selectedTrigger.classList.remove('hidden');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function addNewTrigger() {
+            triggerCounter++;
+            const newTriggerId = 'trigger-' + triggerCounter;
+            
+            // Add button to home page
+            const navButtons = document.querySelector('.nav-buttons');
+            const newButton = document.createElement('button');
+            newButton.className = 'nav-btn';
+            newButton.onclick = function() { showTriggerPage(newTriggerId); };
+            newButton.textContent = 'New Trigger ' + triggerCounter;
+            newButton.setAttribute('data-trigger-id', newTriggerId);
+            navButtons.appendChild(newButton);
+
+            // Create new trigger page
+            const container = document.getElementById('triggersContainer');
+            const newTrigger = document.createElement('div');
+            newTrigger.className = 'trigger-page hidden';
+            newTrigger.id = newTriggerId;
+            newTrigger.innerHTML = `
+                <button class="back-btn" onclick="showHomePage()">← Back to All Triggers</button>
+                <button class="delete-trigger-btn" onclick="deleteTrigger('${newTriggerId}')">Delete This Trigger</button>
+                
+                <div class="page-header">
+                    <h2 class="trigger-title" contenteditable="true">New Trigger</h2>
+                    <div class="trigger-description" contenteditable="true">
+                        Describe this trigger, common pain points, and how to identify it...
+                    </div>
+                </div>
+                
+                <table class="persona-table">
+                    <tr>
+                        <td>
+                            <span class="label" contenteditable="true">Current State</span>
+                            <div class="editable-content" contenteditable="true">
+                                Describe the current state when this trigger occurs...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Business Problems</span>
+                            <div class="editable-content" contenteditable="true">
+                                List the key business problems associated with this trigger...
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <span class="label" contenteditable="true">Business Impact</span>
+                            <div class="editable-content" contenteditable="true">
+                                Describe the impact of these problems on the business...
+                            </div>
+                        </td>
+                        <td>
+                            <span class="label" contenteditable="true">Positive Business Outcomes</span>
+                            <div class="editable-content" contenteditable="true">
+                                Define the desired positive outcomes and success metrics...
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            `;
+            container.appendChild(newTrigger);
+            showTriggerPage(newTriggerId);
+        }
+
+        function deleteTrigger(triggerId) {
+            if (confirm('Are you sure you want to delete this trigger? This action cannot be undone.')) {
+                // Remove the trigger page
+                const triggerPage = document.getElementById(triggerId);
+                if (triggerPage) {
+                    triggerPage.remove();
+                }
+                
+                // Remove the button from home page
+                const buttons = document.querySelectorAll('.nav-btn');
+                buttons.forEach(button => {
+                    if (button.getAttribute('data-trigger-id') === triggerId || 
+                        button.onclick.toString().includes(triggerId)) {
+                        button.remove();
+                    }
+                });
+                
+                // Return to home page
+                showHomePage();
+            }
+        }
+    </script>
+</body>
+</html>

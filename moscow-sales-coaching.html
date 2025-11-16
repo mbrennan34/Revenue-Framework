@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoSCoW Sales Coaching Prioritization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* ===== Base (Dark / BearOps) Theme ===== */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0A1628 0%, #1a2942 100%);
+            padding: 20px;
+            min-height: 100vh;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Top Navigation Buttons */
+        .top-nav {
+            max-width: 1400px;
+            margin: 0 auto 20px auto;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .top-nav-btn,
+        .btn {
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid #3498db;
+            background: rgba(10, 22, 40, 0.85);
+            color: #ffffff;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .top-nav-btn:hover,
+        .btn:hover {
+            background: #3498db;
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.45);
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle {
+            border-color: #9b59b6;
+        }
+
+        .theme-toggle:hover {
+            background: #9b59b6;
+            box-shadow: 0 6px 18px rgba(155, 89, 182, 0.45);
+        }
+
+        header {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .tabs-container,
+        .documents-section,
+        .input-section {
+            background: rgba(10, 22, 40, 0.95);
+            padding: 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+            margin-bottom: 20px;
+            border: 1px solid rgba(52, 152, 219, 0.4);
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: rgba(15, 32, 60, 0.9);
+            border: 2px solid rgba(52, 152, 219, 0.4);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            position: relative;
+            color: #e2e8f0;
+        }
+
+        .tab:hover {
+            background: rgba(32, 64, 117, 0.95);
+            border-color: #3498db;
+        }
+
+        .tab.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.6);
+        }
+
+        .tab-name {
+            cursor: pointer;
+        }
+
+        .tab-edit-btn {
+            margin-left: 5px;
+            padding: 2px 8px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 4px;
+            font-size: 0.85em;
+            opacity: 0.8;
+        }
+
+        .tab-edit-btn:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .tab-close {
+            margin-left: 8px;
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+        }
+
+        .add-tab-btn {
+            padding: 10px 18px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+
+        .add-tab-btn:hover {
+            background: #27ae60;
+            box-shadow: 0 6px 18px rgba(46, 204, 113, 0.5);
+        }
+
+        .documents-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .documents-header h3 {
+            color: #e2e8f0;
+            font-size: 1.2em;
+        }
+
+        .upload-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .upload-btn:hover {
+            background: #2980b9;
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.5);
+        }
+
+        .documents-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .document-card {
+            background: rgba(15, 32, 60, 0.95);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid rgba(52, 152, 219, 0.4);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .document-card:hover {
+            border-color: #3498db;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.45);
+        }
+
+        .document-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .document-name {
+            font-weight: 600;
+            font-size: 0.95em;
+            color: #e2e8f0;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+
+        .document-size {
+            font-size: 0.85em;
+            color: #a0aec0;
+            margin-bottom: 10px;
+        }
+
+        .document-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .document-actions button {
+            padding: 6px 12px;
+            font-size: 0.85em;
+            flex: 1;
+        }
+
+        .download-btn {
+            background: #2ecc71;
+        }
+
+        .download-btn:hover {
+            background: #27ae60;
+        }
+
+        .doc-delete-btn {
+            background: #e53e3e;
+        }
+
+        .doc-delete-btn:hover {
+            background: #c53030;
+        }
+
+        .empty-documents {
+            text-align: center;
+            padding: 40px;
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .input-section h3 {
+            margin-bottom: 15px;
+            color: #e2e8f0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"], textarea {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid rgba(148, 163, 184, 0.7);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s, background 0.3s;
+            background: rgba(15, 32, 60, 0.9);
+            color: #e2e8f0;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(18, 40, 75, 0.95);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        select {
+            padding: 12px;
+            border: 2px solid rgba(148, 163, 184, 0.7);
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(15, 32, 60, 0.9);
+            cursor: pointer;
+            min-width: 150px;
+            color: #e2e8f0;
+        }
+
+        button {
+            padding: 12px 24px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: #2980b9;
+            box-shadow: 0 6px 18px rgba(52, 152, 219, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .moscow-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .moscow-category {
+            background: rgba(10, 22, 40, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+            min-height: 300px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid;
+        }
+
+        .must-have .category-header { border-color: #e53e3e; }
+        .should-have .category-header { border-color: #dd6b20; }
+        .could-have .category-header { border-color: #38a169; }
+        .wont-have .category-header { border-color: #718096; }
+
+        .category-icon {
+            font-size: 1.5em;
+        }
+
+        .category-title {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .must-have .category-title { color: #feb2b2; }
+        .should-have .category-title { color: #fbd38d; }
+        .could-have .category-title { color: #9ae6b4; }
+        .wont-have .category-title { color: #e2e8f0; }
+
+        .category-count {
+            margin-left: auto;
+            background: rgba(15, 32, 60, 0.9);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+        }
+
+        .category-labels {
+            background: rgba(15, 32, 60, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid;
+        }
+
+        .must-have .category-labels { border-color: #e53e3e; }
+        .should-have .category-labels { border-color: #dd6b20; }
+        .could-have .category-labels { border-color: #38a169; }
+        .wont-have .category-labels { border-color: #718096; }
+
+        .label-item {
+            font-size: 0.95em;
+            margin-bottom: 8px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .label-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .item {
+            background: rgba(15, 32, 60, 0.9);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            cursor: pointer;
+        }
+
+        .item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            background: rgba(25, 48, 90, 0.95);
+        }
+
+        .must-have .item { border-color: #e53e3e; }
+        .should-have .item { border-color: #dd6b20; }
+        .could-have .item { border-color: #38a169; }
+        .wont-have .item { border-color: #718096; }
+
+        .item-editable {
+            outline: none;
+            padding: 6px;
+            margin: 3px 0;
+            border-radius: 4px;
+            min-height: 26px;
+        }
+
+        .item-editable:hover {
+            background: rgba(255,255,255,0.04);
+        }
+
+        .item-editable:focus {
+            background: rgba(255,255,255,0.06);
+            box-shadow: 0 0 0 2px #3498db;
+        }
+
+        .item-editable[contenteditable="true"]:empty:before {
+            content: attr(data-placeholder);
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .item-title {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.05em;
+        }
+
+        .item-field {
+            font-size: 0.9em;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .item-field strong {
+            color: #e2e8f0;
+            display: inline-block;
+            min-width: 70px;
+        }
+
+        .item-field-content {
+            color: #cbd5f5;
+        }
+
+        .editable-area {
+            min-height: 100px;
+            padding: 15px;
+            border: 2px dashed rgba(148, 163, 184, 0.7);
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: text;
+            background: rgba(15, 32, 60, 0.9);
+            color: #e2e8f0;
+        }
+
+        .editable-area:hover {
+            border-color: #3498db;
+            background: rgba(18, 40, 75, 0.95);
+        }
+
+        .editable-area:focus {
+            outline: none;
+            border-color: #3498db;
+            border-style: solid;
+        }
+
+        .editable-area[contenteditable="true"]:empty:before {
+            content: "Click to add notes, ideas, or details...";
+            color: #a0aec0;
+            font-style: italic;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .item-actions button {
+            padding: 6px 12px;
+            font-size: 0.8em;
+        }
+
+        .delete-btn {
+            background: #e53e3e;
+        }
+
+        .delete-btn:hover {
+            background: #c53030;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #a0aec0;
+            padding: 30px 20px;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .moscow-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+
+            .top-nav {
+                justify-content: flex-start;
+            }
+        }
+
+        /* ===== Light Mode Overrides (match Sales Engine light variant) ===== */
+        body.light-mode {
+            background: linear-gradient(135deg, #f5f7fb 0%, #e2e8f0 100%);
+            color: #1a202c;
+        }
+
+        body.light-mode header {
+            color: #1a202c;
+        }
+
+        body.light-mode .subtitle {
+            opacity: 0.8;
+        }
+
+        body.light-mode .tabs-container,
+        body.light-mode .documents-section,
+        body.light-mode .input-section {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+        }
+
+        body.light-mode .tab {
+            background: #f7fafc;
+            border-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        body.light-mode .tab:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        body.light-mode .tab.active {
+            background: #3498db;
+            color: #ffffff;
+            border-color: #3498db;
+            box-shadow: 0 6px 16px rgba(52, 152, 219, 0.4);
+        }
+
+        body.light-mode .document-card {
+            background: #f7fafc;
+            border-color: #e2e8f0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        body.light-mode .document-name {
+            color: #2d3748;
+        }
+
+        body.light-mode .document-size {
+            color: #718096;
+        }
+
+        body.light-mode input[type="text"],
+        body.light-mode textarea,
+        body.light-mode select {
+            background: #ffffff;
+            color: #2d3748;
+            border-color: #e2e8f0;
+        }
+
+        body.light-mode input[type="text"]:focus,
+        body.light-mode textarea:focus {
+            border-color: #3498db;
+            background: #f7fafc;
+        }
+
+        body.light-mode select {
+            background: #ffffff;
+        }
+
+        body.light-mode .moscow-category {
+            background: #ffffff;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+        }
+
+        body.light-mode .category-count {
+            background: #edf2f7;
+            border-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        body.light-mode .category-labels {
+            background: #f7fafc;
+        }
+
+        body.light-mode .label-item {
+            color: #2d3748;
+        }
+
+        body.light-mode .item {
+            background: #f7fafc;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        body.light-mode .item:hover {
+            background: #ffffff;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        body.light-mode .item-field strong {
+            color: #2d3748;
+        }
+
+        body.light-mode .item-field-content {
+            color: #4a5568;
+        }
+
+        body.light-mode .editable-area {
+            background: #ffffff;
+            border-color: #e2e8f0;
+            color: #2d3748;
+        }
+
+        body.light-mode .editable-area:hover {
+            background: #f7fafc;
+            border-color: #3498db;
+        }
+
+        body.light-mode .empty-state {
+            color: #a0aec0;
+        }
+
+        body.light-mode .top-nav-btn,
+        body.light-mode .btn {
+            background: #ffffff;
+            border-color: #cbd5e0;
+            color: #2d3748;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+        }
+
+        body.light-mode .top-nav-btn:hover,
+        body.light-mode .btn:hover {
+            background: #edf2f7;
+            border-color: #3498db;
+            box-shadow: 0 5px 14px rgba(52, 152, 219, 0.25);
+        }
+
+        body.light-mode .theme-toggle {
+            border-color: #9b59b6;
+        }
+
+        body.light-mode .theme-toggle:hover {
+            background: #9b59b6;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navigation Buttons -->
+    <div class="top-nav">
+        <button class="top-nav-btn" onclick="window.location.href='Index.html'">Back to Index</button>
+
+        <button id="themeToggle" class="top-nav-btn theme-toggle" onclick="toggleTheme()">☀️ Light Mode</button>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>🎯 MoSCoW Sales Coaching Prioritization</h1>
+            <p class="subtitle">Organize your sales coaching initiatives by priority</p>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tabs-header" id="tabsHeader"></div>
+        </div>
+
+        <div id="tabsContent"></div>
+    </div>
+
+    <script>
+        let sessions = {
+            'session-1': {
+                name: 'Q1 Coaching Session',
+                items: {
+                    must: [],
+                    should: [],
+                    could: [],
+                    wont: []
+                },
+                notes: {
+                    must: '',
+                    should: '',
+                    could: '',
+                    wont: ''
+                },
+                documents: []
+            }
+        };
+
+        let activeSession = 'session-1';
+        let sessionCounter = 1;
+
+        function createTab(sessionId, sessionName) {
+            return `
+                <div class="tab ${activeSession === sessionId ? 'active' : ''}">
+                    <span class="tab-name" onclick="switchTab('${sessionId}')">${sessionName}</span>
+                    <span class="tab-edit-btn" onclick="event.stopPropagation(); editTabName('${sessionId}')">✎</span>
+                    ${Object.keys(sessions).length > 1 ? `<span class="tab-close" onclick="event.stopPropagation(); deleteTab('${sessionId}')">&times;</span>` : ''}
+                </div>
+            `;
+        }
+
+        function addNewTab() {
+            sessionCounter++;
+            const newSessionId = `session-${sessionCounter}`;
+            const newSessionName = prompt('Enter name for new coaching session:', `Q${sessionCounter} Coaching Session`);
+            
+            if (newSessionName) {
+                sessions[newSessionId] = {
+                    name: newSessionName,
+                    items: {
+                        must: [],
+                        should: [],
+                        could: [],
+                        wont: []
+                    },
+                    notes: {
+                        must: '',
+                        should: '',
+                        could: '',
+                        wont: ''
+                    },
+                    documents: []
+                };
+                activeSession = newSessionId;
+                renderTabs();
+                renderContent();
+            }
+        }
+
+        function switchTab(sessionId) {
+            activeSession = sessionId;
+            renderTabs();
+            renderContent();
+        }
+
+        function editTabName(sessionId) {
+            const newName = prompt('Enter new name for this session:', sessions[sessionId].name);
+            if (newName && newName.trim()) {
+                sessions[sessionId].name = newName.trim();
+                renderTabs();
+            }
+        }
+
+        function deleteTab(sessionId) {
+            if (Object.keys(sessions).length === 1) {
+                alert('You must have at least one session');
+                return;
+            }
+            
+            if (confirm(`Delete "${sessions[sessionId].name}"?`)) {
+                delete sessions[sessionId];
+                if (activeSession === sessionId) {
+                    activeSession = Object.keys(sessions)[0];
+                }
+                renderTabs();
+                renderContent();
+            }
+        }
+
+        function renderTabs() {
+            const tabsHeader = document.getElementById('tabsHeader');
+            const tabsHTML = Object.keys(sessions).map(sessionId => 
+                createTab(sessionId, sessions[sessionId].name)
+            ).join('');
+            
+            tabsHeader.innerHTML = tabsHTML + '<button class="add-tab-btn" onclick="addNewTab()">+ New Session</button>';
+        }
+
+        function renderContent() {
+            const tabsContent = document.getElementById('tabsContent');
+            tabsContent.innerHTML = `
+                <div class="tab-content active">
+                    <div class="documents-section">
+                        <div class="documents-header">
+                            <h3>📁 Session Documents</h3>
+                            <button class="upload-btn" onclick="triggerFileUpload()">Upload Document</button>
+                        </div>
+                        <input type="file" id="fileInput" multiple onchange="handleFileUpload(event)" accept="*/*">
+                        <div class="documents-list" id="documents-list"></div>
+                    </div>
+
+                    <div class="input-section">
+                        <h3>Add Coaching Activity</h3>
+                        <div class="input-group">
+                            <input type="text" id="itemTitle" placeholder="Coaching activity (e.g., Cold calling techniques)" />
+                            <select id="categorySelect">
+                                <option value="must">Must Have</option>
+                                <option value="should">Should Have</option>
+                                <option value="could">Could Have</option>
+                                <option value="wont">Won't Have</option>
+                            </select>
+                            <button onclick="addItem()">Add Item</button>
+                        </div>
+                        <input type="text" id="itemWhen" placeholder="When: Timeline or trigger (e.g., During Q1 onboarding)" style="margin-bottom: 10px;" />
+                        <input type="text" id="itemIWant" placeholder="I Want: What you want to achieve (e.g., Teach discovery question framework)" style="margin-bottom: 10px;" />
+                        <textarea id="itemSoThat" placeholder="So That: The desired outcome (e.g., Reps can uncover customer pain points in first calls)"></textarea>
+                    </div>
+
+                    <div class="moscow-grid">
+                        <div class="moscow-category must-have">
+                            <div class="category-header">
+                                <span class="category-icon">🔴</span>
+                                <span class="category-title">Must Have</span>
+                                <span class="category-count" id="must-count">0</span>
+                            </div>
+                            <div class="category-labels">
+                                <div class="label-item">📅 When</div>
+                                <div class="label-item">🎯 I Want</div>
+                                <div class="label-item">✨ So That</div>
+                            </div>
+                            <div class="items-list" id="must-items"></div>
+                        </div>
+
+                        <div class="moscow-category should-have">
+                            <div class="category-header">
+                                <span class="category-icon">🟠</span>
+                                <span class="category-title">Should Have</span>
+                                <span class="category-count" id="should-count">0</span>
+                            </div>
+                            <div class="category-labels">
+                                <div class="label-item">📅 When</div>
+                                <div class="label-item">🎯 I Want</div>
+                                <div class="label-item">✨ So That</div>
+                            </div>
+                            <div class="items-list" id="should-items"></div>
+                        </div>
+
+                        <div class="moscow-category could-have">
+                            <div class="category-header">
+                                <span class="category-icon">🟢</span>
+                                <span class="category-title">Could Have</span>
+                                <span class="category-count" id="could-count">0</span>
+                            </div>
+                            <div class="category-labels">
+                                <div class="label-item">📅 When</div>
+                                <div class="label-item">🎯 I Want</div>
+                                <div class="label-item">✨ So That</div>
+                            </div>
+                            <div class="items-list" id="could-items"></div>
+                        </div>
+
+                        <div class="moscow-category wont-have">
+                            <div class="category-header">
+                                <span class="category-icon">⚪</span>
+                                <span class="category-title">Won't Have</span>
+                                <span class="category-count" id="wont-count">0</span>
+                            </div>
+                            <div class="category-labels">
+                                <div class="label-item">📅 When</div>
+                                <div class="label-item">🎯 I Want</div>
+                                <div class="label-item">✨ So That</div>
+                            </div>
+                            <div class="items-list" id="wont-items"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            renderDocuments();
+            renderItems();
+        }
+
+        function addItem() {
+            const title = document.getElementById('itemTitle').value.trim();
+            const when = document.getElementById('itemWhen').value.trim();
+            const iWant = document.getElementById('itemIWant').value.trim();
+            const soThat = document.getElementById('itemSoThat').value.trim();
+            const category = document.getElementById('categorySelect').value;
+
+            if (!title) {
+                alert('Please enter a coaching activity');
+                return;
+            }
+
+            const item = {
+                id: Date.now(),
+                title: title,
+                when: when,
+                iWant: iWant,
+                soThat: soThat
+            };
+
+            sessions[activeSession].items[category].push(item);
+            
+            document.getElementById('itemTitle').value = '';
+            document.getElementById('itemWhen').value = '';
+            document.getElementById('itemIWant').value = '';
+            document.getElementById('itemSoThat').value = '';
+            
+            renderItems();
+        }
+
+        function deleteItem(category, id) {
+            sessions[activeSession].items[category] = sessions[activeSession].items[category].filter(item => item.id !== id);
+            renderItems();
+        }
+
+        function updateItemField(category, id, field, value) {
+            const item = sessions[activeSession].items[category].find(item => item.id === id);
+            if (item) {
+                item[field] = value;
+            }
+        }
+
+        function moveItem(fromCategory, id, toCategory) {
+            const item = sessions[activeSession].items[fromCategory].find(item => item.id === id);
+            if (item) {
+                sessions[activeSession].items[fromCategory] = sessions[activeSession].items[fromCategory].filter(item => item.id !== id);
+                sessions[activeSession].items[toCategory].push(item);
+                renderItems();
+            }
+        }
+
+        function saveNotes(category) {
+            const noteArea = document.getElementById(`${category}-notes`);
+            sessions[activeSession].notes[category] = noteArea.innerHTML;
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            for (let file of files) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const documentObj = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        size: formatFileSize(file.size),
+                        type: file.type,
+                        data: e.target.result,
+                        uploadDate: new Date().toLocaleDateString()
+                    };
+                    sessions[activeSession].documents.push(documentObj);
+                    renderDocuments();
+                };
+                reader.readAsDataURL(file);
+            }
+            event.target.value = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: '📄',
+                doc: '📝',
+                docx: '📝',
+                xls: '📊',
+                xlsx: '📊',
+                ppt: '📊',
+                pptx: '📊',
+                txt: '📄',
+                jpg: '🖼️',
+                jpeg: '🖼️',
+                png: '🖼️',
+                gif: '🖼️',
+                zip: '📦',
+                default: '📎'
+            };
+            return icons[ext] || icons.default;
+        }
+
+        function downloadDocument(docId) {
+            const doc = sessions[activeSession].documents.find(d => d.id === docId);
+            if (doc) {
+                const link = document.createElement('a');
+                link.href = doc.data;
+                link.download = doc.name;
+                link.click();
+            }
+        }
+
+        function deleteDocument(docId) {
+            if (confirm('Delete this document?')) {
+                sessions[activeSession].documents = sessions[activeSession].documents.filter(d => d.id !== docId);
+                renderDocuments();
+            }
+        }
+
+        function renderDocuments() {
+            const docsContainer = document.getElementById('documents-list');
+            if (!docsContainer) return;
+
+            const docs = sessions[activeSession].documents;
+            
+            if (docs.length === 0) {
+                docsContainer.innerHTML = '<div class="empty-documents">No documents uploaded yet. Click "Upload Document" to add files.</div>';
+            } else {
+                docsContainer.innerHTML = docs.map(doc => `
+                    <div class="document-card">
+                        <div class="document-icon">${getFileIcon(doc.name)}</div>
+                        <div class="document-name">${doc.name}</div>
+                        <div class="document-size">${doc.size}</div>
+                        <div class="document-actions">
+                            <button class="download-btn" onclick="downloadDocument(${doc.id})">Download</button>
+                            <button class="doc-delete-btn" onclick="deleteDocument(${doc.id})">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function triggerFileUpload() {
+            document.getElementById('fileInput').click();
+        }
+
+        function renderItems() {
+            const categories = ['must', 'should', 'could', 'wont'];
+            const currentItems = sessions[activeSession].items;
+            const currentNotes = sessions[activeSession].notes;
+            
+            categories.forEach(category => {
+                const container = document.getElementById(`${category}-items`);
+                const count = document.getElementById(`${category}-count`);
+                
+                if (!container || !count) return;
+                
+                count.textContent = currentItems[category].length;
+                
+                if (currentItems[category].length === 0) {
+                    const emptyMessages = {
+                        must: 'Critical for success. Non-negotiable coaching needs.',
+                        should: 'Important but not vital. Can be deferred if needed.',
+                        could: 'Nice to have. Include if time and resources permit.',
+                        wont: 'Not a priority now. May revisit later.'
+                    };
+                    container.innerHTML = `<div class="empty-state">${emptyMessages[category]}</div>`;
+                } else {
+                    container.innerHTML = currentItems[category].map(item => `
+                        <div class="item">
+                            <div class="item-editable" 
+                                 contenteditable="true" 
+                                 data-placeholder="Click to add title..."
+                                 onblur="updateItemField('${category}', ${item.id}, 'title', this.innerText)"
+                                 style="font-weight: bold; font-size: 1.05em; margin-bottom: 8px;">${item.title || ''}</div>
+                            
+                            <div style="font-size: 0.9em; margin-bottom: 6px;">
+                                <strong>When:</strong>
+                                <div class="item-editable" 
+                                     contenteditable="true" 
+                                     data-placeholder="Click to add when..."
+                                     onblur="updateItemField('${category}', ${item.id}, 'when', this.innerText)"
+                                     style="display: inline-block; min-width: 200px;">${item.when || ''}</div>
+                            </div>
+                            
+                            <div style="font-size: 0.9em; margin-bottom: 6px;">
+                                <strong>I Want:</strong>
+                                <div class="item-editable" 
+                                     contenteditable="true" 
+                                     data-placeholder="Click to add what you want..."
+                                     onblur="updateItemField('${category}', ${item.id}, 'iWant', this.innerText)"
+                                     style="display: inline-block; min-width: 200px;">${item.iWant || ''}</div>
+                            </div>
+                            
+                            <div style="font-size: 0.9em; margin-bottom: 8px;">
+                                <strong>So That:</strong>
+                                <div class="item-editable" 
+                                     contenteditable="true" 
+                                     data-placeholder="Click to add desired outcome..."
+                                     onblur="updateItemField('${category}', ${item.id}, 'soThat', this.innerText)"
+                                     style="display: inline-block; min-width: 200px;">${item.soThat || ''}</div>
+                            </div>
+                            
+                            <div class="item-actions">
+                                ${category !== 'must' ? `<button onclick="moveItem('${category}', ${item.id}, 'must')">→ Must</button>` : ''}
+                                ${category !== 'should' ? `<button onclick="moveItem('${category}', ${item.id}, 'should')">→ Should</button>` : ''}
+                                ${category !== 'could' ? `<button onclick="moveItem('${category}', ${item.id}, 'could')">→ Could</button>` : ''}
+                                ${category !== 'wont' ? `<button onclick="moveItem('${category}', ${item.id}, 'wont')">→ Won't</button>` : ''}
+                                <button class="delete-btn" onclick="deleteItem('${category}', ${item.id})">Delete</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                
+                // Add or update the editable notes area
+                let notesArea = document.getElementById(`${category}-notes`);
+                if (!notesArea) {
+                    notesArea = document.createElement('div');
+                    notesArea.id = `${category}-notes`;
+                    notesArea.className = 'editable-area';
+                    notesArea.contentEditable = 'true';
+                    notesArea.innerHTML = currentNotes[category];
+                    notesArea.addEventListener('blur', () => saveNotes(category));
+                    notesArea.addEventListener('input', () => saveNotes(category));
+                    container.parentElement.appendChild(notesArea);
+                } else {
+                    notesArea.innerHTML = currentNotes[category];
+                }
+            });
+        }
+
+        /* === Theme Toggle === */
+        function updateThemeToggleLabel() {
+            const btn = document.getElementById('themeToggle');
+            if (!btn) return;
+            if (document.body.classList.contains('light-mode')) {
+                btn.textContent = '🌙 Dark Mode';
+            } else {
+                btn.textContent = '☀️ Light Mode';
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const mode = document.body.classList.contains('light-mode') ? 'light' : 'dark';
+            try {
+                localStorage.setItem('bearopsTheme', mode);
+            } catch (e) {
+                // ignore if storage not available
+            }
+            updateThemeToggleLabel();
+        }
+
+        function applySavedTheme() {
+            try {
+                const saved = localStorage.getItem('bearopsTheme');
+                if (saved === 'light') {
+                    document.body.classList.add('light-mode');
+                }
+            } catch (e) {
+                // ignore
+            }
+            updateThemeToggleLabel();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderTabs();
+            renderContent();
+            applySavedTheme();
+            
+            document.addEventListener('keypress', function(e) {
+                if (e.target.id === 'itemTitle' && e.key === 'Enter') {
+                    e.preventDefault();
+                    addItem();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
